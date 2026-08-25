@@ -168,3 +168,49 @@ export interface EEGMetrics {
     institutionalAccountabilityMapped: boolean;
   };
 }
+
+export type UserRole = 'admin' | 'hospital' | 'patient';
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  relation: string;
+  phone: string;
+  notifyOnSOS: boolean;
+}
+
+export interface PatientMedicalProfile {
+  abhaId: string;
+  name: string;
+  age: number;
+  gender: 'Male' | 'Female' | 'Other';
+  bloodGroup: string;
+  allergies: string[];
+  chronicConditions: string[];
+  currentMedications: string[];
+  emergencyContacts: EmergencyContact[];
+  organDonor: boolean;
+  preferredHospital?: string;
+}
+
+export interface HospitalEmergencyStatus {
+  hospitalId: string;
+  emergencyDepartmentOpen: boolean;
+  traumaTeamStandby: boolean;
+  otReady: boolean;
+  divertStatus: boolean; // if true, ER is diverting due to overload
+  activeAdmissionsCount: number;
+}
+
+export interface HospitalAdmissionRecord {
+  id: string;
+  alertId: string;
+  patientName: string;
+  category: EmergencyCategory;
+  urgencyLevel: 'CRITICAL_RED' | 'HIGH_AMBER' | 'MODERATE_YELLOW';
+  arrivedAt: string;
+  bedAssigned: string;
+  doctorInCharge: string;
+  status: 'IN_TRANSIT' | 'BAY_PREPPED' | 'ADMITTED' | 'DISCHARGED';
+}
+

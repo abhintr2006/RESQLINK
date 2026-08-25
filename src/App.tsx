@@ -1,37 +1,47 @@
 import React, { useState } from 'react';
-import { ResqLinkProvider } from './context/ResqLinkContext';
+import { ResqLinkProvider, useResqLink } from './context/ResqLinkContext';
 import { SimulationBar } from './components/SimulationControls/SimulationBar';
 import { Navigation } from './components/Navigation';
-import { CitizenSOSView } from './components/CitizenApp/CitizenSOSView';
-import { DispatcherPortal } from './components/DispatcherCAD/DispatcherPortal';
-import { EEGDashboard } from './components/EEGDashboard/EEGDashboard';
-import { TwilioSMSView } from './components/TwilioSimulator/TwilioSMSView';
-import { AboutPaperView } from './components/AboutPaper/AboutPaperView';
+import { AdminDashboard } from './components/AdminPortal/AdminDashboard';
+import { HospitalDashboard } from './components/HospitalPortal/HospitalDashboard';
+import { PatientDashboard } from './components/PatientPortal/PatientDashboard';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
 
 export const MainLayout: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<'citizen' | 'dispatcher' | 'eeg' | 'twilio' | 'paper'>('citizen');
+  const { userRole, adminViewTab } = useResqLink();
   const [isDPDPOpen, setIsDPDPOpen] = useState<boolean>(false);
+
+  // Determine active view based on role and admin dashboard switcher
+  const renderCurrentView = () => {
+    if (userRole === 'hospital') {
+      return <HospitalDashboard />;
+    }
+
+    if (userRole === 'patient') {
+      return <PatientDashboard />;
+    }
+
+    // Default: Admin can access all 3 dashboards
+    if (adminViewTab === 'hospital') {
+      return <HospitalDashboard />;
+    }
+    if (adminViewTab === 'patient') {
+      return <PatientDashboard />;
+    }
+    return <AdminDashboard />;
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
-      {/* Top Floating Evaluation Simulation Bar */}
+      {/* Top Floating Evaluation Simulation Bar (Visible across all roles for evaluation) */}
       <SimulationBar />
 
-      {/* Main App Navigation */}
-      <Navigation
-        currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
-        onOpenDPDPModal={() => setIsDPDPOpen(true)}
-      />
+      {/* Main App Navigation with Role Switcher */}
+      <Navigation onOpenDPDPModal={() => setIsDPDPOpen(true)} />
 
       {/* View Content */}
       <main className="flex-1 pb-16">
-        {currentTab === 'citizen' && <CitizenSOSView />}
-        {currentTab === 'dispatcher' && <DispatcherPortal />}
-        {currentTab === 'eeg' && <EEGDashboard />}
-        {currentTab === 'twilio' && <TwilioSMSView />}
-        {currentTab === 'paper' && <AboutPaperView />}
+        {renderCurrentView()}
       </main>
 
       {/* Footer */}
