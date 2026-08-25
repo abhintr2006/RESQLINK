@@ -11,12 +11,18 @@ import {
   EEGMetrics,
   LocationLockState,
   AlertStatus,
+  UserRole,
+  PatientMedicalProfile,
+  HospitalEmergencyStatus,
+  HospitalAdmissionRecord,
 } from '../types';
 import {
   BENGALURU_HOSPITALS,
   INITIAL_RESPONDERS,
   BENGALURU_PRESET_LOCATIONS,
   INITIAL_EEG_DATA,
+  INITIAL_PATIENT_PROFILE,
+  INITIAL_ADMISSION_RECORDS,
 } from '../data/bengaluruData';
 import { LocationLockService } from '../services/locationLockService';
 import { AIDispatchEngine } from '../services/aiDispatchEngine';
@@ -25,6 +31,14 @@ import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 
 interface ResqLinkContextType {
+  // Role & Dashboard switching
+  userRole: UserRole;
+  setUserRole: (role: UserRole) => void;
+  adminViewTab: 'admin' | 'hospital' | 'patient';
+  setAdminViewTab: (tab: 'admin' | 'hospital' | 'patient') => void;
+  selectedHospitalId: string;
+  setSelectedHospitalId: (id: string) => void;
+
   activeAlert: EmergencyAlert | null;
   alertHistory: EmergencyAlert[];
   currentLocation: GeoCoordinate | null;
@@ -38,6 +52,21 @@ interface ResqLinkContextType {
   auditLogs: AuditLogEntry[];
   eegMetrics: EEGMetrics;
   isSimulating: boolean;
+
+  // Hospital management state & actions
+  hospitalStatuses: Record<string, HospitalEmergencyStatus>;
+  hospitalAdmissions: HospitalAdmissionRecord[];
+  updateHospitalBeds: (hospitalId: string, delta: number) => void;
+  toggleHospitalOxygen: (hospitalId: string) => void;
+  toggleTraumaTeamStandby: (hospitalId: string) => void;
+  toggleEmergencyDivert: (hospitalId: string) => void;
+  acknowledgeHospitalInbound: (alertId: string) => void;
+  prepareTraumaBay: (alertId: string) => void;
+
+  // Patient profile state & actions
+  patientProfile: PatientMedicalProfile;
+  updatePatientProfile: (profile: Partial<PatientMedicalProfile>) => void;
+
   // Actions
   triggerSOS: (category?: EmergencyCategory) => Promise<void>;
   cancelSOS: (alertId: string) => void;
@@ -54,6 +83,11 @@ interface ResqLinkContextType {
 const ResqLinkContext = createContext<ResqLinkContextType | undefined>(undefined);
 
 export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
+  const [userRole, setUserRole] = useState<UserRole>('admin');
+  const [adminViewTab, setAdminViewTab] = useState<'admin' | 'hospital' | 'patient'>('admin');
+  const [selectedHospitalId, setSelectedHospitalId] = useState<string>('HOSP-01');
+
   const [activeAlert, setActiveAlert] = useState<EmergencyAlert | null>(null);
   const [alertHistory, setAlertHistory] = useState<EmergencyAlert[]>([]);
   const [selectedPreset, setSelectedPreset] = useState(BENGALURU_PRESET_LOCATIONS[0]);
@@ -63,10 +97,32 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [assistiveHighContrast, setAssistiveHighContrast] = useState<boolean>(false);
   const [voiceGuidanceEnabled, setVoiceGuidanceEnabled] = useState<boolean>(true);
   const [responders, setResponders] = useState<Responder[]>(INITIAL_RESPONDERS);
-  const [hospitals] = useState<Hospital[]>(BENGALURU_HOSPITALS);
+  const [hospitals, setHospitals] = useState<Hospital[]>(BENGALURU_HOSPITALS);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [eegMetrics, setEegMetrics] = useState<EEGMetrics>(INITIAL_EEG_DATA);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
+
+  // Hospital management state
+  const [hospitalStatuses, setHospitalStatuses] = useState<Record<string, HospitalEmergencyStatus>>(() => {
+    const init: Record<string, HospitalEmergencyStatus> = {};
+    BENGALURU_HOSPITALS.forEach((h) => {
+      init[h.id] = {
+        hospitalId: h.id,
+        emergencyDepartmentOpen: true,
+        traumaTeamStandby: true,
+        otReady: true,
+        divertStatus: false,
+        activeAdmissionsCount: Math.floor(Math.random() * 4) + 3,
+      };
+    });
+    return init;
+  });
+
+  const [hospitalAdmissions, setHospitalAdmissions] = useState<HospitalAdmissionRecord[]>(INITIAL_ADMISSION_RECORDS);
+
+  // Patient Profile state
+  const [patientProfile, setPatientProfile] = useState<PatientMedicalProfile>(INITIAL_PATIENT_PROFILE);
+
 
   // Initialize initial geolocation
   useEffect(() => {
@@ -435,6 +491,87 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     refreshAuditLogs();
   };
 
+  // Hospital actions
+  const updateHospitalBeds = (hospitalId: string, delta: number) => {
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id !== hospitalId) return h;
+        const newBeds = Math.max(0, h.icuBedsAvailable + delta);
+        return { ...h, icuBedsAvailable: newBeds };
+      })
+    );
+  };
+
+  const toggleHospitalOxygen = (hospitalId: string) => {
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id !== hospitalId) return h;
+        return { ...h, oxygenAvailable: !h.oxygenAvailable };
+      })
+    );
+  };
+
+  const toggleTraumaTeamStandby = (hospitalId: string) => {
+    setHospitalStatuses((prev) => {
+      const current = prev[hospitalId] || {
+        hospitalId,
+        emergencyDepartmentOpen: true,
+        traumaTeamStandby: true,
+        otReady: true,
+        divertStatus: false,
+        activeAdmissionsCount: 4,
+      };
+      return {
+        ...prev,
+        [hospitalId]: {
+          ...current,
+          traumaTeamStandby: !current.traumaTeamStandby,
+        },
+      };
+    });
+  };
+
+  const toggleEmergencyDivert = (hospitalId: string) => {
+    setHospitalStatuses((prev) => {
+      const current = prev[hospitalId] || {
+        hospitalId,
+        emergencyDepartmentOpen: true,
+        traumaTeamStandby: true,
+        otReady: true,
+        divertStatus: false,
+        activeAdmissionsCount: 4,
+      };
+      return {
+        ...prev,
+        [hospitalId]: {
+          ...current,
+          divertStatus: !current.divertStatus,
+        },
+      };
+    });
+  };
+
+  const acknowledgeHospitalInbound = (alertId: string) => {
+    AuditLogger.logEvent(alertId, 'STATUS_UPDATED', 'DISPATCHER_CAD', {
+      action: 'HOSPITAL_ACKNOWLEDGED',
+      note: 'Hospital ER team acknowledged incoming transport',
+    });
+    refreshAuditLogs();
+  };
+
+  const prepareTraumaBay = (alertId: string) => {
+    AuditLogger.logEvent(alertId, 'STATUS_UPDATED', 'DISPATCHER_CAD', {
+      action: 'TRAUMA_BAY_PREPPED',
+      note: 'Emergency Trauma Bay prepped and life-support ready',
+    });
+    refreshAuditLogs();
+  };
+
+  // Patient profile actions
+  const updatePatientProfile = (updates: Partial<PatientMedicalProfile>) => {
+    setPatientProfile((prev) => ({ ...prev, ...updates }));
+  };
+
   const resetAllData = () => {
     setActiveAlert(null);
     setAlertHistory([]);
@@ -446,6 +583,12 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <ResqLinkContext.Provider
       value={{
+        userRole,
+        setUserRole,
+        adminViewTab,
+        setAdminViewTab,
+        selectedHospitalId,
+        setSelectedHospitalId,
         activeAlert,
         alertHistory,
         currentLocation,
@@ -459,6 +602,16 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         auditLogs,
         eegMetrics,
         isSimulating,
+        hospitalStatuses,
+        hospitalAdmissions,
+        updateHospitalBeds,
+        toggleHospitalOxygen,
+        toggleTraumaTeamStandby,
+        toggleEmergencyDivert,
+        acknowledgeHospitalInbound,
+        prepareTraumaBay,
+        patientProfile,
+        updatePatientProfile,
         triggerSOS,
         cancelSOS,
         updateAlertStatus,
@@ -475,6 +628,7 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </ResqLinkContext.Provider>
   );
 };
+
 
 export const useResqLink = () => {
   const context = useContext(ResqLinkContext);
