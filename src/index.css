@@ -4,74 +4,105 @@
 
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #030712;
+    color: #f8fafc;
     overflow-x: hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.025em;
   }
 
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
   }
+}
+
+/* Double-Bezel Hardware Architecture */
+.double-bezel {
+  border-radius: 1.5rem;
+  padding: 0.375rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.double-bezel-inner {
+  border-radius: calc(1.5rem - 0.375rem);
+  background: rgba(3, 7, 18, 0.85);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Tactical Radar Animation */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 4s linear infinite;
 }
 
 /* Custom Leaflet Map styling */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  border-radius: 0.75rem;
-  background-color: #0f172a;
+  border-radius: 1.25rem;
+  background-color: #030712;
 }
 
 .leaflet-tile {
-  filter: brightness(0.7) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+  filter: brightness(0.65) invert(1) contrast(3.2) hue-rotate(200deg) saturate(0.25) brightness(0.65);
 }
 
 .dark-map-tiles .leaflet-tile {
-  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+  filter: brightness(0.55) invert(1) contrast(3.2) hue-rotate(200deg) saturate(0.25) brightness(0.55);
 }
 
-/* Custom scrollbars */
+/* Custom sleek scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #030712;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: #1e293b;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #334155;
 }
 
-/* SOS Pulse Animations */
-@keyframes sos-wave {
+/* SOS Radiant Pulse Wave Animations */
+@keyframes sos-radiant {
   0% {
-    transform: scale(1);
-    opacity: 0.8;
+    transform: scale(0.95);
+    opacity: 0.9;
   }
   100% {
-    transform: scale(2.2);
+    transform: scale(2.4);
     opacity: 0;
   }
 }
 
-.animate-sos-wave-1 {
-  animation: sos-wave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+.animate-sos-radiant-1 {
+  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
-.animate-sos-wave-2 {
-  animation: sos-wave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite 0.6s;
+.animate-sos-radiant-2 {
+  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.7s;
 }
 
-.animate-sos-wave-3 {
-  animation: sos-wave 2s cubic-bezier(0, 0.2, 0.8, 1) infinite 1.2s;
+.animate-sos-radiant-3 {
+  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite 1.4s;
 }

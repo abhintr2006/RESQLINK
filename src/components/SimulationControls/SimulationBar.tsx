@@ -30,41 +30,41 @@ export const SimulationBar: React.FC = () => {
   } = useResqLink();
 
   return (
-    <aside aria-label="Evaluation simulation controls" className="bg-slate-900/95 backdrop-blur border-b border-slate-800 text-xs text-slate-300 px-3 py-2 sticky top-0 z-50">
+    <aside aria-label="Evaluation simulation controls" className="bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/80 text-xs text-slate-300 px-4 py-2 sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Left: Simulation Label */}
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 relative">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
           </span>
-          <span className="font-semibold text-white tracking-wide flex items-center gap-1.5">
+          <span className="font-extrabold text-white tracking-wide flex items-center gap-1.5 text-[11px] uppercase">
             <Sparkles className="w-3.5 h-3.5 text-rose-400" />
             EVALUATION SIMULATOR:
           </span>
         </div>
 
         {/* Center: Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Network Tier Switcher */}
-          <div className="flex items-center bg-slate-800/80 rounded-lg p-0.5 border border-slate-700">
+          <div className="flex items-center bg-slate-900 rounded-xl p-0.5 border border-slate-800 shadow-inner">
             <button
               onClick={() => setNetworkTier('5G_HIGH_SPEED')}
-              className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition ${
+              className={`px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-xs ${
                 networkTier === '5G_HIGH_SPEED'
-                  ? 'bg-emerald-600 text-white font-medium shadow-sm'
+                  ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Full 5G/4G Broadband connection"
             >
               <Wifi className="w-3.5 h-3.5" />
-              <span>5G Data</span>
+              <span>5G Online</span>
             </button>
             <button
               onClick={() => setNetworkTier('3G_SPOTTY')}
-              className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition ${
+              className={`px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-xs ${
                 networkTier === '3G_SPOTTY'
-                  ? 'bg-amber-600 text-white font-medium shadow-sm'
+                  ? 'bg-amber-600 text-white font-bold shadow-md shadow-amber-600/30'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Weak / Low Bandwidth connection with GPS jitter"
@@ -74,9 +74,9 @@ export const SimulationBar: React.FC = () => {
             </button>
             <button
               onClick={() => setNetworkTier('2G_SMS_FALLBACK')}
-              className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition ${
+              className={`px-3 py-1 rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer text-xs ${
                 networkTier === '2G_SMS_FALLBACK'
-                  ? 'bg-rose-600 text-white font-medium shadow-sm'
+                  ? 'bg-rose-600 text-white font-bold shadow-md shadow-rose-600/30'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Offline / 2G Cellular mode - Triggers Twilio SMS Fallback"
@@ -87,7 +87,7 @@ export const SimulationBar: React.FC = () => {
           </div>
 
           {/* Location Preset Picker */}
-          <div className="flex items-center gap-1 bg-slate-800/80 rounded-lg px-2 py-1 border border-slate-700">
+          <div className="flex items-center gap-1.5 bg-slate-900 rounded-xl px-3 py-1 border border-slate-800 shadow-inner">
             <MapPin className="w-3.5 h-3.5 text-rose-400" />
             <select
               value={selectedPreset.name}
@@ -95,11 +95,11 @@ export const SimulationBar: React.FC = () => {
                 const found = BENGALURU_PRESET_LOCATIONS.find((p) => p.name === e.target.value);
                 if (found) setSelectedPreset(found);
               }}
-              className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer pr-1"
+              className="bg-transparent text-slate-200 text-xs font-bold focus:outline-none cursor-pointer pr-1"
             >
               {BENGALURU_PRESET_LOCATIONS.map((loc) => (
-                <option key={loc.name} value={loc.name} className="bg-slate-900 text-white">
-                  {loc.name} {loc.isPeripheral ? '(Outer Ward)' : '(Central)'}
+                <option key={loc.name} value={loc.name} className="bg-slate-900 text-slate-100 font-medium">
+                  {loc.name} {loc.isPeripheral ? '(Outer)' : '(Central)'}
                 </option>
               ))}
             </select>
@@ -108,54 +108,60 @@ export const SimulationBar: React.FC = () => {
           {/* Voice Guidance Toggle */}
           <button
             onClick={toggleVoiceGuidance}
-            className={`px-2 py-1 rounded-lg border flex items-center gap-1 transition ${
+            className={`px-2.5 py-1 rounded-xl flex items-center gap-1.5 border text-xs font-bold transition-all cursor-pointer ${
               voiceGuidanceEnabled
-                ? 'bg-indigo-900/60 border-indigo-600 text-indigo-300'
-                : 'bg-slate-800 border-slate-700 text-slate-400'
+                ? 'bg-indigo-950/80 border-indigo-700/80 text-indigo-300'
+                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
             }`}
-            title="Toggle Accessibility Audio Speech Synthesis"
+            title="Toggle Multilingual TTS Audio Guidance"
           >
             {voiceGuidanceEnabled ? (
-              <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>TTS Voice ON</span>
+              </>
             ) : (
-              <VolumeX className="w-3.5 h-3.5" />
+              <>
+                <VolumeX className="w-3.5 h-3.5 text-slate-500" />
+                <span>TTS Muted</span>
+              </>
             )}
-            <span>Voice TTS</span>
           </button>
 
-          {/* High Contrast Mode */}
+          {/* High Contrast Toggle */}
           <button
             onClick={toggleHighContrast}
-            className={`px-2 py-1 rounded-lg border flex items-center gap-1 transition ${
+            className={`px-2.5 py-1 rounded-xl flex items-center gap-1.5 border text-xs font-bold transition-all cursor-pointer ${
               assistiveHighContrast
-                ? 'bg-yellow-900/60 border-yellow-500 text-yellow-300'
-                : 'bg-slate-800 border-slate-700 text-slate-400'
+                ? 'bg-yellow-950/80 border-yellow-700/80 text-yellow-300'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
-            title="High-Contrast Mode for Differently-Abled Users"
+            title="A11y High Contrast Theme"
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>High-Contrast</span>
+            <span>High Contrast</span>
           </button>
         </div>
 
-        {/* Right: Triggers */}
+        {/* Right: Simulation Actions */}
         <div className="flex items-center gap-2">
+          {/* Inject Incident */}
           <button
             onClick={simulateExternalIncident}
-            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1.5 transition"
-            title="Inject a random SOS incident in Bengaluru for CAD testing"
+            className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+            title="Inject an external emergency incident into CAD"
           >
-            <PlusCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span>+ Inject SOS</span>
+            <PlusCircle className="w-3.5 h-3.5 text-rose-400" />
+            <span>+ Inject Incident</span>
           </button>
 
+          {/* Reset All */}
           <button
             onClick={resetAllData}
-            className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-lg border border-slate-700 flex items-center gap-1 transition"
-            title="Reset system state and audit logs"
+            className="p-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 rounded-xl transition-all active:scale-95 cursor-pointer"
+            title="Reset active alert and restore default simulation"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
           </button>
         </div>
       </div>
