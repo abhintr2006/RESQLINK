@@ -38,176 +38,156 @@ export const DispatcherPortal: React.FC = () => {
   const totalIcuBeds = hospitals.reduce((acc, h) => acc + h.icuBedsAvailable, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-      {/* Top Metrics Ribbon */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-              ACTIVE SOS QUEUE
+    <div className="space-y-6">
+      {/* Top Metrics Ribbon - Double Bezel */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="double-bezel shadow-lg">
+          <div className="double-bezel-inner p-4 flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+                ACTIVE SOS QUEUE
+              </div>
+              <div className="text-2xl font-black text-rose-400 mt-1">
+                {allAlerts.filter((a) => a.status !== 'RESOLVED' && a.status !== 'CANCELLED').length}
+              </div>
             </div>
-            <div className="text-2xl font-black text-rose-400 mt-0.5">
-              {allAlerts.filter((a) => a.status !== 'RESOLVED' && a.status !== 'CANCELLED').length}
+            <div className="w-10 h-10 rounded-2xl bg-rose-950/80 border border-rose-800 text-rose-400 flex items-center justify-center shadow-md">
+              <Radio className="w-5 h-5 animate-pulse" />
             </div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-400 flex items-center justify-center">
-            <Radio className="w-5 h-5 animate-pulse" />
           </div>
         </div>
 
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-              AMBULANCES PATROL
+        <div className="double-bezel shadow-lg">
+          <div className="double-bezel-inner p-4 flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+                AMBULANCES PATROL
+              </div>
+              <div className="text-2xl font-black text-emerald-400 mt-1">
+                {availableAmbulanceCount} / {responders.length}
+              </div>
             </div>
-            <div className="text-2xl font-black text-emerald-400 mt-0.5">
-              {availableAmbulanceCount} / {responders.length}
+            <div className="w-10 h-10 rounded-2xl bg-emerald-950/80 border border-emerald-800 text-emerald-400 flex items-center justify-center shadow-md">
+              <Ambulance className="w-5 h-5" />
             </div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-400 flex items-center justify-center">
-            <Ambulance className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-              HOSPITAL ICU BEDS
+        <div className="double-bezel shadow-lg">
+          <div className="double-bezel-inner p-4 flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+                HOSPITAL ICU BEDS
+              </div>
+              <div className="text-2xl font-black text-indigo-400 mt-1">
+                {totalIcuBeds} Beds
+              </div>
             </div>
-            <div className="text-2xl font-black text-indigo-400 mt-0.5">
-              {totalIcuBeds} Beds
+            <div className="w-10 h-10 rounded-2xl bg-indigo-950/80 border border-indigo-800 text-indigo-400 flex items-center justify-center shadow-md">
+              <Building2 className="w-5 h-5" />
             </div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-950/80 border border-indigo-800 text-indigo-400 flex items-center justify-center">
-            <Building2 className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
-              DISPATCH SLA AVG
+        <div className="double-bezel shadow-lg">
+          <div className="double-bezel-inner p-4 flex items-center justify-between">
+            <div>
+              <div className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+                DISPATCH SLA AVG
+              </div>
+              <div className="text-2xl font-black text-amber-400 mt-1">
+                8.4 sec
+              </div>
             </div>
-            <div className="text-2xl font-black text-amber-400 mt-0.5">
-              8.4 sec
+            <div className="w-10 h-10 rounded-2xl bg-amber-950/80 border border-amber-800 text-amber-400 flex items-center justify-center shadow-md">
+              <Clock className="w-5 h-5" />
             </div>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-800 text-amber-400 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
           </div>
         </div>
       </div>
 
-      {/* Main Grid: CAD Queue on Left + CAD Map on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Incidents List + Selected Incident Details */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="h-[360px]">
-            <ActiveIncidentsQueue
-              alerts={allAlerts}
-              selectedAlertId={selectedAlert?.id || null}
-              onSelectAlert={(a) => setSelectedAlert(a)}
-              onUpdateStatus={updateAlertStatus}
-            />
-          </div>
-
-          {/* Selected Incident Drilldown Card */}
-          {selectedAlert && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-white">
-                      Incident #{selectedAlert.id}
-                    </span>
-                    <span className="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-800 font-bold">
-                      {selectedAlert.category.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Triggered: {new Date(selectedAlert.timestamp).toLocaleTimeString()}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-1 rounded">
-                    Status: {selectedAlert.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Patient & Location info */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">
-                    Citizen / Reporter
-                  </span>
-                  <div className="font-bold text-white truncate">
-                    {selectedAlert.citizenName || 'Citizen'}
-                  </div>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    {selectedAlert.citizenPhone || '+91 98450 00000'}
-                  </span>
-                </div>
-
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-500 uppercase block font-bold">
-                    Ward &amp; Pincode
-                  </span>
-                  <div className="font-bold text-white truncate">
-                    {selectedAlert.equityMetadata.wardName}
-                  </div>
-                  <span className="text-[11px] text-slate-400">
-                    {selectedAlert.equityMetadata.isPeripheralWard ? 'Outer Bengaluru' : 'Central Ward'}
-                  </span>
-                </div>
-              </div>
-
-              {/* AI Triage Rationale */}
-              <div className="bg-slate-950 p-3 rounded-xl border border-indigo-900/40 text-xs">
-                <div className="flex items-center gap-1.5 font-bold text-indigo-300 mb-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>AI Triage Assessment (Score: {selectedAlert.aiTriage.triageScore}/100)</span>
-                </div>
-                <p className="text-slate-300 text-[11px] leading-relaxed">
-                  Recommended response: {selectedAlert.aiTriage.suggestedALS ? 'ALS (Advanced Life Support) Unit' : 'BLS Unit'}. Pre-hospital resuscitation protocol active.
-                </p>
-              </div>
-
-              {/* Assigned Responder Bar */}
-              {selectedAlert.assignedResponder && (
-                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <Ambulance className="w-4 h-4 text-emerald-400" />
-                    <div>
-                      <strong className="text-white block">{selectedAlert.assignedResponder.name}</strong>
-                      <span className="text-[11px] text-slate-400">
-                        Driver: {selectedAlert.assignedResponder.driverName} • ETA: ~{selectedAlert.estimatedArrivalMinutes} min
-                      </span>
-                    </div>
-                  </div>
-
-                  <a
-                    href={`tel:${selectedAlert.assignedResponder.contactNumber}`}
-                    className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow transition"
-                  >
-                    <PhoneCall className="w-3 h-3" />
-                    <span>Call Driver</span>
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
+      {/* Main CAD Split Screen: Queue + Map */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[560px]">
+        {/* Left Col: Incidents Queue */}
+        <div className="lg:col-span-4 h-full">
+          <ActiveIncidentsQueue
+            alerts={allAlerts}
+            selectedAlertId={selectedAlert?.id || null}
+            onSelectAlert={(a) => setSelectedAlert(a)}
+            onUpdateStatus={updateAlertStatus}
+          />
         </div>
 
-        {/* Right Column: CAD Fleet Map */}
-        <div className="lg:col-span-7">
-          <LiveFleetMap
-            alerts={allAlerts}
-            responders={responders}
-            hospitals={hospitals}
-            selectedAlert={selectedAlert}
-          />
+        {/* Right Col: Live Fleet Map & Incident Telemetry */}
+        <div className="lg:col-span-8 flex flex-col gap-4">
+          <div className="double-bezel flex-1 min-h-[400px] shadow-2xl">
+            <div className="double-bezel-inner p-2 h-full overflow-hidden">
+              <LiveFleetMap
+                alerts={allAlerts}
+                selectedAlert={selectedAlert}
+                responders={responders}
+                hospitals={hospitals}
+              />
+            </div>
+          </div>
+
+
+          {/* Selected Incident Telemetry Inspector */}
+          {selectedAlert && (
+            <div className="double-bezel shadow-xl">
+              <div className="double-bezel-inner p-5 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-950">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-xl text-xs font-mono font-black bg-rose-600 text-white shadow-md">
+                      {selectedAlert.shortCode}
+                    </span>
+                    <span className="text-sm font-black text-white">
+                      {selectedAlert.category.replace('_', ' ')}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">
+                      • {selectedAlert.equityMetadata.wardName}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-rose-400">
+                      STATUS: {selectedAlert.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 text-xs">
+                  <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Allocated Ambulance</span>
+                    <p className="font-bold text-white mt-0.5">
+                      {selectedAlert.assignedResponder?.name || 'Searching...'}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Assigned Hospital</span>
+                    <p className="font-bold text-white mt-0.5">
+                      {selectedAlert.assignedHospital?.name || 'Searching...'}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Estimated ETA</span>
+                    <p className="font-bold text-amber-400 mt-0.5">
+                      ~{selectedAlert.estimatedArrivalMinutes} min
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">AI Triage Priority</span>
+                    <p className="font-bold text-rose-400 mt-0.5">
+                      {selectedAlert.aiTriage.urgencyLevel.replace('_', ' ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
