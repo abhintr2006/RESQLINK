@@ -233,3 +233,69 @@ export const INITIAL_EEG_DATA = {
     institutionalAccountabilityMapped: true,
   }
 };
+
+export const INITIAL_PATIENT_PROFILE = {
+  abhaId: '91-4521-8890-3312',
+  name: 'Ananya Sharma',
+  age: 34,
+  gender: 'Female' as const,
+  bloodGroup: 'O+ Positive',
+  allergies: ['Penicillin', 'Sulfa Drugs'],
+  chronicConditions: ['Mild Asthma', 'Hypertension (Controlled)'],
+  currentMedications: ['Salbutamol Inhaler (PRN)', 'Amlodipine 5mg OD'],
+  emergencyContacts: [
+    {
+      id: 'EC-01',
+      name: 'Dr. Rajesh Sharma',
+      relation: 'Spouse / Next of Kin',
+      phone: '+91 98450 12345',
+      notifyOnSOS: true,
+    },
+    {
+      id: 'EC-02',
+      name: 'Sunita Sharma',
+      relation: 'Mother',
+      phone: '+91 94480 67890',
+      notifyOnSOS: true,
+    },
+  ],
+  organDonor: true,
+  preferredHospital: 'HOSP-01', // KSSEM Medical Center
+};
+
+export const INITIAL_ADMISSION_RECORDS = [
+  {
+    id: 'ADM-2026-081',
+    alertId: 'INC-8812',
+    patientName: 'Kishore Kumar (58M)',
+    category: 'CARDIAC' as const,
+    urgencyLevel: 'CRITICAL_RED' as const,
+    arrivedAt: '12:45 PM',
+    bedAssigned: 'ICU Bed #04 (Cath Lab)',
+    doctorInCharge: 'Dr. Vivek Murthy (Cardiologist)',
+    status: 'ADMITTED' as const,
+  },
+  {
+    id: 'ADM-2026-079',
+    alertId: 'INC-8804',
+    patientName: 'Ravi Shankar (29M)',
+    category: 'TRAUMA_ACCIDENT' as const,
+    urgencyLevel: 'HIGH_AMBER' as const,
+    arrivedAt: '11:20 AM',
+    bedAssigned: 'ER Trauma Bay 2',
+    doctorInCharge: 'Dr. Preeti Gowda (Trauma Lead)',
+    status: 'ADMITTED' as const,
+  },
+  {
+    id: 'ADM-2026-074',
+    alertId: 'INC-8791',
+    patientName: 'Meenakshi Iyer (72F)',
+    category: 'ELDERLY_FALL' as const,
+    urgencyLevel: 'MODERATE_YELLOW' as const,
+    arrivedAt: '09:15 AM',
+    bedAssigned: 'Observation Bed 07',
+    doctorInCharge: 'Dr. Arvind Rao',
+    status: 'DISCHARGED' as const,
+  },
+];
+
