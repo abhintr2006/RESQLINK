@@ -25,6 +25,13 @@ import {
   INITIAL_PATIENT_PROFILE,
   INITIAL_ADMISSION_RECORDS,
 } from '../data/bengaluruData';
+import { LocationLockService } from '../services/locationLockService';
+import { AIDispatchEngine } from '../services/aiDispatchEngine';
+import { TwilioSmsService } from '../services/twilioSmsService';
+import { AuditLogger } from '../services/auditLogger';
+import { audioService } from '../services/audioService';
+import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
+
 import { api, authStorage, AuthUser } from '../services/api';
 
 interface ResqLinkContextType {
@@ -227,6 +234,79 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const simulateExternalIncident = () => {
+    const randomPreset =
+      BENGALURU_PRESET_LOCATIONS[
+        Math.floor(Math.random() * BENGALURU_PRESET_LOCATIONS.length)
+      ];
+    const categories: EmergencyCategory[] = [
+      'TRAUMA_ACCIDENT',
+      'CARDIAC',
+      'STROKE',
+      'RESPIRATORY',
+      'ELDERLY_FALL',
+    ];
+    // Use bias-free CSPRNG helpers (rejection sampling for int, 53-bit mantissa for float)
+    const category = categories[secureRandomInt(categories.length)];
+    const alertId = `EXT-${2000 + secureRandomInt(8000)}`;
+
+    const coord: GeoCoordinate = {
+      latitude: randomPreset.latitude + (secureRandomFloat() - 0.5) * 0.01,
+      longitude: randomPreset.longitude + (secureRandomFloat() - 0.5) * 0.01,
+      accuracy: 10,
+      timestamp: Date.now(),
+      provider: 'GPS_HARDWARE',
+    };
+
+    const decision = AIDispatchEngine.computeOptimalDispatch(
+      coord,
+      category,
+      randomPreset.isPeripheral,
+      responders
+    );
+
+    const newAlert: EmergencyAlert = {
+      id: alertId,
+      shortCode: `EXT-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+      timestamp: new Date().toISOString(),
+      category,
+      description: `Emergency reported in ${randomPreset.ward}`,
+      citizenName: 'Bengaluru Citizen',
+      citizenPhone: '+91 99887 66554',
+      location: coord,
+      locationLockState: {
+        isLocked: true,
+        samples: [],
+        finalCoordinate: coord,
+        confidenceScore: 94,
+        lockDurationMs: 1200,
+        attemptCount: 2,
+      },
+      status: 'CONFIRMED',
+      statusTimestamps: {
+        triggeredAt: new Date().toISOString(),
+        confirmedAt: new Date().toISOString(),
+      },
+      networkUsed: Math.random() > 0.3 ? '5G_HIGH_SPEED' : '2G_SMS_FALLBACK',
+      fallbackSMSUsed: Math.random() > 0.7,
+      assignedResponder: decision.matchedResponder,
+      assignedHospital: decision.matchedHospital,
+      estimatedArrivalMinutes: decision.estimatedArrivalMinutes,
+      aiTriage: AIDispatchEngine.getAIFirstAidGuidance(category),
+      equityMetadata: {
+        deviceTier: 'SMARTPHONE',
+        wardName: randomPreset.ward,
+        isPeripheralWard: randomPreset.isPeripheral,
+        userDemographic: 'GENERAL',
+      },
+    };
+
+    setAlertHistory((prev) => [newAlert, ...prev]);
+    AuditLogger.logEvent(alertId, 'SOS_TRIGGERED', 'CITIZEN', {
+      simulated: true,
+      ward: randomPreset.ward,
+      category,
+    });
+    refreshAuditLogs();
     void api.simulateExternalIncident().then(async (alert) => {
       setAlertHistory((previous) => [alert, ...previous]);
       await refreshAuditLogs(alert.id);
