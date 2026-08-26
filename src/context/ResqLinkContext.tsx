@@ -428,12 +428,13 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       'RESPIRATORY',
       'ELDERLY_FALL',
     ];
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const alertId = `EXT-${Math.floor(2000 + Math.random() * 8000)}`;
+    const secureRand = crypto.getRandomValues(new Uint32Array(4));
+    const category = categories[Math.floor(secureRand[0] / 0x100000000 * categories.length)];
+    const alertId = `EXT-${Math.floor(2000 + (secureRand[1] / 0x100000000) * 8000)}`;
 
     const coord: GeoCoordinate = {
-      latitude: randomPreset.latitude + (Math.random() - 0.5) * 0.01,
-      longitude: randomPreset.longitude + (Math.random() - 0.5) * 0.01,
+      latitude: randomPreset.latitude + (secureRand[2] / 0x100000000 - 0.5) * 0.01,
+      longitude: randomPreset.longitude + (secureRand[3] / 0x100000000 - 0.5) * 0.01,
       accuracy: 10,
       timestamp: Date.now(),
       provider: 'GPS_HARDWARE',
