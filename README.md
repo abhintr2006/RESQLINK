@@ -122,7 +122,7 @@ Decoded server-side and routed directly into the CAD incident queue with high de
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/srushtiv83-ux/RESQLINK.git
+https://github.com/abhintr2006/RESQLINK.git
 cd RESQLINK
 ```
 
