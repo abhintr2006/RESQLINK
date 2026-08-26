@@ -1,4 +1,6 @@
 import { GeoCoordinate, LocationLockSample, LocationLockState } from '../types';
+import { secureRandomFloat } from '../utils/secureRandom';
+
 
 // Haversine distance in meters between two lat/lng pairs
 export function calculateHaversineDistanceMeters(
@@ -105,10 +107,9 @@ export class LocationLockService {
         const baseLat = presetFallback?.latitude ?? 12.8715; // default KSSEM
         const baseLng = presetFallback?.longitude ?? 77.5452;
         // Add tiny realistic jitter (3-12 meters)
-        // Use cryptographically secure RNG to avoid CWE-338 (js/insecure-randomness)
-        const jitterRand = crypto.getRandomValues(new Uint32Array(2));
-        const jitterLat = (jitterRand[0] / 0x100000000 - 0.5) * 0.00015;
-        const jitterLng = (jitterRand[1] / 0x100000000 - 0.5) * 0.00015;
+        // secureRandomFloat() uses 53-bit mantissa construction — no modulo bias
+        const jitterLat = (secureRandomFloat() - 0.5) * 0.00015;
+        const jitterLng = (secureRandomFloat() - 0.5) * 0.00015;
 
         setTimeout(() => {
           resolve({
