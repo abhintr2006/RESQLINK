@@ -1,6 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Brand / emergency color palette */
+  --color-resq-50: #fff1f2;
+  --color-resq-100: #ffe4e6;
+  --color-resq-200: #fecdd3;
+  --color-resq-300: #fda4af;
+  --color-resq-400: #fb7185;
+  --color-resq-500: #f43f5e;
+  --color-resq-600: #e11d48;
+  --color-resq-700: #be123c;
+  --color-resq-800: #9f1239;
+  --color-resq-900: #881337;
+  --color-resq-950: #4c0519;
+
+  --color-emergency-red: #EF4444;
+  --color-emergency-amber: #F59E0B;
+  --color-emergency-green: #10B981;
+  --color-emergency-blue: #3B82F6;
+  --color-emergency-dark: #0F172A;
+  --color-emergency-panel: #1E293B;
+
+  /* Custom animations */
+  --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-ripple: ripple 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  --animate-radar: radar 3s linear infinite;
+
+  @keyframes ripple {
+    0%   { transform: scale(0.95); opacity: 1; }
+    100% { transform: scale(1.8);  opacity: 0; }
+  }
+
+  @keyframes radar {
+    0%   { transform: rotate(0deg);   }
+    100% { transform: rotate(360deg); }
+  }
+}
 
 @layer base {
   body {
@@ -9,7 +44,7 @@
     color: #f8fafc;
     overflow-x: hidden;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.025em;
   }
@@ -36,12 +71,8 @@
 
 /* Tactical Radar Animation */
 @keyframes radar-sweep {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0%   { transform: rotate(0deg);   }
+  100% { transform: rotate(360deg); }
 }
 
 .animate-radar-sweep {
@@ -85,14 +116,8 @@
 
 /* SOS Radiant Pulse Wave Animations */
 @keyframes sos-radiant {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
+  0%   { transform: scale(0.95); opacity: 0.9; }
+  100% { transform: scale(2.4);  opacity: 0;   }
 }
 
 .animate-sos-radiant-1 {

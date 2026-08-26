@@ -1,5 +1,4 @@
 version: 2
-
 updates:
   # Python backend
   - package-ecosystem: "pip"
@@ -30,3 +29,4 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      
