@@ -2,15 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-
-try:
-    from sqlalchemy import JSON
-except ImportError:
-    from sqlalchemy import Text as JSON  # type: ignore[assignment]
 
 
 class Hospital(Base):

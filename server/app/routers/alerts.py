@@ -15,9 +15,8 @@ from app.core.logging import get_logger
 from app.db.models import Alert, AuditLog, Hospital, Responder
 from app.middleware.rate_limit import limiter
 from app.routers.ws import manager as ws_manager
-from app.schemas.alert import AlertOut, SosRequest, StatusUpdate
+from app.schemas.alert import SosRequest, StatusUpdate
 from app.services.dispatch import (
-    DispatchDecision,
     HospitalSnapshot,
     ResponderSnapshot,
     get_guidance,
@@ -295,8 +294,12 @@ async def simulate_incident(user: AdminUser, db: DbSession) -> dict[str, Any]:
 
 @router.get("/bootstrap")
 async def bootstrap(user: AnyUser, db: DbSession) -> dict[str, Any]:
-    from sqlalchemy import select as sel
-    from app.db.models import Hospital, HospitalAdmission, HospitalStatus, PatientProfile
+    from app.db.models import (
+        Hospital,
+        HospitalAdmission,
+        HospitalStatus,
+        PatientProfile,
+    )
 
     alerts_result = await db.execute(select(Alert).order_by(Alert.created_at.desc()))
     all_alerts = [_alert_to_dict(a) for a in alerts_result.scalars()]
