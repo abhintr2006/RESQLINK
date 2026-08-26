@@ -10,7 +10,7 @@ PyJWT>=2.13.0,<3.0
 # ── Database ──────────────────────────────────────────────────────────────────
 sqlalchemy>=2.0.52,<3.0
 alembic>=1.19.1,<2.0
-aiosqlite>=0.20,<1.0          # SQLite async driver (local dev default)
+aiosqlite>=0.22.1,<1.0          # SQLite async driver (local dev default)
 # asyncpg>=0.29,<1.0          # Uncomment for PostgreSQL
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
