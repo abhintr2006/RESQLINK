@@ -12,6 +12,7 @@ import {
   UserCheck,
   Activity,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -27,6 +28,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
     setUserRole,
     adminViewTab,
     setAdminViewTab,
+    authUser,
+    logout,
   } = useResqLink();
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
@@ -184,7 +187,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                   <span>Switch Active Role</span>
                   <Sparkles className="w-3 h-3 text-rose-400" />
                 </div>
-                {(['admin', 'hospital', 'patient'] as UserRole[]).map((role) => {
+                {(userRole === 'admin' ? (['admin', 'hospital', 'patient'] as UserRole[]) : [userRole]).map((role) => {
                   const cfg = roleConfigs[role];
                   const Icon = cfg.icon;
                   const isSelected = userRole === role;
@@ -214,6 +217,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
               </div>
             )}
           </div>
+
+          <button
+            onClick={() => void logout()}
+            className="hidden lg:flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold text-slate-300 bg-slate-900/90 border border-slate-800 rounded-2xl hover:bg-slate-800 transition cursor-pointer"
+            title={`Sign out ${authUser?.displayName || 'user'}`}
+          >
+            <LogOut className="w-3.5 h-3.5 text-slate-400" />
+            <span>Sign out</span>
+          </button>
 
           {/* DPDP 2023 Consent Notice Pill */}
           <button

@@ -26,3 +26,9 @@ dist-ssr
 .agents/
 .claude/
 skills-lock.json
+
+# Python server
+server/.venv/
+server/**/__pycache__/
+server/**/*.pyc
+server/data/resqlink.json
