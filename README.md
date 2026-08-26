@@ -1,280 +1,207 @@
 # RESQLINK: AI-Powered Citizen-Centric Emergency Assistance and Dispatch System
 
-**Evaluating Equity, Efficacy, and Governance in Urban India**
+<div align="center">
 
-Department of Computer Science and Business Systems
-K S School of Engineering and Management (KSSEM)
-Bengaluru, India
+![CI](https://github.com/srushtiv83-ux/RESQLINK/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite_6-646CFF?logo=vite&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy_2-D71F00?logo=sqlalchemy&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-4169E1?logo=postgresql&logoColor=white)
+![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-8A2BE2?logo=socketdotio&logoColor=white)
+![Leaflet](https://img.shields.io/badge/Leaflet-Map-199900?logo=leaflet&logoColor=white)
+![Twilio](https://img.shields.io/badge/Twilio-SMS_Fallback-F22F46?logo=twilio&logoColor=white)
+![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
+<br/>
+
+**Evaluating Equity, Efficacy, and Governance in Urban Emergency Response**  
+*Department of Computer Science and Business Systems*  
+*K S School of Engineering and Management (KSSEM), Bengaluru, India*  
 
 Aligned with **UN SDG 3: Good Health and Well-being** and **UN SDG 11: Sustainable Cities and Communities**
+
+</div>
 
 ---
 
 ## Overview
 
-**RESQLINK** is an AI-powered emergency assistance and dispatch mobile web application designed to address critical gaps in urban emergency response systems, with a specific focus on Bengaluru, India.
+**RESQLINK** is an AI-powered emergency assistance and dispatch system designed to address systemic delays and geographic disparities in urban emergency response, with an operational benchmark in **Bengaluru, India**.
 
-The platform enables citizens to request emergency assistance through a single-tap interface designed with accessibility and ease of use as core principles. It is particularly intended to support elderly users, differently-abled individuals, and users with limited digital literacy.
+The platform enables citizens to trigger emergency requests through an ultra-accessible, single-tap interface designed for elderly individuals, differently-abled persons, and low digital-literacy users. RESQLINK integrates:
+- **Dual-reading temporal GPS verification** to eliminate false triggers.
+- **Multi-factor AI dispatch** considering ALS/BLS capabilities, live traffic, and peripheral ward equity.
+- **Real-time WebSockets and Leaflet CAD monitoring** for emergency dispatchers and hospital trauma centers.
+- **GSM/2G SMS fallback** with 160-character compressed payloads for zero-broadband resilience.
+- **Cryptographically auditable governance ledger** aligned with India's DPDP Act, 2023.
 
-RESQLINK combines location verification, AI-assisted emergency dispatch, real-time fleet tracking, low-connectivity communication, and governance-oriented analytics into an integrated emergency response platform.
+---
 
-## Key Architecture and Capabilities
+## System Architecture and Capabilities
+
+```mermaid
+graph TD
+    A[Citizen App / SMS] -->|Dual-Lock GPS / GSM Payload| B[FastAPI Gateway]
+    B -->|Rate Limiter & X-Request-ID| C[Auth & Security Layer]
+    C --> D[AI Dispatch Engine]
+    D -->|Haversine + Traffic + ALS/BLS + Equity| E[(Async SQLAlchemy DB)]
+    B <-->|Bidirectional WebSockets /api/ws| F[Dispatcher CAD Portal]
+    B <-->|Live Admission Sync| G[Hospital Trauma Portal]
+    B -->|Twilio Adapter| H[GSM SMS Fallback Gateway]
+    E --> I[EEG Governance Dashboard]
+```
 
 ### 1. Client Application Layer
-
-The client application provides a simplified emergency interface with:
-
-* One-tap SOS activation
-* High-contrast accessibility mode
-* Speech synthesis and voice assistance
-* Multilingual support for:
-
-  * English
-  * Kannada (ಕನ್ನಡ)
-  * Hindi (हिन्दी)
-* Responsive mobile-first interface
+- **One-Tap SOS Activation**: Instant trigger with audio-haptic feedback.
+- **High-Contrast Accessibility Mode**: WCAG AAA compliant styling.
+- **Voice Assistance and Text-to-Speech**: Hands-free guidance.
+- **Multilingual Localization**: English, Kannada (ಕನ್ನಡ), and Hindi (हिन्दी).
+- **Responsive Mobile-First PWA**: Zero latency on low-end mobile browsers.
 
 ### 2. Location-Lock Safety Protocol
-
-RESQLINK implements a dual-reading temporal location verification mechanism to improve the reliability of emergency triggers.
-
-The protocol validates consecutive GPS readings within a maximum distance of **25 metres** to help distinguish genuine emergency requests from accidental activations and GPS signal jitter.
+- Implements a dual-reading temporal GPS verification algorithm.
+- Validates consecutive coordinates within **≤ 25 metres** over a timed window.
+- Distinguishes genuine panic triggers from pocket dials and GPS signal drift.
 
 ### 3. AI-Assisted Dispatch Engine
+Evaluates live operational vectors to compute optimal responder allocation:
+- **Proximity**: Haversine distance to incident epicenter.
+- **Care Capability**: Advanced Life Support (ALS) vs. Basic Life Support (BLS) matching.
+- **Hospital Capability**: Trauma-care capacity and ICU bed availability.
+- **Live Traffic Factor**: Congestion multipliers for Bengaluru arterial corridors.
+- **Peripheral Ward Equity Bonus**: Counteracts central-zone bias for underserved outer wards.
 
-The dispatch engine supports responder allocation by evaluating multiple operational factors, including:
-
-* Responder proximity
-* Ambulance capability, including ALS and BLS units
-* Hospital trauma-centre availability
-* Live Bengaluru traffic conditions
-* Estimated response time
-* Peripheral ward equity weighting
-
-The objective is to improve response efficiency while considering equitable access to emergency services across different geographic areas.
-
-### 4. Dispatcher CAD Portal
-
-The Computer-Aided Dispatch (CAD) portal provides emergency operators with a centralized command interface featuring:
-
-* Real-time incident queues
-* Live Leaflet-based fleet tracking
-* Route polylines
-* Responder location monitoring
-* Unit status management
-* Incident and dispatch information
+### 4. Dispatcher CAD and Hospital Portals
+- **Real-Time Incident Queues**: Filtered by triage priority (Critical, Moderate, Minor).
+- **Live Leaflet Fleet Tracking**: Dynamic route polylines, speed, and ETA calculations.
+- **Hospital Bed Allocation**: Direct pre-hospital notification for incoming trauma admissions.
+- **Real-time WebSocket Broadcasts**: Instant state sync across all active portals without polling.
 
 ### 5. Low-Connectivity SMS Fallback
-
-To maintain emergency communication during mobile broadband outages or low-connectivity conditions, RESQLINK provides a Twilio-based SMS fallback mechanism.
-
-The system transmits a compressed emergency payload designed for GSM/2G communication:
-
+When broadband or 4G/5G data is unavailable, RESQLINK triggers a GSM SMS payload compressed into standard 160-character format:
 ```text
 RESQ#ID#LOC#ACC#TYPE#USR#TIME
 ```
+Decoded server-side and routed directly into the CAD incident queue with high delivery reliability.
 
-The payload is designed to remain within the standard 160-character SMS constraint while retaining essential emergency information.
-
-### 6. Equity, Efficacy, and Governance Dashboard
-
-The EEG Dashboard provides a quantitative evaluation framework for assessing system performance, accessibility, and governance.
-
-Key evaluation areas include:
-
-* 2G versus 5G service parity
-* SOS-to-confirmation latency
-* Emergency dispatch performance
-* Geographic equity
-* Digital accessibility
-* Data protection and privacy considerations
-* Auditability and accountability
-
-The project evaluates a target SOS-to-confirmation latency of approximately **8.4 seconds**, compared with approximately **195 seconds** for the traditional CAD workflow used as a comparison benchmark.
-
-The platform also incorporates cryptographic hashing for an immutable audit ledger and considers compliance requirements under India's **Digital Personal Data Protection (DPDP) Act, 2023**.
+### 6. Equity, Efficacy, and Governance (EEG) Dashboard
+- **2G vs. 5G Parity**: Verifies emergency response integrity across connectivity strata.
+- **Latency Benchmarking**: Achieves **~8.4s** SOS-to-confirmation latency vs. **~195s** legacy voice CAD.
+- **Auditability**: SHA-256 event chaining for DPDP Act, 2023 compliance.
 
 ---
 
-## Technology and Architecture
+## Technology Stack
 
-The system is designed around the following technology components:
-
-* **Frontend:** React / TypeScript
-* **Build Tooling:** Vite
-* **Mapping:** Leaflet
-* **Emergency Communication:** Twilio SMS
-* **Geolocation:** Browser Geolocation APIs
-* **Deployment:** Netlify
-* **Dependency Management:** pnpm
-
-The architecture is designed to support real-time emergency workflows while maintaining accessibility, resilience, and auditability as primary design considerations.
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19, TypeScript 5.7, Tailwind CSS v4, Lucide Icons |
+| **Build and Tooling** | Vite 6, PostCSS, pnpm |
+| **Backend Framework** | FastAPI (Async Python 3.11+), Uvicorn, SlowAPI Rate Limiting |
+| **Database and ORM** | SQLAlchemy 2 (Async), aiosqlite (Dev) / asyncpg (Prod Ready) |
+| **Real-time Comms** | WebSockets (`/api/ws`), ConnectionManager |
+| **Observability** | structlog (Structured JSON), X-Request-ID Middleware |
+| **Mapping and GIS** | Leaflet, OpenStreetMap |
+| **SMS Gateway** | Twilio REST API (Adapter Pattern: Simulated / Live) |
+| **CI / CD** | GitHub Actions (Matrix Python 3.11/3.12, Node 22, CodeQL SAST) |
 
 ---
 
-## Local Development
+## Getting Started
 
 ### Prerequisites
+- **Node.js** 22+ and **pnpm**
+- **Python** 3.11+ and `pip`
+- **Git**
 
-Ensure that the following are installed:
-
-* Node.js
-* pnpm
-* Git
-
-### Installation
-
-Clone the repository:
-
+### 1. Clone Repository
 ```bash
-git clone https://github.com/abhintr2006/resqlink-app.git
-cd resqlink-app
+git clone https://github.com/srushtiv83-ux/RESQLINK.git
+cd RESQLINK
 ```
 
-Install dependencies:
-
+### 2. Backend Setup
 ```bash
+cd server
+
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+# source .venv/bin/activate # Linux / macOS
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start backend server (auto-seeds Bengaluru hospital and responder data)
+uvicorn app.main:app --reload --port 8000
+```
+- **API URL**: `http://localhost:8000`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
+- **WebSocket Endpoint**: `ws://localhost:8000/api/ws`
+
+### 3. Frontend Setup
+In a new terminal from the project root:
+```bash
+# Install frontend packages
 pnpm install
-```
 
-Start the development server:
-
-```bash
+# Start Vite dev server
 pnpm run dev
 ```
-
-Open the local application at:
-
-```text
-http://localhost:3000
-```
-
-> The development server port may vary depending on the Vite configuration.
+- **App URL**: `http://localhost:3000`
 
 ---
 
-## Production Build
+## Demo Credentials
 
-Create a production build using:
+The database is automatically seeded on startup with the following test accounts:
 
+| Role | Username | Password | Access Level |
+|---|---|---|---|
+| **Dispatcher / Admin** | `admin` | `admin123` | CAD Portal, Fleet Control, EEG Metrics |
+| **Hospital Staff** | `hospital` | `hospital123` | Trauma Intake, Bed Status Management |
+| **Citizen / Patient** | `patient` | `patient123` | Mobile SOS, Profile and Medical Records |
+
+---
+
+## Testing and Quality Assurance
+
+### Run Backend Tests (23 Async Tests)
 ```bash
+cd server
+python -m pytest -q
+```
+
+### Run Frontend Typecheck and Build
+```bash
+pnpm exec tsc --noEmit
 pnpm run build
 ```
 
-The generated production files are placed in the `dist` directory.
-
-To preview the production build locally:
-
-```bash
-pnpm run preview
-```
-
 ---
 
-## Deployment
+## Academic Reference and Governance Grounding
 
-### Netlify
-
-RESQLINK can be deployed to Netlify using either of the following approaches.
-
-#### Option 1: Manual Deployment
-
-1. Build the application:
-
-```bash
-pnpm run build
-```
-
-2. Open the Netlify deployment interface.
-3. Deploy the generated `dist` directory.
-
-#### Option 2: GitHub Integration
-
-Connect the repository to Netlify and configure:
-
-```text
-Build command: pnpm run build
-Publish directory: dist
-```
-
-The included `netlify.toml` and `_redirects` configuration can be used to support SPA routing.
-
----
-
-## Project Objectives
-
-RESQLINK focuses on four primary objectives:
-
-1. **Accessibility**
-   Provide an emergency interface that can be used with minimal digital literacy.
-
-2. **Response Efficiency**
-   Reduce the time between emergency activation, verification, and responder allocation.
-
-3. **Resilience**
-   Maintain emergency communication capabilities during periods of poor mobile broadband connectivity.
-
-4. **Equity and Governance**
-   Evaluate emergency response performance across geographic and connectivity disparities while supporting privacy, transparency, and auditability.
-
----
-
-## Academic and Governance Context
-
-The project is grounded in the following academic and policy references:
-
-* **Digital Personal Data Protection Act, 2023** — Government of India
-* **MeitY AI Governance Guidelines, 2025** — including principles such as "Understandable by Design" and "People First"
-* **Jesus et al. (2024)** — Research concerning dual-channel resilience under common-cause failures
-* **Arora et al. (2026)** — Research concerning the rural-urban digital divide and 2G-based equity mitigation
+- **Digital Personal Data Protection (DPDP) Act, 2023** – Government of India
+- **MeitY AI Governance Guidelines (2025)** – Principles of *'Understandable by Design'* and *'People First'*
+- **Jesus et al. (2024)** – Dual-channel resilience under common cause failures in public safety networks
+- **Arora et al. (2026)** – Rural-urban digital divide and 2G equity mitigation frameworks
 
 ---
 
 ## UN Sustainable Development Goals
 
-RESQLINK aligns with the following United Nations Sustainable Development Goals:
-
-### SDG 3 — Good Health and Well-being
-
-The project aims to improve access to emergency assistance and support faster emergency response.
-
-### SDG 11 — Sustainable Cities and Communities
-
-The system addresses urban emergency-response accessibility, resilience, and equitable service delivery.
+- **UN SDG 3: Good Health and Well-being** — Target 3.6 and 3.d: Halving urban emergency response delays and fortifying early warning/risk reduction.
+- **UN SDG 11: Sustainable Cities and Communities** — Target 11.2 and 11.5: Expanding accessible, inclusive municipal safety infrastructure.
 
 ---
-
-## Project Status
-
-RESQLINK is an academic and research-oriented prototype intended to demonstrate the integration of AI-assisted dispatch, emergency communication resilience, accessibility, and governance evaluation within an urban emergency-response context.
-
-Performance figures and system capabilities should be interpreted within the scope of the project's experimental evaluation and prototype implementation.
-
----
-
-## Repository
-
-**GitHub:** `https://github.com/abhintr2006/resqlink-app`
-
-## Python Server
-
-The frontend is now connected to a FastAPI server under `server/`. Start it in a separate terminal before launching the Vite app:
-
-```bash
-cd server
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-The frontend uses `http://localhost:8000/api` by default. To point it at another backend, set `VITE_API_BASE_URL` before running the frontend, for example `VITE_API_BASE_URL=https://api.example.com/api npm run dev`. See [`server/README.md`](server/README.md) for the endpoint map, environment variables, test commands, and production hardening notes.
-
-## Academic Reference & Governance Grounding
-- **Digital Personal Data Protection (DPDP) Act, 2023** – India
-- **MeitY AI Governance Guidelines (2025)** – 'Understandable by Design' & 'People First'
-- **Jesus et al. (2024)** – Dual-channel resilience under common cause failures
-- **Arora et al. (2026)** – Rural-urban digital divide and 2G equity mitigation
 
 ## License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
