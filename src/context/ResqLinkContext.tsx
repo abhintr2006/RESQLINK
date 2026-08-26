@@ -29,6 +29,8 @@ import { AIDispatchEngine } from '../services/aiDispatchEngine';
 import { TwilioSmsService } from '../services/twilioSmsService';
 import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
+import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
+
 
 interface ResqLinkContextType {
   // Role & Dashboard switching
@@ -428,13 +430,13 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       'RESPIRATORY',
       'ELDERLY_FALL',
     ];
-    const secureRand = crypto.getRandomValues(new Uint32Array(4));
-    const category = categories[Math.floor(secureRand[0] / 0x100000000 * categories.length)];
-    const alertId = `EXT-${Math.floor(2000 + (secureRand[1] / 0x100000000) * 8000)}`;
+    // Use bias-free CSPRNG helpers (rejection sampling for int, 53-bit mantissa for float)
+    const category = categories[secureRandomInt(categories.length)];
+    const alertId = `EXT-${2000 + secureRandomInt(8000)}`;
 
     const coord: GeoCoordinate = {
-      latitude: randomPreset.latitude + (secureRand[2] / 0x100000000 - 0.5) * 0.01,
-      longitude: randomPreset.longitude + (secureRand[3] / 0x100000000 - 0.5) * 0.01,
+      latitude: randomPreset.latitude + (secureRandomFloat() - 0.5) * 0.01,
+      longitude: randomPreset.longitude + (secureRandomFloat() - 0.5) * 0.01,
       accuracy: 10,
       timestamp: Date.now(),
       provider: 'GPS_HARDWARE',
