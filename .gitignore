@@ -1,34 +1,118 @@
+# ============================================================
 # Logs
-logs
+# ============================================================
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+
+# ============================================================
+# Frontend - Vite / React / TypeScript
+# ============================================================
+dist/
+dist-ssr/
+.vite/
+
+# Vite environment files
+.env
+.env.*
+!.env.example
+
+# Local build / cache files
 *.local
 
-# Editor directories and files
+# TypeScript
+*.tsbuildinfo
+
+# ============================================================
+# Python / Backend
+# ============================================================
+server/.venv/
+server/**/__pycache__/
+server/**/*.py[cod]
+
+# Python tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Python coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# Python distribution/build artifacts
+server/build/
+server/dist/
+server/*.egg-info/
+server/**/build/
+server/**/dist/
+server/**/*.egg-info/
+
+# Backend environment files
+server/.env
+server/.env.*
+!server/.env.example
+
+# Backend local data
+server/data/resqlink.json
+
+# ============================================================
+# IDEs / Editors
+# ============================================================
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+
+.idea/
 *.suo
+*.user
+*.userossc
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.metadata.json
+
+# ============================================================
+# OS files
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# ============================================================
+# AI / Agent tooling
+# ============================================================
 .agents/
 .claude/
 skills-lock.json
 
-# Python server
-server/.venv/
-server/**/__pycache__/
-server/**/*.pyc
-server/data/resqlink.json
+# ============================================================
+# Testing / Coverage
+# ============================================================
+coverage/
+.nyc_output/
+
+# ============================================================
+# Misc
+# ============================================================
+*.tmp
+*.temp
+*.bak
+
+# ============================================================
+# Project-specific
+# ============================================================
+pytest.ini

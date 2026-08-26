@@ -1,1 +1,1 @@
-"""RESQLINK Python backend package."""
+"""RESQLINK server package."""
