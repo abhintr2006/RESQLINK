@@ -105,8 +105,10 @@ export class LocationLockService {
         const baseLat = presetFallback?.latitude ?? 12.8715; // default KSSEM
         const baseLng = presetFallback?.longitude ?? 77.5452;
         // Add tiny realistic jitter (3-12 meters)
-        const jitterLat = (Math.random() - 0.5) * 0.00015;
-        const jitterLng = (Math.random() - 0.5) * 0.00015;
+        // Use cryptographically secure RNG to avoid CWE-338 (js/insecure-randomness)
+        const jitterRand = crypto.getRandomValues(new Uint32Array(2));
+        const jitterLat = (jitterRand[0] / 0x100000000 - 0.5) * 0.00015;
+        const jitterLng = (jitterRand[1] / 0x100000000 - 0.5) * 0.00015;
 
         setTimeout(() => {
           resolve({
