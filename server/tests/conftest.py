@@ -15,17 +15,20 @@ os.environ["RATE_LIMIT_SOS"] = "1000/minute"
 
 # Clear lru_cache so test overrides take effect
 from app.core.config import get_settings  # noqa: E402
+
 get_settings.cache_clear()
 
-import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.db.base import Base, get_db  # noqa: E402
 from app.main import create_app  # noqa: E402
 from app.services.seed import seed_database  # noqa: E402
-
 
 _TEST_ENGINE = create_async_engine(
     "sqlite+aiosqlite:///:memory:",

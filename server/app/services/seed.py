@@ -6,7 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password
-from app.db.models import Hospital, HospitalAdmission, HospitalStatus, PatientProfile, Responder, User
+from app.db.models import (
+    Hospital,
+    HospitalAdmission,
+    HospitalStatus,
+    PatientProfile,
+    Responder,
+    User,
+)
 
 # ── Seed data (Bengaluru-specific) ────────────────────────────────────────────
 
