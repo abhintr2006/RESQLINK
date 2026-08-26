@@ -257,8 +257,4 @@ Performance figures and system capabilities should be interpreted within the sco
 **GitHub:** `https://github.com/abhintr2006/resqlink-app`
 
 ## License
-
-This project is licensed under the **MIT License**.
-
-See the [LICENSE](LICENSE) file for the full license text.
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
