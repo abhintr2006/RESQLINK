@@ -1,12 +1,32 @@
 version: 2
 
 updates:
+  # Python backend
   - package-ecosystem: "pip"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    groups:
+      fastapi-stack:
+        patterns:
+          - "fastapi"
+          - "uvicorn"
+          - "pydantic*"
+          - "sqlalchemy"
+          - "alembic"
+      security:
+        patterns:
+          - "PyJWT"
+          - "slowapi"
+
+  # Frontend (npm/pnpm)
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "npm"
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
