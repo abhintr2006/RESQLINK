@@ -21,11 +21,11 @@
     "@types/leaflet": "^1.9.16",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.1.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.7.3",
+    "typescript": "^7.0.2",
     "vite": "^8.2.2"
   }
 }
