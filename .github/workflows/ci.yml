@@ -46,7 +46,7 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           JWT_SECRET_KEY: ci-test-secret-key-must-be-at-least-32-bytes
           LOG_LEVEL: WARNING
         run: python -m pytest -q --tb=short
