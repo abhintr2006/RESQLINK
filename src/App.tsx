@@ -6,10 +6,19 @@ import { AdminDashboard } from './components/AdminPortal/AdminDashboard';
 import { HospitalDashboard } from './components/HospitalPortal/HospitalDashboard';
 import { PatientDashboard } from './components/PatientPortal/PatientDashboard';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
+import { LoginScreen } from './components/Auth/LoginScreen';
 
 export const MainLayout: React.FC = () => {
-  const { userRole, adminViewTab } = useResqLink();
+  const { userRole, adminViewTab, authUser, authLoading } = useResqLink();
   const [isDPDPOpen, setIsDPDPOpen] = useState<boolean>(false);
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center">Loading secure session…</div>;
+  }
+
+  if (!authUser) {
+    return <LoginScreen />;
+  }
 
   // Determine active view based on role and admin dashboard switcher
   const renderCurrentView = () => {

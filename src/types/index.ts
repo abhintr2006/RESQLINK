@@ -23,6 +23,15 @@ export type NetworkTier = '5G_HIGH_SPEED' | '3G_SPOTTY' | '2G_SMS_FALLBACK';
 
 export type LanguageCode = 'en' | 'kn' | 'hi';
 
+export interface PresetLocation {
+  name: string;
+  ward: string;
+  latitude: number;
+  longitude: number;
+  isPeripheral: boolean;
+  pincode: string;
+}
+
 export interface GeoCoordinate {
   latitude: number;
   longitude: number;

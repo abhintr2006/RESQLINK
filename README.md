@@ -57,3 +57,17 @@ Open **`http://localhost:3000`** in your browser.
 - **MeitY AI Governance Guidelines (2025)** – 'Understandable by Design' & 'People First'
 - **Jesus et al. (2024)** – Dual-channel resilience under common cause failures
 - **Arora et al. (2026)** – Rural-urban digital divide and 2G equity mitigation
+
+## 🐍 Python Server
+
+The frontend is now connected to a FastAPI server under `server/`. Start it in a separate terminal before launching the Vite app:
+
+```bash
+cd server
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+The frontend uses `http://localhost:8000/api` by default. To point it at another backend, set `VITE_API_BASE_URL` before running the frontend, for example `VITE_API_BASE_URL=https://api.example.com/api npm run dev`. See [`server/README.md`](server/README.md) for the endpoint map, environment variables, test commands, and production hardening notes.
