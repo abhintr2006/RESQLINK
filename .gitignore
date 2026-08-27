@@ -116,3 +116,5 @@ coverage/
 # Project-specific
 # ============================================================
 pytest.ini
+
+server\resqlink.db
