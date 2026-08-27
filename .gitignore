@@ -117,4 +117,4 @@ coverage/
 # ============================================================
 pytest.ini
 
-server\resqlink.db
+server/resqlink.db
