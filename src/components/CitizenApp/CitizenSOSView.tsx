@@ -20,6 +20,7 @@ import {
   Volume2,
   Sparkles,
   Zap,
+  Activity,
 } from 'lucide-react';
 
 export const CitizenSOSView: React.FC = () => {
@@ -37,42 +38,48 @@ export const CitizenSOSView: React.FC = () => {
 
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory>('CARDIAC');
 
-  const categories: { id: EmergencyCategory; label: { en: string; kn: string; hi: string }; icon: any; color: string }[] = [
+  const categories: { id: EmergencyCategory; label: { en: string; kn: string; hi: string }; icon: any; color: string; badge: string }[] = [
     {
       id: 'CARDIAC',
-      label: { en: 'Heart Attack / Cardiac', kn: 'ಹೃದಯಾಘಾತ', hi: 'हार्ट अटैक' },
+      label: { en: 'Cardiac Arrest', kn: 'ಹೃದಯಾಘಾತ', hi: 'हार्ट अटैक' },
       icon: HeartPulse,
-      color: 'from-rose-600 to-rose-700',
+      color: 'text-rose-400 bg-rose-950/60 border-rose-700/60',
+      badge: 'ALS UNIT',
     },
     {
       id: 'TRAUMA_ACCIDENT',
-      label: { en: 'Road Accident / Trauma', kn: 'ರಸ್ತೆ ಅಪಘಾತ', hi: 'सड़क दुर्घटना' },
+      label: { en: 'Road Trauma', kn: 'ರಸ್ತೆ ಅಪಘಾತ', hi: 'सड़क दुर्घटना' },
       icon: Car,
-      color: 'from-amber-600 to-amber-700',
+      color: 'text-amber-400 bg-amber-950/60 border-amber-700/60',
+      badge: 'TRAUMA L1',
     },
     {
       id: 'STROKE',
-      label: { en: 'Stroke / Paralysis', kn: 'ಪಾರ್ಶ್ವವಾಯು', hi: 'स्ट्रोक / लकवा' },
+      label: { en: 'Acute Stroke', kn: 'ಪಾರ್ಶ್ವವಾಯು', hi: 'स्ट्रोक / लकवा' },
       icon: Brain,
-      color: 'from-purple-600 to-purple-700',
+      color: 'text-purple-400 bg-purple-950/60 border-purple-700/60',
+      badge: 'NEURO HUB',
     },
     {
       id: 'RESPIRATORY',
-      label: { en: 'Severe Breathing Trouble', kn: 'ಉಸಿರಾಟದ ತೊಂದರೆ', hi: 'सांस लेने में तकलीफ' },
+      label: { en: 'Severe Dyspnea', kn: 'ಉಸಿರಾಟದ ತೊಂದರೆ', hi: 'सांस की तकलीफ' },
       icon: Wind,
-      color: 'from-cyan-600 to-cyan-700',
+      color: 'text-cyan-400 bg-cyan-950/60 border-cyan-700/60',
+      badge: 'O2 SUPPORT',
     },
     {
       id: 'ELDERLY_FALL',
-      label: { en: 'Elderly Fall / Injury', kn: 'ಹಿರಿಯ ನಾಗರಿಕರ ಪತನ', hi: 'बुजुर्गों का गिरना / चोट' },
+      label: { en: 'Elderly Injury', kn: 'ಹಿರಿಯ ನಾಗರಿಕರ ಪತನ', hi: 'बुजुर्गों का गिरना' },
       icon: UserCheck,
-      color: 'from-emerald-600 to-emerald-700',
+      color: 'text-emerald-400 bg-emerald-950/60 border-emerald-700/60',
+      badge: 'BLS UNIT',
     },
     {
       id: 'GENERAL_MEDICAL',
-      label: { en: 'General Medical Emergency', kn: 'ಸಾಮಾನ್ಯ ತುರ್ತುಸ್ಥಿತಿ', hi: 'सामान्य आपातकाल' },
+      label: { en: 'General Urgent', kn: 'ಸಾಮಾನ್ಯ ತುರ್ತುಸ್ಥಿತಿ', hi: 'सामान्य आपातकाल' },
       icon: Stethoscope,
-      color: 'from-blue-600 to-blue-700',
+      color: 'text-blue-400 bg-blue-950/60 border-blue-700/60',
+      badge: 'TRIAGE',
     },
   ];
 
@@ -82,55 +89,57 @@ export const CitizenSOSView: React.FC = () => {
   };
 
   const sosButtonTextByLang = {
-    en: 'TAP FOR EMERGENCY HELP',
+    en: 'ACTIVATE EMERGENCY SOS',
     kn: 'ತುರ್ತು ಸಹಾಯಕ್ಕಾಗಿ ಒತ್ತಿ',
-    hi: 'आपातकालीन सहायता के लिए दबाएं',
+    hi: 'आपातकालीन सहायता सक्रिय करें',
   };
 
   return (
     <div
-      className={`max-w-2xl mx-auto space-y-6 transition-colors duration-200 ${
+      className={`max-w-3xl mx-auto space-y-5 transition-colors duration-200 ${
         assistiveHighContrast ? 'bg-black text-yellow-300' : ''
       }`}
     >
-      {/* Top Location & Connectivity Card - Double Bezel */}
+      {/* Top Telemetry & Location Bar */}
       <div className="double-bezel shadow-xl">
-        <div className="double-bezel-inner p-4 md:p-5 flex flex-wrap items-center justify-between gap-4 bg-slate-950/90">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-rose-950/80 border border-rose-800/80 flex items-center justify-center text-rose-400 shadow-md">
-              <MapPin className="w-5 h-5" />
+        <div className="double-bezel-inner p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-950/90">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-rose-950/80 border border-rose-700/60 flex items-center justify-center text-rose-400 shadow-md">
+              <MapPin className="w-4.5 h-4.5" />
             </div>
             <div>
-              <div className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">
-                CURRENT EMERGENCY GPS PRESET
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-slate-400">
+                  GPS TELEMETRY
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400 font-bold px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-800/60">
+                  {selectedPreset.isPeripheral ? 'PERIPHERAL WARD' : 'CORE WARD'}
+                </span>
               </div>
-              <div className="text-sm font-black text-white">
-                {selectedPreset.name}
+              <div className="text-sm font-bold text-white font-mono tracking-tight">
+                {selectedPreset.name} <span className="text-slate-500 text-xs font-normal">({selectedPreset.ward})</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Ward: <strong className="text-slate-300">{selectedPreset.ward}</strong> • PIN: {selectedPreset.pincode}
-              </p>
             </div>
           </div>
 
           {/* Network Tier Pill */}
-          <div className="flex items-center gap-2 text-xs font-black px-3.5 py-1.5 rounded-2xl border bg-slate-900 shadow-inner">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold px-3 py-1.5 rounded-xl border bg-slate-900 shadow-inner">
             {networkTier === '5G_HIGH_SPEED' && (
               <>
-                <Wifi className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300">5G / High-Speed</span>
+                <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-300">5G BROADBAND</span>
               </>
             )}
             {networkTier === '3G_SPOTTY' && (
               <>
-                <Signal className="w-4 h-4 text-amber-400" />
-                <span className="text-amber-300">3G Spotty Signal</span>
+                <Signal className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-amber-300">3G SPOTTY (JITTER)</span>
               </>
             )}
             {networkTier === '2G_SMS_FALLBACK' && (
               <>
-                <WifiOff className="w-4 h-4 text-rose-400 animate-pulse" />
-                <span className="text-rose-300">2G SMS Fallback Active</span>
+                <WifiOff className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                <span className="text-rose-300">2G SMS FALLBACK ACTIVE</span>
               </>
             )}
           </div>
@@ -139,7 +148,7 @@ export const CitizenSOSView: React.FC = () => {
 
       {/* ACTIVE EMERGENCY VIEW vs IDLE SOS TRIGGER */}
       {activeAlert ? (
-        <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="space-y-5 animate-in fade-in duration-200">
           {/* Location Lock Feedback */}
           {activeAlert.locationLockState && (
             <LocationLockIndicator
@@ -163,18 +172,20 @@ export const CitizenSOSView: React.FC = () => {
           />
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Emergency Category Selector */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-black text-slate-200 tracking-wider uppercase flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-400" />
-                <span>Select Emergency Condition:</span>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between px-1">
+              <label className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                <span>1. SELECT EMERGENCY CLASSIFICATION:</span>
               </label>
-              <span className="text-[11px] text-slate-400 font-bold">1-Touch Auto-Triage</span>
+              <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                AI TRIAGE ENGINE
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const isSelected = selectedCategory === cat.id;
@@ -182,28 +193,30 @@ export const CitizenSOSView: React.FC = () => {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-3.5 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[96px] cursor-pointer active:scale-95 ${
+                    className={`p-3 rounded-2xl border text-left transition-all duration-200 relative overflow-hidden flex flex-col justify-between min-h-[90px] cursor-pointer active:scale-[0.98] ${
                       isSelected
-                        ? 'bg-slate-900/95 border-rose-500 shadow-xl shadow-rose-500/20 ring-2 ring-rose-500/40'
-                        : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 text-slate-300 hover:bg-slate-800/50'
+                        ? 'bg-slate-900 border-rose-500 shadow-lg shadow-rose-500/20 ring-1 ring-rose-500'
+                        : 'bg-slate-900/70 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/60'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full mb-1">
                       <div
-                        className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-transform duration-300 ${
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
                           isSelected
                             ? 'bg-rose-600 text-white shadow-md'
                             : 'bg-slate-800 text-slate-400'
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <Icon className="w-4 h-4" />
                       </div>
-                      {isSelected && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-                      )}
+                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
+                        isSelected ? 'bg-rose-950/80 border-rose-600 text-rose-300' : 'bg-slate-800 border-slate-700 text-slate-400'
+                      }`}>
+                        {cat.badge}
+                      </span>
                     </div>
                     <div>
-                      <div className="font-black text-xs text-white leading-tight">
+                      <div className="font-bold text-xs text-white leading-tight">
                         {cat.label[language] || cat.label.en}
                       </div>
                     </div>
@@ -213,57 +226,57 @@ export const CitizenSOSView: React.FC = () => {
             </div>
           </div>
 
-          {/* MASSIVE ONE-TAP SOS BUTTON - Tactile Hardware Beacon */}
-          <div className="pt-6 pb-4 flex flex-col items-center justify-center text-center">
+          {/* MASSIVE ONE-TAP SOS BUTTON - Tactical Beacon */}
+          <div className="py-4 flex flex-col items-center justify-center text-center">
             <div className="relative flex items-center justify-center">
               {/* Concentric Radiant Waves */}
-              <div className="absolute w-72 h-72 rounded-full bg-rose-600/20 animate-sos-radiant-1 pointer-events-none"></div>
-              <div className="absolute w-72 h-72 rounded-full bg-rose-600/15 animate-sos-radiant-2 pointer-events-none"></div>
-              <div className="absolute w-72 h-72 rounded-full bg-rose-600/10 animate-sos-radiant-3 pointer-events-none"></div>
+              <div className="absolute w-64 h-64 rounded-full bg-rose-600/20 animate-sos-radiant-1 pointer-events-none"></div>
+              <div className="absolute w-64 h-64 rounded-full bg-rose-600/15 animate-sos-radiant-2 pointer-events-none"></div>
+              <div className="absolute w-64 h-64 rounded-full bg-rose-600/10 animate-sos-radiant-3 pointer-events-none"></div>
 
               {/* Central Tactile Button */}
               <button
                 onClick={handleSOSTrigger}
                 disabled={isSimulating}
-                className={`relative w-52 h-52 rounded-full bg-gradient-to-tr from-rose-700 via-rose-600 to-red-500 text-white font-black shadow-2xl shadow-rose-600/60 border-4 border-white/30 active:scale-95 transition-all duration-300 transform flex flex-col items-center justify-center gap-1.5 cursor-pointer group hover:scale-105 hover:from-rose-600 hover:to-red-400 ${
+                className={`relative w-48 h-48 rounded-full bg-gradient-to-tr from-rose-700 via-rose-600 to-red-500 text-white font-black shadow-2xl shadow-rose-600/60 border-4 border-white/30 active:scale-95 transition-all duration-200 transform flex flex-col items-center justify-center gap-1 cursor-pointer group hover:scale-105 hover:from-rose-600 hover:to-red-400 ${
                   isSimulating ? 'opacity-70 animate-pulse' : ''
                 }`}
                 aria-label="One-tap SOS Emergency Button"
               >
-                <span className="text-4xl font-black tracking-widest text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <span className="text-4xl font-black font-mono tracking-widest text-white drop-shadow-md group-hover:scale-110 transition-transform">
                   SOS
                 </span>
-                <span className="text-[11px] font-black tracking-wider uppercase px-4 text-center text-rose-100 leading-tight">
+                <span className="text-[10px] font-bold tracking-wider uppercase px-4 text-center text-rose-100 leading-tight">
                   {sosButtonTextByLang[language] || sosButtonTextByLang.en}
                 </span>
-                <span className="text-[9px] text-white/80 font-mono tracking-widest font-bold mt-0.5 bg-black/20 px-2 py-0.5 rounded-full">
-                  INSTANT CAD DISPATCH
+                <span className="text-[8px] text-white/90 font-mono tracking-widest font-bold mt-0.5 bg-black/30 px-2 py-0.5 rounded-full border border-white/20">
+                  INSTANT CAD ALLOCATION
                 </span>
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 max-w-md mt-8 text-center leading-relaxed font-medium">
-              Pressing SOS locks your GPS coordinates, verifies signal triangulation, allocates the nearest Bengaluru ALS ambulance, and initiates pre-arrival hospital prep under DPDP Act 2023.
+            <p className="text-xs text-slate-400 max-w-lg mt-6 text-center leading-relaxed font-mono">
+              Pressing SOS locks GPS coordinates, verifies signal triangulation, allocates nearest ALS/BLS fleet, and alerts Bengaluru hospital trauma units under DPDP Act 2023.
             </p>
           </div>
 
           {/* Quick Voice & Accessibility Help Banner */}
-          <div className="p-4 rounded-3xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs text-slate-300 shadow-sm">
+          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs text-slate-300 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-indigo-950 border border-indigo-800 text-indigo-400 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-indigo-950 border border-indigo-800 text-indigo-400 flex items-center justify-center shrink-0">
                 <Volume2 className="w-4 h-4" />
               </div>
               <div>
-                <strong className="text-white block font-bold">
-                  Multilingual AI Audio Assist
+                <strong className="text-white block font-bold text-xs">
+                  Multilingual AI Audio Guidance
                 </strong>
                 <span className="text-[11px] text-slate-400">
-                  Speech guidance in English, ಕನ್ನಡ, and हिन्दी automatically triggers upon dispatch.
+                  Voice guidance in English, ಕನ್ನಡ, and हिन्दी triggers automatically during dispatch.
                 </span>
               </div>
             </div>
-            <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-xl border border-slate-700 font-mono font-bold">
-              SDG 3 &amp; 11
+            <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 font-mono font-bold">
+              UN SDG 3 &bull; 11
             </span>
           </div>
         </div>
