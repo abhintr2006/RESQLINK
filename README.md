@@ -26,6 +26,12 @@
 
 Aligned with **UN SDG 3: Good Health and Well-being** and **UN SDG 11: Sustainable Cities and Communities**
 
+<br/>
+
+![RESQLINK Command Center Dashboard](public/dashboard.png)
+
+*Tactical command center dashboard featuring real-time GIS fleet tracking, multi-portal triage, and live emergency telemetry.*
+
 </div>
 
 ---
