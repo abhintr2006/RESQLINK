@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand / emergency color palette */
+  /* Tactical Emergency Command Color Tokens */
   --color-resq-50: #fff1f2;
   --color-resq-100: #ffe4e6;
   --color-resq-200: #fecdd3;
@@ -14,59 +14,128 @@
   --color-resq-900: #881337;
   --color-resq-950: #4c0519;
 
-  --color-emergency-red: #EF4444;
-  --color-emergency-amber: #F59E0B;
-  --color-emergency-green: #10B981;
-  --color-emergency-blue: #3B82F6;
-  --color-emergency-dark: #0F172A;
-  --color-emergency-panel: #1E293B;
+  --color-hud-bg: #030712;
+  --color-hud-card: #0b0f19;
+  --color-hud-card-subtle: #0e1526;
+  --color-hud-border: #1e293b;
+  --color-hud-border-glow: rgba(244, 63, 94, 0.4);
 
-  /* Custom animations */
+  --color-emergency-red: #ef4444;
+  --color-emergency-amber: #f59e0b;
+  --color-emergency-green: #10b981;
+  --color-emergency-cyan: #06b6d4;
+  --color-emergency-blue: #3b82f6;
+  --color-emergency-purple: #a855f7;
+
+  /* Custom high-performance animations */
   --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-ripple: ripple 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-  --animate-radar: radar 3s linear infinite;
+  --animate-radar: radar 3.5s linear infinite;
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-hud-shimmer: shimmer 2.5s ease-in-out infinite;
 
   @keyframes ripple {
     0%   { transform: scale(0.95); opacity: 1; }
-    100% { transform: scale(1.8);  opacity: 0; }
+    100% { transform: scale(2.2);  opacity: 0; }
   }
 
   @keyframes radar {
     0%   { transform: rotate(0deg);   }
     100% { transform: rotate(360deg); }
   }
+
+  @keyframes scanline {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(1000%); }
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+  }
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     background-color: #030712;
-    color: #f8fafc;
+    color: #f1f5f9;
     overflow-x: hidden;
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     letter-spacing: -0.025em;
+    font-weight: 700;
   }
 
-  code, pre, .font-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  code, pre, .font-mono, .hud-telemetry {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-feature-settings: "tnum" 1, "zero" 1;
   }
+}
+
+/* Tactical Background Grid Pattern */
+.bg-tactical-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+.bg-tactical-dots {
+  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
 }
 
 /* Double-Bezel Hardware Architecture */
 .double-bezel {
-  border-radius: 1.5rem;
-  padding: 0.375rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.7);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 1.25rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.3) 0%, rgba(51, 65, 85, 0.4) 50%, rgba(16, 185, 129, 0.2) 100%);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .double-bezel-inner {
-  border-radius: calc(1.5rem - 0.375rem);
-  background: rgba(3, 7, 18, 0.85);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  border-radius: calc(1.25rem - 1px);
+  background: rgba(11, 15, 25, 0.95);
+  backdrop-filter: blur(16px);
+}
+
+/* Tactical Glassmorphism */
+.tactical-glass {
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.tactical-glass-subtle {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Glowing Telemetry Accents */
+.glow-rose {
+  box-shadow: 0 0 20px -3px rgba(244, 63, 94, 0.45);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.45);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.45);
+}
+
+.glow-amber {
+  box-shadow: 0 0 20px -3px rgba(245, 158, 11, 0.45);
 }
 
 /* Tactical Radar Animation */
@@ -76,29 +145,29 @@
 }
 
 .animate-radar-sweep {
-  animation: radar-sweep 4s linear infinite;
+  animation: radar-sweep 3.2s linear infinite;
 }
 
 /* Custom Leaflet Map styling */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   background-color: #030712;
 }
 
 .leaflet-tile {
-  filter: brightness(0.65) invert(1) contrast(3.2) hue-rotate(200deg) saturate(0.25) brightness(0.65);
+  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(205deg) saturate(0.3) brightness(0.7);
 }
 
 .dark-map-tiles .leaflet-tile {
-  filter: brightness(0.55) invert(1) contrast(3.2) hue-rotate(200deg) saturate(0.25) brightness(0.55);
+  filter: brightness(0.5) invert(1) contrast(3.2) hue-rotate(210deg) saturate(0.2) brightness(0.6);
 }
 
 /* Custom sleek scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -108,6 +177,7 @@
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
   border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -117,17 +187,17 @@
 /* SOS Radiant Pulse Wave Animations */
 @keyframes sos-radiant {
   0%   { transform: scale(0.95); opacity: 0.9; }
-  100% { transform: scale(2.4);  opacity: 0;   }
+  100% { transform: scale(2.5);  opacity: 0;   }
 }
 
 .animate-sos-radiant-1 {
-  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation: sos-radiant 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .animate-sos-radiant-2 {
-  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.7s;
+  animation: sos-radiant 2s cubic-bezier(0.16, 1, 0.3, 1) infinite 0.6s;
 }
 
 .animate-sos-radiant-3 {
-  animation: sos-radiant 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite 1.4s;
+  animation: sos-radiant 2s cubic-bezier(0.16, 1, 0.3, 1) infinite 1.2s;
 }
