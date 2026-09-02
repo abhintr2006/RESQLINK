@@ -21,7 +21,30 @@ export type AlertStatus =
 
 export type NetworkTier = '5G_HIGH_SPEED' | '3G_SPOTTY' | '2G_SMS_FALLBACK';
 
-export type LanguageCode = 'en' | 'kn' | 'hi';
+export type LanguageCode =
+  | 'en' // English
+  | 'kn' // Kannada (ಕನ್ನಡ)
+  | 'hi' // Hindi (हिन्दी)
+  | 'ta' // Tamil (தமிழ்)
+  | 'te' // Telugu (తెలుగు)
+  | 'ml' // Malayalam (മലയാളം)
+  | 'mr' // Marathi (मराठी)
+  | 'bn' // Bengali (বাংলা)
+  | 'gu' // Gujarati (ગુજરાતી)
+  | 'pa' // Punjabi (ਪੰਜਾਬੀ)
+  | 'or' // Odia (ଓଡ଼ିଆ)
+  | 'as' // Assamese (অসমীয়া)
+  | 'ur' // Urdu (اردو)
+  | 'sa' // Sanskrit (संस्कृतम्)
+  | 'kok' // Konkani (कोंकणी)
+  | 'mai' // Maithili (मैथिली)
+  | 'doi' // Dogri (डोगरी)
+  | 'ks' // Kashmiri (کٲشُر / कश्मीरी)
+  | 'ne' // Nepali (नेपाली)
+  | 'sd' // Sindhi (سنڌي / सिन्धी)
+  | 'sat' // Santhali (ᱥᱟᱱᱛᱟᱲᱤ)
+  | 'brx' // Bodo (बड़ो)
+  | 'mni'; // Manipuri (মৈতৈলোন্)
 
 export interface PresetLocation {
   name: string;
@@ -118,11 +141,8 @@ export interface EmergencyAlert {
     triageScore: number; // 1-100
     suggestedALS: boolean;
     firstAidInstructions: string[];
-    speechSummary: {
-      en: string;
-      kn: string;
-      hi: string;
-    };
+    speechSummary: Record<string, string>;
+
   };
   equityMetadata: {
     deviceTier: 'SMARTPHONE' | 'FEATURE_2G';
