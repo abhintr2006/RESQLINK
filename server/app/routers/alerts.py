@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select
 
 from app.core.deps import AdminOrPatient, AdminUser, AnyUser, DbSession
@@ -24,17 +24,9 @@ from app.services.dispatch import (
 )
 from app.services.location import lock_location
 from app.services.sms import get_sms_adapter
-from app.services.voice_call import voice_call_service
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api", tags=["alerts"])
-
-
-async def _start_fixed_sos_call_safe(alert_id: str, location: dict[str, Any], category: str, actor_username: str) -> None:
-    try:
-        await voice_call_service.initiate_fixed_sos_call(alert_id, location, category, actor_username)
-    except Exception as exc:
-        logger.error("fixed_sos_voice_call_failed", alert_id=alert_id, error=str(exc))
 
 _PRESETS = [
     {"name": "KSSEM Campus, Kanakapura Road", "ward": "Vajrahalli / Mallasandra (Outer Ward)", "latitude": 12.8715, "longitude": 77.5452, "isPeripheral": True, "pincode": "560109"},
@@ -156,7 +148,7 @@ async def get_alert(alert_id: str, user: AnyUser, db: DbSession) -> dict[str, An
 
 @router.post("/sos", status_code=201)
 @limiter.limit("5/minute")
-async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, db: DbSession, background_tasks: BackgroundTasks) -> dict[str, Any]:
+async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, db: DbSession) -> dict[str, Any]:
     preset = body.selectedPreset.model_dump() if body.selectedPreset else _PRESETS[0]
     alert_id = f"BLR-{random.randint(1000, 9999)}"
     short_code = f"RQ-{uuid.uuid4().hex[:4].upper()}"
@@ -172,9 +164,11 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     hospitals = await _load_hospital_snapshots(db)
     decision = run_dispatch(final_coord, body.category, preset.get("isPeripheral", False), responders, hospitals)
 
-    adapter = get_sms_adapter()
-    sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName)
-    sms_payload: str | None = sms_result.raw_payload
+    sms_payload: str | None = None
+    if body.networkTier == "2G_SMS_FALLBACK":
+        adapter = get_sms_adapter()
+        sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName)
+        sms_payload = sms_result.raw_payload
 
     alert = Alert(
         id=alert_id,
@@ -214,13 +208,11 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     await _write_audit(db, alert_id, "LOCATION_LOCK_VERIFIED", "GEOLOCATION_ENGINE", {"confidenceScore": lock_result.confidence_score, "isLocked": lock_result.is_locked})
     await _write_audit(db, alert_id, "AI_TRIAGE_COMPUTED", "AI_DISPATCH_ENGINE", {"triageScore": decision.triage_score, "urgencyLevel": decision.urgency_level})
     await _write_audit(db, alert_id, "RESPONDER_ALLOCATED", "AI_DISPATCH_ENGINE", {"responderId": decision.matched_responder["id"], "etaMinutes": decision.estimated_arrival_minutes})
-    await _write_audit(db, alert_id, "LOCATION_SMS_QUEUED", "SMS_SERVICE", {"recipient": sms_result.recipient_number, "providerStatus": sms_result.status, "locationIncluded": True})
 
     await db.flush()
     result_dict = _alert_to_dict(alert)
     await ws_manager.broadcast("alert_created", result_dict)
-    background_tasks.add_task(_start_fixed_sos_call_safe, alert_id, final_coord, body.category, user.username)
-    logger.info("sos_triggered", alert_id=alert_id, category=body.category, sms_recipient=sms_result.recipient_number)
+    logger.info("sos_triggered", alert_id=alert_id, category=body.category)
     return result_dict
 
 
@@ -398,27 +390,3 @@ async def bootstrap(user: AnyUser, db: DbSession) -> dict[str, Any]:
         "selectedHospitalId": user.hospitalId or "HOSP-01",
         "presets": _PRESETS,
     }
-
-
-@router.post("/reset")
-async def reset_system(user: AnyUser, db: DbSession) -> dict[str, Any]:
-    """Resets active alerts, sets all responders to available, and cleans up emergency state."""
-    from app.db.models import Alert, HospitalStatus, Responder
-
-    # Resolve all open alerts
-    alerts_result = await db.execute(select(Alert).where(Alert.status.notin_(["RESOLVED", "CANCELLED"])))
-    for alert in alerts_result.scalars():
-        alert.status = "RESOLVED"
-        alert.status_timestamps = {**alert.status_timestamps, "resolvedAt": _now_iso()}
-
-    # Free all responders
-    resp_result = await db.execute(select(Responder))
-    for r in resp_result.scalars():
-        r.is_available = True
-        r.assigned_incident_id = None
-
-    await db.flush()
-    await ws_manager.broadcast("system_reset", {"message": "All emergency states have been reset"})
-    logger.info("system_reset", actor=user.username)
-    return {"ok": True, "message": "System successfully reset"}
-
