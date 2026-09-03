@@ -74,3 +74,39 @@ def decode_access_token(token: str) -> dict:
         algorithms=[settings.JWT_ALGORITHM],
         issuer=settings.JWT_ISSUER,
     )
+
+
+def create_workflow_handoff_token(
+    occurrence_id: str,
+    patient_username: str,
+    stages: list[str],
+    expires_minutes: int = 5,
+) -> tuple[str, int]:
+    """Create a short-lived signed capability for the next workflow stages."""
+    settings = get_settings()
+    now = datetime.now(timezone.utc)
+    expires = now + timedelta(minutes=expires_minutes)
+    claims = {
+        "typ": "workflow_handoff",
+        "sub": patient_username,
+        "occurrenceId": occurrence_id,
+        "stages": stages,
+        "iss": settings.JWT_ISSUER,
+        "iat": now,
+        "exp": expires,
+    }
+    return jwt.encode(claims, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM), expires_minutes * 60
+
+
+def decode_workflow_handoff_token(token: str) -> dict:
+    """Verify a workflow capability token and reject ordinary user JWTs."""
+    settings = get_settings()
+    claims = jwt.decode(
+        token,
+        settings.JWT_SECRET_KEY,
+        algorithms=[settings.JWT_ALGORITHM],
+        issuer=settings.JWT_ISSUER,
+    )
+    if claims.get("typ") != "workflow_handoff":
+        raise jwt.InvalidTokenError("Invalid workflow token type")
+    return claims
