@@ -30,7 +30,7 @@ from app.core.logging import configure_logging, get_logger
 from app.db.base import create_all_tables, get_session_factory
 from app.middleware.rate_limit import limiter
 from app.middleware.request_id import RequestIDMiddleware
-from app.routers import alerts, audit, auth, eeg, hospitals, patient, responders, ws
+from app.routers import alerts, audit, auth, claps, eeg, emergency, hospitals, patient, responders, voice_calls, ws
 
 logger = get_logger(__name__)
 
@@ -44,16 +44,27 @@ async def lifespan(application: FastAPI):
     # Create tables (no-op if already exist)
     await create_all_tables()
 
-    # Seed demo data
+    # Seed demo data and clean initial emergency state
     factory = get_session_factory()
     async with factory() as session:
         async with session.begin():
             from app.services.seed import seed_database
             await seed_database(session)
 
-    logger.info("ready", message="RESQLINK backend is ready")
+            from sqlalchemy import select
+            from app.db.models import Alert, Responder
+            alerts_res = await session.execute(select(Alert).where(Alert.status.notin_(["RESOLVED", "CANCELLED"])))
+            for a in alerts_res.scalars():
+                a.status = "RESOLVED"
+            resps_res = await session.execute(select(Responder))
+            for r in resps_res.scalars():
+                r.is_available = True
+                r.assigned_incident_id = None
+
+    logger.info("ready", message="RESQLINK backend is ready (clean initial state)")
     yield
     logger.info("shutdown")
+
 
 
 def create_app() -> FastAPI:
@@ -87,6 +98,9 @@ def create_app() -> FastAPI:
     application.include_router(audit.router)
     application.include_router(eeg.router)
     application.include_router(patient.router)
+    application.include_router(claps.router)
+    application.include_router(emergency.router)
+    application.include_router(voice_calls.router)
     application.include_router(ws.router, prefix="/api")
 
     # ── Health ────────────────────────────────────────────────────────────────

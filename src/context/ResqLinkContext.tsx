@@ -35,13 +35,25 @@ import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
 
-import { api, authStorage, AuthUser } from '../services/api';
+import { api, authStorage, AuthUser, realtimeUrl } from '../services/api';
+
+interface EmergencyLaunchSignal {
+  occurrenceId: string;
+  launchSignalId: string;
+  launchImmediately: boolean;
+  patient: { username: string; name: string };
+  workflowStages: Array<{ name: string; status: string; sequence: number }>;
+  handoffToken: string;
+  handoffExpiresAt: string;
+}
 
 interface ResqLinkContextType {
   authUser: AuthUser | null;
   authLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  emergencyLaunch: EmergencyLaunchSignal | null;
+  dismissEmergencyLaunch: () => void;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
   adminViewTab: 'admin' | 'hospital' | 'patient';
@@ -107,6 +119,7 @@ const initialStatuses = (): Record<string, HospitalEmergencyStatus> => {
 export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [emergencyLaunch, setEmergencyLaunch] = useState<EmergencyLaunchSignal | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('admin');
   const [adminViewTab, setAdminViewTab] = useState<'admin' | 'hospital' | 'patient'>('admin');
   const [selectedHospitalId, setSelectedHospitalId] = useState('HOSP-01');
@@ -139,8 +152,12 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   const hydrate = useCallback(async () => {
     try {
       const data = await api.bootstrap();
-      setActiveAlert(data.activeAlert);
-      setAlertHistory(data.alertHistory);
+      if (data.activeAlert && !['RESOLVED', 'CANCELLED'].includes(data.activeAlert.status)) {
+        setActiveAlert(data.activeAlert);
+      } else {
+        setActiveAlert(null);
+      }
+      setAlertHistory(data.alertHistory || []);
       setCurrentLocation(data.currentLocation);
       setSelectedPreset(data.selectedPreset);
       setResponders(data.responders);
@@ -191,6 +208,27 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
       setAuthUser(null);
     }).finally(() => setAuthLoading(false));
   }, [hydrate]);
+
+  useEffect(() => {
+    const token = authStorage.getToken();
+    if (!authUser || !token || token.startsWith('mock_jwt_token_')) return;
+
+    const socket = new WebSocket(realtimeUrl(token));
+    socket.onmessage = (message) => {
+      try {
+        const frame = JSON.parse(message.data) as { event?: string; data?: EmergencyLaunchSignal };
+        if (frame.event !== 'resqlink_launch' || !frame.data) return;
+        setEmergencyLaunch(frame.data);
+        window.dispatchEvent(new CustomEvent('resqlink:launch', { detail: frame.data }));
+        window.focus();
+        void audioService.playEmergencyAlertTone();
+      } catch (error) {
+        console.error('Unable to process RESQLINK realtime event', error);
+      }
+    };
+    socket.onerror = () => console.error('RESQLINK realtime channel unavailable');
+    return () => socket.close();
+  }, [authUser]);
 
   useEffect(() => {
     if (!currentLocation) {
@@ -257,8 +295,11 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
       setActiveAlert(null);
       setAlertHistory([]);
       setAuditLogs([]);
+      setEmergencyLaunch(null);
     }
   };
+
+  const dismissEmergencyLaunch = () => setEmergencyLaunch(null);
 
   const triggerSOS = async (category: EmergencyCategory = 'CARDIAC') => {
     setIsSimulating(true);
@@ -352,10 +393,16 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
 
   const cancelSOS = (alertId: string) => {
     setActiveAlert(null);
-    void api.cancelSos(alertId).then(async () => {
-      await hydrate();
-    }).catch(() => {});
+    setResponders((prev) =>
+      prev.map((r) =>
+        r.assignedIncidentId === alertId
+          ? { ...r, isAvailable: true, assignedIncidentId: undefined }
+          : r
+      )
+    );
+    void api.cancelSos(alertId).catch(() => {});
   };
+
 
   const updateAlertStatus = (alertId: string, status: AlertStatus) => {
     setActiveAlert((prev) => (prev && prev.id === alertId ? { ...prev, status } : prev));
@@ -516,12 +563,13 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   const resetAllData = () => {
     setActiveAlert(null);
     setAlertHistory([]);
-    setResponders(INITIAL_RESPONDERS);
+    setResponders(INITIAL_RESPONDERS.map((r) => ({ ...r, isAvailable: true, assignedIncidentId: undefined })));
     setHospitals(BENGALURU_HOSPITALS);
     setHospitalStatuses(initialStatuses());
     setPatientProfile(INITIAL_PATIENT_PROFILE);
-    void api.reset().then(hydrate).catch(() => {});
+    void api.reset().catch(() => {});
   };
+
 
   return (
     <ResqLinkContext.Provider value={{
@@ -529,6 +577,8 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
       authLoading,
       login,
       logout,
+      emergencyLaunch,
+      dismissEmergencyLaunch,
       userRole,
       setUserRole,
       adminViewTab,
