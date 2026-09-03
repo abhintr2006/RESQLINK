@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { EmergencyAlert, LanguageCode } from '../../types';
 import L from 'leaflet';
+import { useTranslation } from '../../i18n';
 import {
   PhoneCall,
   Clock,
@@ -26,6 +27,7 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const responderMarkerRef = useRef<L.Marker | null>(null);
   const routePolylineRef = useRef<L.Polyline | null>(null);
+  const { t } = useTranslation();
 
   const { assignedResponder, assignedHospital, location, estimatedArrivalMinutes } = alert;
 
@@ -199,10 +201,10 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
               </div>
               <div>
                 <div className="text-[9px] uppercase font-mono font-bold tracking-widest text-emerald-300">
-                  ESTIMATED TIME TO ARRIVAL
+                  {t('track.ambulance_eta')}
                 </div>
                 <div className="text-xl font-mono font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                  ~ {estimatedArrivalMinutes} MIN <span className="text-xs font-normal text-slate-400 font-sans">(MODERATE Traffic)</span>
+                  ~ {estimatedArrivalMinutes} {t('track.minutes')} <span className="text-xs font-normal text-slate-400 font-sans">(MODERATE Traffic)</span>
                 </div>
               </div>
             </div>

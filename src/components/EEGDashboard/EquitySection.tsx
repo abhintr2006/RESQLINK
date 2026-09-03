@@ -1,5 +1,6 @@
 import React from 'react';
-import { EEGMetrics } from '../../types';
+import { EEGMetrics, LanguageCode } from '../../types';
+import { LANGUAGE_MAP } from '../../i18n';
 import {
   Users,
   Smartphone,
@@ -125,44 +126,41 @@ export const EquitySection: React.FC<EquitySectionProps> = ({ metrics }) => {
             </div>
 
             <div className="space-y-2.5 font-mono text-xs">
-              <div>
-                <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300 font-bold">ಕನ್ನಡ (Kannada) - Regional Primary</span>
-                  <span className="text-amber-400 font-bold">{metrics.multiLanguageUsagePct.kn}%</span>
-                </div>
-                <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-amber-500 h-full rounded-full"
-                    style={{ width: `${metrics.multiLanguageUsagePct.kn}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300 font-bold">English - Cosmopolitan</span>
-                  <span className="text-cyan-400 font-bold">{metrics.multiLanguageUsagePct.en}%</span>
-                </div>
-                <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-cyan-500 h-full rounded-full"
-                    style={{ width: `${metrics.multiLanguageUsagePct.en}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-[11px] mb-1">
-                  <span className="text-slate-300 font-bold">हिन्दी (Hindi) - Migrant Workforce</span>
-                  <span className="text-emerald-400 font-bold">{metrics.multiLanguageUsagePct.hi}%</span>
-                </div>
-                <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full"
-                    style={{ width: `${metrics.multiLanguageUsagePct.hi}%` }}
-                  />
-                </div>
-              </div>
+              {Object.entries(metrics.multiLanguageUsagePct)
+                .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
+                .map(([code, pct], idx) => {
+                  const info = LANGUAGE_MAP[code as LanguageCode];
+                  const colors = [
+                    'bg-amber-500 text-amber-400',
+                    'bg-cyan-500 text-cyan-400',
+                    'bg-emerald-500 text-emerald-400',
+                    'bg-rose-500 text-rose-400',
+                    'bg-violet-500 text-violet-400',
+                    'bg-blue-500 text-blue-400',
+                    'bg-orange-500 text-orange-400',
+                    'bg-teal-500 text-teal-400',
+                    'bg-pink-500 text-pink-400',
+                  ];
+                  const colorPair = colors[idx % colors.length];
+                  const [barColor, textColor] = colorPair.split(' ');
+                  const displayName = info
+                    ? `${info.nativeName} (${info.name})`
+                    : code.toUpperCase();
+                  return (
+                    <div key={code}>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span className="text-slate-300 font-bold">{displayName}</span>
+                        <span className={`${textColor} font-bold`}>{pct}%</span>
+                      </div>
+                      <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className={`${barColor} h-full rounded-full`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>
