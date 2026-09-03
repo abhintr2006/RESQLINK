@@ -12,15 +12,18 @@ import {
   Flame,
   Radio,
   Zap,
+  Building2,
 } from 'lucide-react';
 
 export const InboundAmbulanceRadar: React.FC = () => {
   const {
     activeAlert,
     selectedHospitalId,
+    setSelectedHospitalId,
     hospitals,
     acknowledgeHospitalInbound,
     prepareTraumaBay,
+    simulateExternalIncident,
   } = useResqLink();
 
   const currentHospital = hospitals.find((h) => h.id === selectedHospitalId) || hospitals[0];
@@ -30,6 +33,9 @@ export const InboundAmbulanceRadar: React.FC = () => {
     (activeAlert.status === 'DISPATCHED' ||
       activeAlert.status === 'EN_ROUTE' ||
       activeAlert.status === 'ON_SCENE');
+
+  const isAssignedToThisHospital =
+    activeAlert?.assignedHospital?.id === currentHospital.id;
 
   return (
     <div className="double-bezel shadow-2xl">
@@ -61,6 +67,24 @@ export const InboundAmbulanceRadar: React.FC = () => {
           </div>
         </div>
 
+        {/* Hospital Routing Notification if assigned elsewhere */}
+        {isInbound && activeAlert && !isAssignedToThisHospital && activeAlert.assignedHospital && (
+          <div className="bg-amber-950/40 border border-amber-600/60 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 text-amber-300 font-bold">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+              <span>
+                Active inbound ambulance is currently routed to <strong>{activeAlert.assignedHospital.name}</strong> ({activeAlert.assignedHospital.area}).
+              </span>
+            </div>
+            <button
+              onClick={() => setSelectedHospitalId(activeAlert.assignedHospital?.id || 'HOSP-01')}
+              className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-black transition cursor-pointer shadow-md"
+            >
+              Switch to {activeAlert.assignedHospital.name.split(' ')[0]} ➔
+            </button>
+          </div>
+        )}
+
         {/* Inbound Alert Telemetry Card */}
         {isInbound && activeAlert ? (
           <div className="bg-gradient-to-r from-rose-950/40 via-slate-950 to-slate-950 border border-rose-800/80 rounded-3xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
@@ -81,7 +105,7 @@ export const InboundAmbulanceRadar: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  Citizen: <strong className="text-white">{activeAlert.citizenName || 'Verified Bengaluru Citizen'}</strong> • Ward: <strong className="text-rose-300">{activeAlert.equityMetadata.wardName}</strong>
+                  Citizen: <strong className="text-white">{activeAlert.citizenName || 'Verified Citizen'}</strong> • Location: <strong className="text-rose-300">{activeAlert.equityMetadata?.wardName || 'Bengaluru Urban'}</strong>
                 </p>
               </div>
 
@@ -99,24 +123,28 @@ export const InboundAmbulanceRadar: React.FC = () => {
               {/* Ambulance Details */}
               <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl space-y-2">
                 <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-rose-400" /> Assigned Unit
+                  <Truck className="w-4 h-4 text-indigo-400" /> Dispatched Unit
                 </span>
-                <p className="font-black text-slate-100 text-sm">{activeAlert.assignedResponder?.name || 'ALS Mobile ICU'}</p>
-                <p className="font-mono text-[11px] text-slate-400">
-                  {activeAlert.assignedResponder?.vehicleNumber} • Driver: {activeAlert.assignedResponder?.driverName}
-                </p>
-                <a
-                  href={`tel:${activeAlert.assignedResponder?.contactNumber}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-bold hover:underline pt-1"
-                >
-                  <Phone className="w-3.5 h-3.5" /> Call Paramedic Crew
-                </a>
+                <div className="font-bold text-white text-sm">
+                  {activeAlert.assignedResponder?.name || '108 Advanced Life Support Unit'}
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  Driver: <span className="text-slate-200 font-bold">{activeAlert.assignedResponder?.driverName || ' Anthony Das'}</span> • Veh: {activeAlert.assignedResponder?.vehicleNumber || 'KA-02-ICU-8822'}
+                </div>
+                {activeAlert.assignedResponder?.contactNumber && (
+                  <a
+                    href={`tel:${activeAlert.assignedResponder.contactNumber}`}
+                    className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-bold hover:underline"
+                  >
+                    <Phone className="w-3 h-3" /> Call Paramedic Crew
+                  </a>
+                )}
               </div>
 
-              {/* AI Triage Urgency */}
+              {/* Triage & Urgency */}
               <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl space-y-2">
                 <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-amber-400" /> Pre-Hospital AI Triage
+                  <ShieldAlert className="w-4 h-4 text-amber-400" /> Clinical Severity
                 </span>
                 <p className="font-black text-amber-300 text-sm">
                   Severity Score: {activeAlert.aiTriage.triageScore} / 100
@@ -137,7 +165,7 @@ export const InboundAmbulanceRadar: React.FC = () => {
               </div>
             </div>
 
-            {/* Action Buttons with Button-in-Button Architecture */}
+            {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-800">
               <div className="flex items-center gap-3">
                 <button
@@ -167,15 +195,25 @@ export const InboundAmbulanceRadar: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-slate-950/60 border border-dashed border-slate-800 rounded-3xl p-12 text-center space-y-4">
+          <div className="bg-slate-950/60 border border-dashed border-slate-800 rounded-3xl p-10 text-center space-y-5">
             <div className="w-14 h-14 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mx-auto shadow-inner">
               <CheckCircle2 className="w-7 h-7 text-emerald-400" />
             </div>
             <div>
               <h3 className="text-base font-black text-slate-200">No Inbound Emergency Transports in Progress</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto leading-relaxed">
-                Emergency room intake radar is active and monitoring all dispatched ambulances across Bengaluru. Trigger an incident from the Simulation Bar to test pre-hospital telemetry ingestion.
+                Emergency room intake radar is active and monitoring all dispatched ambulances across Bengaluru. Trigger a test emergency incident to stream live telemetry.
               </p>
+            </div>
+
+            <div>
+              <button
+                onClick={() => simulateExternalIncident()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition cursor-pointer active:scale-95"
+              >
+                <Zap className="w-4 h-4 text-amber-300" />
+                <span>Simulate Inbound Emergency Transport</span>
+              </button>
             </div>
           </div>
         )}
