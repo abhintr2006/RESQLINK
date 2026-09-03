@@ -4,8 +4,6 @@ import { EmergencyCategory } from '../../types';
 import { LocationLockIndicator } from './LocationLockIndicator';
 import { LiveTrackingCard } from './LiveTrackingCard';
 import { AIFirstAidGuidance } from './AIFirstAidGuidance';
-import { getCategoryTranslation, t } from '../../services/localizationService';
-import { ALL_INDIAN_LANGUAGES } from '../../data/languages';
 import {
   HeartPulse,
   Car,
@@ -13,14 +11,15 @@ import {
   Wind,
   UserCheck,
   Stethoscope,
-  Baby,
   MapPin,
   Wifi,
   WifiOff,
   Signal,
+  ShieldCheck,
   AlertCircle,
   Volume2,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 
 export const CitizenSOSView: React.FC = () => {
@@ -38,39 +37,40 @@ export const CitizenSOSView: React.FC = () => {
 
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory>('CARDIAC');
 
-  const categories: { id: EmergencyCategory; icon: any; color: string }[] = [
+  const categories: { id: EmergencyCategory; label: { en: string; kn: string; hi: string }; icon: any; color: string }[] = [
     {
       id: 'CARDIAC',
+      label: { en: 'Heart Attack / Cardiac', kn: 'ಹೃದಯಾಘಾತ', hi: 'हार्ट अटैक' },
       icon: HeartPulse,
       color: 'from-rose-600 to-rose-700',
     },
     {
       id: 'TRAUMA_ACCIDENT',
+      label: { en: 'Road Accident / Trauma', kn: 'ರಸ್ತೆ ಅಪಘಾತ', hi: 'सड़क दुर्घटना' },
       icon: Car,
       color: 'from-amber-600 to-amber-700',
     },
     {
       id: 'STROKE',
+      label: { en: 'Stroke / Paralysis', kn: 'ಪಾರ್ಶ್ವವಾಯು', hi: 'स्ट्रोक / लकवा' },
       icon: Brain,
       color: 'from-purple-600 to-purple-700',
     },
     {
       id: 'RESPIRATORY',
+      label: { en: 'Severe Breathing Trouble', kn: 'ಉಸಿರಾಟದ ತೊಂದರೆ', hi: 'सांस लेने में तकलीफ' },
       icon: Wind,
       color: 'from-cyan-600 to-cyan-700',
     },
     {
       id: 'ELDERLY_FALL',
+      label: { en: 'Elderly Fall / Injury', kn: 'ಹಿರಿಯ ನಾಗರಿಕರ ಪತನ', hi: 'बुजुर्गों का गिरना / चोट' },
       icon: UserCheck,
       color: 'from-emerald-600 to-emerald-700',
     },
     {
-      id: 'MATERNAL_CRITICAL',
-      icon: Baby,
-      color: 'from-pink-600 to-pink-700',
-    },
-    {
       id: 'GENERAL_MEDICAL',
+      label: { en: 'General Medical Emergency', kn: 'ಸಾಮಾನ್ಯ ತುರ್ತುಸ್ಥಿತಿ', hi: 'सामान्य आपातकाल' },
       icon: Stethoscope,
       color: 'from-blue-600 to-blue-700',
     },
@@ -81,7 +81,11 @@ export const CitizenSOSView: React.FC = () => {
     triggerSOS(selectedCategory);
   };
 
-  const currentLangObj = ALL_INDIAN_LANGUAGES.find((l) => l.code === language) || ALL_INDIAN_LANGUAGES[0];
+  const sosButtonTextByLang = {
+    en: 'TAP FOR EMERGENCY HELP',
+    kn: 'ತುರ್ತು ಸಹಾಯಕ್ಕಾಗಿ ಒತ್ತಿ',
+    hi: 'आपातकालीन सहायता के लिए दबाएं',
+  };
 
   return (
     <div
@@ -98,7 +102,7 @@ export const CitizenSOSView: React.FC = () => {
             </div>
             <div>
               <div className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">
-                GPS EMERGENCY POSITION ({currentLangObj.nativeName})
+                CURRENT EMERGENCY GPS PRESET
               </div>
               <div className="text-sm font-black text-white">
                 {selectedPreset.name}
@@ -114,7 +118,7 @@ export const CitizenSOSView: React.FC = () => {
             {networkTier === '5G_HIGH_SPEED' && (
               <>
                 <Wifi className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300">5G High-Speed</span>
+                <span className="text-emerald-300">5G / High-Speed</span>
               </>
             )}
             {networkTier === '3G_SPOTTY' && (
@@ -126,7 +130,7 @@ export const CitizenSOSView: React.FC = () => {
             {networkTier === '2G_SMS_FALLBACK' && (
               <>
                 <WifiOff className="w-4 h-4 text-rose-400 animate-pulse" />
-                <span className="text-rose-300">2G SMS Active</span>
+                <span className="text-rose-300">2G SMS Fallback Active</span>
               </>
             )}
           </div>
@@ -136,23 +140,6 @@ export const CitizenSOSView: React.FC = () => {
       {/* ACTIVE EMERGENCY VIEW vs IDLE SOS TRIGGER */}
       {activeAlert ? (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Active Emergency Top Control Bar */}
-          <div className="bg-gradient-to-r from-rose-950/90 via-slate-950 to-slate-950 border border-rose-700/80 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xl">
-            <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
-              <div>
-                <div className="text-xs font-black text-white">Active Emergency #{activeAlert.shortCode} • {activeAlert.category.replace('_', ' ')}</div>
-                <div className="text-[11px] text-rose-300">Paramedic unit dispatched and en route</div>
-              </div>
-            </div>
-            <button
-              onClick={() => cancelSOS(activeAlert.id)}
-              className="px-3.5 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-100 hover:text-white rounded-xl text-xs font-black border border-rose-600 transition cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
-            >
-              <span>✕ Return to SOS Ready Screen</span>
-            </button>
-          </div>
-
           {/* Location Lock Feedback */}
           {activeAlert.locationLockState && (
             <LocationLockIndicator
@@ -182,25 +169,20 @@ export const CitizenSOSView: React.FC = () => {
             <div className="flex items-center justify-between">
               <label className="text-xs font-black text-slate-200 tracking-wider uppercase flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-400" />
-                <span>{t('select_emergency', language)}</span>
+                <span>Select Emergency Condition:</span>
               </label>
-              <span className="text-[11px] text-indigo-400 font-bold flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                {currentLangObj.nativeName} ({currentLangObj.name})
-              </span>
+              <span className="text-[11px] text-slate-400 font-bold">1-Touch Auto-Triage</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const isSelected = selectedCategory === cat.id;
-                const trans = getCategoryTranslation(cat.id, language);
-
                 return (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-3.5 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[105px] cursor-pointer active:scale-95 ${
+                    className={`p-3.5 rounded-3xl border text-left transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[96px] cursor-pointer active:scale-95 ${
                       isSelected
                         ? 'bg-slate-900/95 border-rose-500 shadow-xl shadow-rose-500/20 ring-2 ring-rose-500/40'
                         : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 text-slate-300 hover:bg-slate-800/50'
@@ -221,14 +203,9 @@ export const CitizenSOSView: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <div className="font-black text-xs text-white leading-snug">
-                        {trans.name}
+                      <div className="font-black text-xs text-white leading-tight">
+                        {cat.label[language] || cat.label.en}
                       </div>
-                      {trans.desc && (
-                        <div className="text-[10px] text-slate-400 line-clamp-1 mt-0.5 font-normal">
-                          {trans.desc}
-                        </div>
-                      )}
                     </div>
                   </button>
                 );
@@ -248,7 +225,7 @@ export const CitizenSOSView: React.FC = () => {
               <button
                 onClick={handleSOSTrigger}
                 disabled={isSimulating}
-                className={`relative w-56 h-56 rounded-full bg-gradient-to-tr from-rose-700 via-rose-600 to-red-500 text-white font-black shadow-2xl shadow-rose-600/60 border-4 border-white/30 active:scale-95 transition-all duration-300 transform flex flex-col items-center justify-center gap-1.5 cursor-pointer group hover:scale-105 hover:from-rose-600 hover:to-red-400 ${
+                className={`relative w-52 h-52 rounded-full bg-gradient-to-tr from-rose-700 via-rose-600 to-red-500 text-white font-black shadow-2xl shadow-rose-600/60 border-4 border-white/30 active:scale-95 transition-all duration-300 transform flex flex-col items-center justify-center gap-1.5 cursor-pointer group hover:scale-105 hover:from-rose-600 hover:to-red-400 ${
                   isSimulating ? 'opacity-70 animate-pulse' : ''
                 }`}
                 aria-label="One-tap SOS Emergency Button"
@@ -256,17 +233,17 @@ export const CitizenSOSView: React.FC = () => {
                 <span className="text-4xl font-black tracking-widest text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
                   SOS
                 </span>
-                <span className="text-xs font-black tracking-wider uppercase px-4 text-center text-rose-100 leading-tight">
-                  {t('sos_button', language)}
+                <span className="text-[11px] font-black tracking-wider uppercase px-4 text-center text-rose-100 leading-tight">
+                  {sosButtonTextByLang[language] || sosButtonTextByLang.en}
                 </span>
-                <span className="text-[9px] text-white/90 font-mono tracking-widest font-bold mt-0.5 bg-black/25 px-2.5 py-0.5 rounded-full">
-                  {t('one_tap_dispatch', language)}
+                <span className="text-[9px] text-white/80 font-mono tracking-widest font-bold mt-0.5 bg-black/20 px-2 py-0.5 rounded-full">
+                  INSTANT CAD DISPATCH
                 </span>
               </button>
             </div>
 
             <p className="text-xs text-slate-400 max-w-md mt-8 text-center leading-relaxed font-medium">
-              Pressing SOS locks your GPS coordinates, assigns the nearest ambulance, informs the receiving hospital, and generates localized first-aid voice instructions in <strong>{currentLangObj.nativeName} ({currentLangObj.name})</strong>.
+              Pressing SOS locks your GPS coordinates, verifies signal triangulation, allocates the nearest Bengaluru ALS ambulance, and initiates pre-arrival hospital prep under DPDP Act 2023.
             </p>
           </div>
 
@@ -278,15 +255,15 @@ export const CitizenSOSView: React.FC = () => {
               </div>
               <div>
                 <strong className="text-white block font-bold">
-                  {t('speech_readout_prompt', language)}
+                  Multilingual AI Audio Assist
                 </strong>
                 <span className="text-[11px] text-slate-400">
-                  Speech guidance actively speaking in <strong>{currentLangObj.nativeName} ({currentLangObj.region})</strong>.
+                  Speech guidance in English, ಕನ್ನಡ, and हिन्दी automatically triggers upon dispatch.
                 </span>
               </div>
             </div>
-            <span className="text-[10px] bg-indigo-950 text-indigo-300 px-2.5 py-1 rounded-xl border border-indigo-800 font-mono font-bold shrink-0">
-              {language.toUpperCase()}
+            <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-xl border border-slate-700 font-mono font-bold">
+              SDG 3 &amp; 11
             </span>
           </div>
         </div>

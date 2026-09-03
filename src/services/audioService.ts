@@ -1,5 +1,4 @@
 import { LanguageCode } from '../types';
-import { ALL_INDIAN_LANGUAGES } from '../data/languages';
 
 class AudioService {
   private synth: SpeechSynthesis | null = null;
@@ -81,9 +80,13 @@ class AudioService {
       this.synth.cancel(); // Stop any pending speech
       const utterance = new SpeechSynthesisUtterance(text);
       
-      const langMatch = ALL_INDIAN_LANGUAGES.find((l) => l.code === lang);
-      utterance.lang = langMatch ? langMatch.ttsCode : 'en-IN';
-      utterance.rate = 0.92;
+      const langCodes: Record<LanguageCode, string> = {
+        en: 'en-IN',
+        kn: 'kn-IN',
+        hi: 'hi-IN'
+      };
+      utterance.lang = langCodes[lang] || 'en-IN';
+      utterance.rate = 0.95;
       utterance.pitch = 1.0;
 
       this.synth.speak(utterance);

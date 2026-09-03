@@ -36,26 +36,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_SOS: str = "5/minute"
     RATE_LIMIT_LOGIN: str = "10/minute"
 
-    # ── Twilio SMS / Voice (optional) ───────────────────────────────────────────
+    # ── Twilio SMS (optional) ─────────────────────────────────────────────────
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
-    TWILIO_VOICE_FROM_NUMBER: str = ""
-    TWILIO_VOICE_STATUS_CALLBACK_URL: str = ""
-    TELEPHONY_CALLBACK_SECRET: str = ""
-    SOS_RECIPIENT_NUMBER: str = "+917013753816"
-    SOS_VOICE_MESSAGE: str = "The patient is having emergency. Please provide emergency assistance."
-
-    # ── TTS (optional) ─────────────────────────────────────────────────────────
-    TTS_PROVIDER: str = "simulated"
-    TTS_API_KEY: str = ""
-    TTS_API_URL: str = ""
-    TTS_VOICE: str = "alloy"
-    PUBLIC_MEDIA_BASE_URL: str = ""
-
-    # ── Stage 3 retry policy ───────────────────────────────────────────────────
-    VOICE_CALL_MAX_ATTEMPTS: int = 3
-    VOICE_CALL_RETRY_DELAY_SECONDS: int = 10
 
     # ── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
@@ -63,14 +47,6 @@ class Settings(BaseSettings):
     @property
     def twilio_configured(self) -> bool:
         return bool(self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and self.TWILIO_FROM_NUMBER)
-
-    @property
-    def twilio_voice_configured(self) -> bool:
-        return bool(self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and (self.TWILIO_VOICE_FROM_NUMBER or self.TWILIO_FROM_NUMBER))
-
-    @property
-    def tts_configured(self) -> bool:
-        return self.TTS_PROVIDER != "simulated" and bool(self.TTS_API_KEY and self.TTS_API_URL)
 
 
 @lru_cache

@@ -5,12 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "cd server && .venv/bin/uvicorn app.main:app --reload --port 8000",
-    "server:test": "cd server && .venv/bin/pytest",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
-
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "leaflet": "^1.9.4",

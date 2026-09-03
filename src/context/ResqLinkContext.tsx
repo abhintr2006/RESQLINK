@@ -1,6 +1,3 @@
-// React is supplied by the host application; keep this context usable when its
-// type declarations are not available to the standalone TypeScript checker.
-// @ts-ignore
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import {
   EmergencyAlert,
@@ -35,25 +32,13 @@ import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
 
-import { api, authStorage, AuthUser, realtimeUrl } from '../services/api';
-
-interface EmergencyLaunchSignal {
-  occurrenceId: string;
-  launchSignalId: string;
-  launchImmediately: boolean;
-  patient: { username: string; name: string };
-  workflowStages: Array<{ name: string; status: string; sequence: number }>;
-  handoffToken: string;
-  handoffExpiresAt: string;
-}
+import { api, authStorage, AuthUser } from '../services/api';
 
 interface ResqLinkContextType {
   authUser: AuthUser | null;
   authLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  emergencyLaunch: EmergencyLaunchSignal | null;
-  dismissEmergencyLaunch: () => void;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
   adminViewTab: 'admin' | 'hospital' | 'patient';
@@ -116,10 +101,9 @@ const initialStatuses = (): Record<string, HospitalEmergencyStatus> => {
   return statuses;
 };
 
-export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) => {
+export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [emergencyLaunch, setEmergencyLaunch] = useState<EmergencyLaunchSignal | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('admin');
   const [adminViewTab, setAdminViewTab] = useState<'admin' | 'hospital' | 'patient'>('admin');
   const [selectedHospitalId, setSelectedHospitalId] = useState('HOSP-01');
@@ -152,12 +136,8 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   const hydrate = useCallback(async () => {
     try {
       const data = await api.bootstrap();
-      if (data.activeAlert && !['RESOLVED', 'CANCELLED'].includes(data.activeAlert.status)) {
-        setActiveAlert(data.activeAlert);
-      } else {
-        setActiveAlert(null);
-      }
-      setAlertHistory(data.alertHistory || []);
+      setActiveAlert(data.activeAlert);
+      setAlertHistory(data.alertHistory);
       setCurrentLocation(data.currentLocation);
       setSelectedPreset(data.selectedPreset);
       setResponders(data.responders);
@@ -176,26 +156,7 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   useEffect(() => {
-    const token = authStorage.getToken();
-    if (!token) {
-      setAuthLoading(false);
-      return;
-    }
-
-    // If it's a mock token, restore mock session immediately
-    if (token.startsWith('mock_jwt_token_')) {
-      const roleStr = token.replace('mock_jwt_token_', '') as UserRole;
-      const role: UserRole = ['admin', 'hospital', 'patient'].includes(roleStr) ? roleStr : 'admin';
-      const mockUser: AuthUser = {
-        username: role,
-        role,
-        displayName: role === 'admin' ? 'Dr. Pavan (CAD Director)' : role === 'hospital' ? 'ER Trauma Lead' : 'Ananya Sharma',
-        hospitalId: role === 'hospital' ? 'HOSP-01' : null,
-      };
-      setAuthUser(mockUser);
-      setUserRole(role);
-      setAdminViewTab(role === 'admin' ? 'admin' : role);
-      setSelectedHospitalId(mockUser.hospitalId || 'HOSP-01');
+    if (!authStorage.hasToken()) {
       setAuthLoading(false);
       return;
     }
@@ -210,27 +171,6 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   }, [hydrate]);
 
   useEffect(() => {
-    const token = authStorage.getToken();
-    if (!authUser || !token || token.startsWith('mock_jwt_token_')) return;
-
-    const socket = new WebSocket(realtimeUrl(token));
-    socket.onmessage = (message) => {
-      try {
-        const frame = JSON.parse(message.data) as { event?: string; data?: EmergencyLaunchSignal };
-        if (frame.event !== 'resqlink_launch' || !frame.data) return;
-        setEmergencyLaunch(frame.data);
-        window.dispatchEvent(new CustomEvent('resqlink:launch', { detail: frame.data }));
-        window.focus();
-        void audioService.playEmergencyAlertTone();
-      } catch (error) {
-        console.error('Unable to process RESQLINK realtime event', error);
-      }
-    };
-    socket.onerror = () => console.error('RESQLINK realtime channel unavailable');
-    return () => socket.close();
-  }, [authUser]);
-
-  useEffect(() => {
     if (!currentLocation) {
       setCurrentLocation({
         latitude: selectedPreset.latitude,
@@ -243,177 +183,55 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   }, [currentLocation, selectedPreset]);
 
   const login = async (username: string, password: string) => {
-    try {
-      const response = await api.login(username, password);
-      setAuthUser(response.user);
-      setUserRole(response.user.role);
-      setAdminViewTab(response.user.role === 'admin' ? 'admin' : response.user.role);
-      setSelectedHospitalId(response.user.hospitalId || 'HOSP-01');
-      await hydrate();
-    } catch (apiError) {
-      // Offline fallback for demo prototype mode
-      const normalized = username.trim().toLowerCase();
-      let role: UserRole = 'admin';
-      let displayName = 'System Administrator';
-      let hospitalId = 'HOSP-01';
-
-      if (normalized === 'hospital') {
-        role = 'hospital';
-        displayName = 'ER Trauma Lead (KSSEM)';
-        hospitalId = 'HOSP-01';
-      } else if (normalized === 'patient' || normalized === 'citizen') {
-        role = 'patient';
-        displayName = 'Ananya Sharma (Citizen)';
-      } else if (normalized === 'admin') {
-        role = 'admin';
-        displayName = 'Dr. Pavan (CAD Director)';
-      }
-
-      const mockUser: AuthUser = {
-        username: normalized,
-        role,
-        displayName,
-        hospitalId: role === 'hospital' ? hospitalId : null,
-      };
-
-      authStorage.setToken(`mock_jwt_token_${role}`);
-      setAuthUser(mockUser);
-      setUserRole(role);
-      setAdminViewTab(role === 'admin' ? 'admin' : role);
-      setSelectedHospitalId(hospitalId);
-    }
+    const response = await api.login(username, password);
+    setAuthUser(response.user);
+    setUserRole(response.user.role);
+    setAdminViewTab(response.user.role === 'admin' ? 'admin' : response.user.role);
+    setSelectedHospitalId(response.user.hospitalId || 'HOSP-01');
+    await hydrate();
   };
 
   const logout = async () => {
-    try {
-      await api.logout();
-    } catch {
-      // Local fallback
-    } finally {
-      authStorage.clear();
-      setAuthUser(null);
-      setActiveAlert(null);
-      setAlertHistory([]);
-      setAuditLogs([]);
-      setEmergencyLaunch(null);
-    }
+    await api.logout();
+    setAuthUser(null);
+    setActiveAlert(null);
+    setAlertHistory([]);
+    setAuditLogs([]);
   };
-
-  const dismissEmergencyLaunch = () => setEmergencyLaunch(null);
 
   const triggerSOS = async (category: EmergencyCategory = 'CARDIAC') => {
     setIsSimulating(true);
     try {
-      try {
-        const alert = await api.triggerSos({
-          category,
-          networkTier,
-          language,
-          selectedPreset,
-          currentLocation,
-        });
-        setActiveAlert(alert);
-        setAlertHistory((previous) => [alert, ...previous.filter((item) => item.id !== alert.id)]);
-        setResponders((previous) => previous.map((responder) => responder.id === alert.assignedResponder?.id ? { ...responder, ...alert.assignedResponder, isAvailable: false, assignedIncidentId: alert.id } : responder));
-        await refreshAuditLogs(alert.id);
-        return;
-      } catch {
-        // Fallback local simulation
-        const coord: GeoCoordinate = currentLocation || {
-          latitude: selectedPreset.latitude,
-          longitude: selectedPreset.longitude,
-          accuracy: networkTier === '3G_SPOTTY' ? 30 : 8,
-          timestamp: Date.now(),
-          provider: 'GPS_HARDWARE',
-        };
-
-        const decision = AIDispatchEngine.computeOptimalDispatch(
-          coord,
-          category,
-          selectedPreset.isPeripheral,
-          responders
-        );
-
-        const alertId = `SOS-${Date.now().toString().slice(-4)}`;
-        const localAlert: EmergencyAlert = {
-          id: alertId,
-          shortCode: `SOS-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          timestamp: new Date().toISOString(),
-          category,
-          description: `Emergency reported in ${selectedPreset.ward}`,
-          citizenName: patientProfile.name,
-          citizenPhone: '+91 98450 12345',
-          location: coord,
-          locationLockState: {
-            isLocked: true,
-            samples: [],
-            finalCoordinate: coord,
-            confidenceScore: 98,
-            lockDurationMs: 1100,
-            attemptCount: 1,
-          },
-          status: 'CONFIRMED',
-          statusTimestamps: {
-            triggeredAt: new Date().toISOString(),
-            confirmedAt: new Date().toISOString(),
-          },
-          networkUsed: networkTier,
-          fallbackSMSUsed: networkTier === '2G_SMS_FALLBACK',
-          assignedResponder: decision.matchedResponder,
-          assignedHospital: decision.matchedHospital,
-          estimatedArrivalMinutes: decision.estimatedArrivalMinutes,
-          aiTriage: AIDispatchEngine.getAIFirstAidGuidance(category),
-          equityMetadata: {
-            deviceTier: networkTier === '2G_SMS_FALLBACK' ? 'FEATURE_2G' : 'SMARTPHONE',
-            wardName: selectedPreset.ward,
-            isPeripheralWard: selectedPreset.isPeripheral,
-            userDemographic: 'GENERAL',
-          },
-        };
-
-        setActiveAlert(localAlert);
-        setAlertHistory((prev) => [localAlert, ...prev]);
-        setResponders((prev) =>
-          prev.map((r) =>
-            r.id === decision.matchedResponder.id
-              ? { ...r, isAvailable: false, assignedIncidentId: alertId }
-              : r
-          )
-        );
-        AuditLogger.logEvent(alertId, 'SOS_TRIGGERED', 'CITIZEN', {
-          ward: selectedPreset.ward,
-          category,
-        });
-        setAuditLogs(AuditLogger.getLogs());
-      }
+      const alert = await api.triggerSos({
+        category,
+        networkTier,
+        language,
+        selectedPreset,
+        currentLocation,
+      });
+      setActiveAlert(alert);
+      setAlertHistory((previous) => [alert, ...previous.filter((item) => item.id !== alert.id)]);
+      setResponders((previous) => previous.map((responder) => responder.id === alert.assignedResponder?.id ? { ...responder, ...alert.assignedResponder, isAvailable: false, assignedIncidentId: alert.id } : responder));
+      await refreshAuditLogs(alert.id);
     } finally {
       setIsSimulating(false);
     }
   };
 
   const cancelSOS = (alertId: string) => {
-    setActiveAlert(null);
-    setResponders((prev) =>
-      prev.map((r) =>
-        r.assignedIncidentId === alertId
-          ? { ...r, isAvailable: true, assignedIncidentId: undefined }
-          : r
-      )
-    );
-    void api.cancelSos(alertId).catch(() => {});
+    void api.cancelSos(alertId).then(async () => {
+      setActiveAlert(null);
+      await hydrate();
+    }).catch((error) => console.error('Unable to cancel SOS', error));
   };
 
-
   const updateAlertStatus = (alertId: string, status: AlertStatus) => {
-    setActiveAlert((prev) => (prev && prev.id === alertId ? { ...prev, status } : prev));
-    setAlertHistory((prev) => prev.map((item) => (item.id === alertId ? { ...item, status } : item)));
     void api.updateAlertStatus(alertId, status).then(async (updated) => {
       setActiveAlert(updated);
       setAlertHistory((previous) => previous.map((item) => item.id === alertId ? updated : item));
       await refreshAuditLogs(alertId);
-    }).catch(() => {});
+    }).catch((error) => console.error('Unable to update alert status', error));
   };
-
 
   const simulateExternalIncident = () => {
     const randomPreset =
@@ -496,80 +314,44 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const updateHospitalBeds = (hospitalId: string, delta: number) => {
-    setHospitals((previous) =>
-      previous.map((hospital) =>
-        hospital.id === hospitalId
-          ? { ...hospital, icuBedsAvailable: Math.max(0, hospital.icuBedsAvailable + delta) }
-          : hospital
-      )
-    );
     void api.updateHospitalBeds(hospitalId, delta).then((updated) => {
       setHospitals((previous) => previous.map((hospital) => hospital.id === updated.id ? updated : hospital));
-    }).catch(() => {});
+    }).catch((error) => console.error('Unable to update hospital beds', error));
   };
 
   const toggleHospitalOxygen = (hospitalId: string) => {
-    setHospitals((previous) =>
-      previous.map((hospital) =>
-        hospital.id === hospitalId
-          ? { ...hospital, oxygenAvailable: !hospital.oxygenAvailable }
-          : hospital
-      )
-    );
     void api.toggleHospitalOxygen(hospitalId).then((updated) => {
       setHospitals((previous) => previous.map((hospital) => hospital.id === updated.id ? updated : hospital));
-    }).catch(() => {});
+    }).catch((error) => console.error('Unable to update hospital oxygen', error));
   };
 
   const toggleTraumaTeamStandby = (hospitalId: string) => {
-    setHospitalStatuses((previous) => ({
-      ...previous,
-      [hospitalId]: {
-        ...(previous[hospitalId] || { hospitalId, emergencyDepartmentOpen: true, traumaTeamStandby: false, otReady: true, divertStatus: false, activeAdmissionsCount: 4 }),
-        traumaTeamStandby: !previous[hospitalId]?.traumaTeamStandby,
-      },
-    }));
     void api.toggleTraumaTeam(hospitalId).then((updated) => {
       setHospitalStatuses((previous) => ({ ...previous, [hospitalId]: updated }));
-    }).catch(() => {});
+    }).catch((error) => console.error('Unable to update trauma team status', error));
   };
 
   const toggleEmergencyDivert = (hospitalId: string) => {
-    setHospitalStatuses((previous) => ({
-      ...previous,
-      [hospitalId]: {
-        ...(previous[hospitalId] || { hospitalId, emergencyDepartmentOpen: true, traumaTeamStandby: true, otReady: true, divertStatus: false, activeAdmissionsCount: 4 }),
-        divertStatus: !previous[hospitalId]?.divertStatus,
-      },
-    }));
     void api.toggleEmergencyDivert(hospitalId).then((updated) => {
       setHospitalStatuses((previous) => ({ ...previous, [hospitalId]: updated }));
-    }).catch(() => {});
+    }).catch((error) => console.error('Unable to update hospital divert status', error));
   };
 
   const acknowledgeHospitalInbound = (alertId: string) => {
-    void api.acknowledgeHospitalInbound(alertId).then(() => refreshAuditLogs(alertId)).catch(() => {});
+    void api.acknowledgeHospitalInbound(alertId).then(() => refreshAuditLogs(alertId)).catch((error) => console.error('Unable to acknowledge inbound alert', error));
   };
 
   const prepareTraumaBay = (alertId: string) => {
-    void api.prepareTraumaBay(alertId).then(() => refreshAuditLogs(alertId)).catch(() => {});
+    void api.prepareTraumaBay(alertId).then(() => refreshAuditLogs(alertId)).catch((error) => console.error('Unable to prepare trauma bay', error));
   };
 
   const updatePatientProfile = (updates: Partial<PatientMedicalProfile>) => {
-    setPatientProfile((previous) => ({ ...previous, ...updates }));
-    void api.updatePatientProfile(updates).then(setPatientProfile).catch(() => {});
+    void api.updatePatientProfile(updates).then(setPatientProfile).catch((error) => console.error('Unable to update patient profile', error));
   };
 
   const resetAllData = () => {
-    setActiveAlert(null);
-    setAlertHistory([]);
-    setResponders(INITIAL_RESPONDERS.map((r) => ({ ...r, isAvailable: true, assignedIncidentId: undefined })));
-    setHospitals(BENGALURU_HOSPITALS);
-    setHospitalStatuses(initialStatuses());
-    setPatientProfile(INITIAL_PATIENT_PROFILE);
-    void api.reset().catch(() => {});
+    void api.reset().then(hydrate).catch((error) => console.error('Unable to reset RESQLINK data', error));
   };
-
 
   return (
     <ResqLinkContext.Provider value={{
@@ -577,8 +359,6 @@ export const ResqLinkProvider = ({ children }: { children: React.ReactNode }) =>
       authLoading,
       login,
       logout,
-      emergencyLaunch,
-      dismissEmergencyLaunch,
       userRole,
       setUserRole,
       adminViewTab,
