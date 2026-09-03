@@ -14,7 +14,9 @@ import {
   Sparkles,
   LogOut,
   Zap,
+  Search,
 } from 'lucide-react';
+import { INDIAN_LANGUAGES, getLanguageLabel } from '../i18n';
 
 interface NavigationProps {
   onOpenDPDPModal: () => void;
@@ -35,6 +37,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
   } = useResqLink();
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
+
+  const filteredLanguages = INDIAN_LANGUAGES.filter((l) =>
+    l.name.toLowerCase().includes(langSearch.toLowerCase()) ||
+    l.nativeName.toLowerCase().includes(langSearch.toLowerCase()) ||
+    l.code.toLowerCase().includes(langSearch.toLowerCase())
+  );
 
   const activeCount =
     (activeAlert && activeAlert.status !== 'RESOLVED' && activeAlert.status !== 'CANCELLED' ? 1 : 0) +
@@ -243,22 +253,69 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
             <span>DPDP 2023</span>
           </button>
 
-          {/* Multilingual Switcher Pill */}
-          <div className="flex items-center bg-slate-900/90 rounded-xl p-0.5 border border-slate-800 shadow-inner">
-            <Languages className="w-3 h-3 text-slate-400 ml-1.5 mr-1" />
-            {(['en', 'kn', 'hi'] as LanguageCode[]).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold transition cursor-pointer ${
-                  language === lang
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {lang === 'en' ? 'EN' : lang === 'kn' ? 'KN' : 'HI'}
-              </button>
-            ))}
+          {/* Pan-India Language Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setIsLangDropdownOpen((p) => !p)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-xs font-bold text-slate-100 transition-all duration-200 cursor-pointer shadow-md hover:border-slate-600 active:scale-[0.98]"
+              title="Select Language"
+            >
+              <Languages className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-mono text-[10px] uppercase tracking-wider">{language.toUpperCase()}</span>
+            </button>
+
+            {isLangDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-72 bg-slate-900/95 backdrop-blur-2xl border border-slate-700 rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 overflow-hidden">
+                <div className="px-3 py-2 border-b border-slate-800">
+                  <div className="flex items-center gap-2 text-[9px] font-mono font-bold uppercase tracking-widest text-slate-400 mb-2">
+                    <Languages className="w-3 h-3 text-cyan-400" />
+                    <span>Pan-India Languages (23)</span>
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+                    <input
+                      type="text"
+                      value={langSearch}
+                      onChange={(e) => setLangSearch(e.target.value)}
+                      placeholder="Search language..."
+                      className="w-full pl-7 pr-2 py-1.5 text-xs bg-slate-800/80 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-600 font-mono"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <div className="max-h-64 overflow-y-auto p-1.5 space-y-0.5 scrollbar-thin scrollbar-thumb-slate-700">
+                  {filteredLanguages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code as LanguageCode);
+                        setIsLangDropdownOpen(false);
+                        setLangSearch('');
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        language === lang.code
+                          ? 'bg-cyan-600/20 text-cyan-100 border border-cyan-500/40 shadow-inner'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-8 text-center text-[10px] font-mono uppercase text-slate-400">{lang.code}</span>
+                        <div className="text-left">
+                          <div className="font-bold text-[11px]">{lang.nativeName}</div>
+                          <div className="text-[9px] text-slate-400 font-normal">{lang.name} • {lang.region}</div>
+                        </div>
+                      </div>
+                      {language === lang.code && (
+                        <span className="text-[9px] font-mono text-cyan-400">✓</span>
+                      )}
+                    </button>
+                  ))}
+                  {filteredLanguages.length === 0 && (
+                    <p className="text-center text-xs text-slate-500 py-3 font-mono">No languages found</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sign out */}

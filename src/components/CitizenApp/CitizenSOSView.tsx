@@ -4,6 +4,7 @@ import { EmergencyCategory } from '../../types';
 import { LocationLockIndicator } from './LocationLockIndicator';
 import { LiveTrackingCard } from './LiveTrackingCard';
 import { AIFirstAidGuidance } from './AIFirstAidGuidance';
+import { useTranslation } from '../../i18n';
 import {
   HeartPulse,
   Car,
@@ -35,48 +36,49 @@ export const CitizenSOSView: React.FC = () => {
     triggerSOS,
     cancelSOS,
   } = useResqLink();
+  const { t } = useTranslation();
 
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory>('CARDIAC');
 
-  const categories: { id: EmergencyCategory; label: { en: string; kn: string; hi: string }; icon: any; color: string; badge: string }[] = [
+  const categories: { id: EmergencyCategory; label: string; icon: any; color: string; badge: string }[] = [
     {
       id: 'CARDIAC',
-      label: { en: 'Cardiac Arrest', kn: 'ಹೃದಯಾಘಾತ', hi: 'हार्ट अटैक' },
+      label: t('sos.cardiac'),
       icon: HeartPulse,
       color: 'text-rose-400 bg-rose-950/60 border-rose-700/60',
       badge: 'ALS UNIT',
     },
     {
       id: 'TRAUMA_ACCIDENT',
-      label: { en: 'Road Trauma', kn: 'ರಸ್ತೆ ಅಪಘಾತ', hi: 'सड़क दुर्घटना' },
+      label: t('sos.trauma'),
       icon: Car,
       color: 'text-amber-400 bg-amber-950/60 border-amber-700/60',
       badge: 'TRAUMA L1',
     },
     {
       id: 'STROKE',
-      label: { en: 'Acute Stroke', kn: 'ಪಾರ್ಶ್ವವಾಯು', hi: 'स्ट्रोक / लकवा' },
+      label: t('sos.stroke'),
       icon: Brain,
       color: 'text-purple-400 bg-purple-950/60 border-purple-700/60',
       badge: 'NEURO HUB',
     },
     {
       id: 'RESPIRATORY',
-      label: { en: 'Severe Dyspnea', kn: 'ಉಸಿರಾಟದ ತೊಂದರೆ', hi: 'सांस की तकलीफ' },
+      label: t('sos.respiratory'),
       icon: Wind,
       color: 'text-cyan-400 bg-cyan-950/60 border-cyan-700/60',
       badge: 'O2 SUPPORT',
     },
     {
       id: 'ELDERLY_FALL',
-      label: { en: 'Elderly Injury', kn: 'ಹಿರಿಯ ನಾಗರಿಕರ ಪತನ', hi: 'बुजुर्गों का गिरना' },
+      label: t('sos.elderly_fall'),
       icon: UserCheck,
       color: 'text-emerald-400 bg-emerald-950/60 border-emerald-700/60',
       badge: 'BLS UNIT',
     },
     {
       id: 'GENERAL_MEDICAL',
-      label: { en: 'General Urgent', kn: 'ಸಾಮಾನ್ಯ ತುರ್ತುಸ್ಥಿತಿ', hi: 'सामान्य आपातकाल' },
+      label: t('sos.general'),
       icon: Stethoscope,
       color: 'text-blue-400 bg-blue-950/60 border-blue-700/60',
       badge: 'TRIAGE',
@@ -86,12 +88,6 @@ export const CitizenSOSView: React.FC = () => {
   const handleSOSTrigger = () => {
     if (activeAlert) return;
     triggerSOS(selectedCategory);
-  };
-
-  const sosButtonTextByLang = {
-    en: 'ACTIVATE EMERGENCY SOS',
-    kn: 'ತುರ್ತು ಸಹಾಯಕ್ಕಾಗಿ ಒತ್ತಿ',
-    hi: 'आपातकालीन सहायता सक्रिय करें',
   };
 
   return (
@@ -217,7 +213,7 @@ export const CitizenSOSView: React.FC = () => {
                     </div>
                     <div>
                       <div className="font-bold text-xs text-white leading-tight">
-                        {cat.label[language] || cat.label.en}
+                        {cat.label}
                       </div>
                     </div>
                   </button>
@@ -247,7 +243,7 @@ export const CitizenSOSView: React.FC = () => {
                   SOS
                 </span>
                 <span className="text-[10px] font-bold tracking-wider uppercase px-4 text-center text-rose-100 leading-tight">
-                  {sosButtonTextByLang[language] || sosButtonTextByLang.en}
+                  {t('sos.activate')}
                 </span>
                 <span className="text-[8px] text-white/90 font-mono tracking-widest font-bold mt-0.5 bg-black/30 px-2 py-0.5 rounded-full border border-white/20">
                   INSTANT CAD ALLOCATION

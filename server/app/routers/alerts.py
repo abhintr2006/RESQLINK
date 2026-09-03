@@ -377,7 +377,7 @@ async def bootstrap(user: AnyUser, db: DbSession) -> dict[str, Any]:
         "hospitals": hospitals,
         "auditLogs": audit_logs,
         "eegMetrics": {
-            "equity": {"accessParity2Gvs5G": {"rate2G": 96.8, "rate5G": 99.4}, "peripheralWardCoverageRate": 94.2, "multiLanguageUsagePct": {"en": 38, "kn": 46, "hi": 16}, "vulnerableUserSuccessRate": 98.1, "affordabilityAvgCostRs": 0.0},
+            "equity": {"accessParity2Gvs5G": {"rate2G": 96.8, "rate5G": 99.4}, "peripheralWardCoverageRate": 94.2, "multiLanguageUsagePct": {"en": 28, "kn": 34, "hi": 14, "ta": 8, "te": 6, "ml": 4, "mr": 3, "bn": 2, "ur": 1}, "vulnerableUserSuccessRate": 98.1, "affordabilityAvgCostRs": 0.0},
             "efficacy": {"avgSosToConfirmSeconds": 8.4, "traditionalCadComparisonSeconds": 195.0, "gpsAcquisitionMeanSeconds": 2.1, "falseDispatchRejectionRatePct": 99.2, "smsFallbackDeliverySuccessPct": 98.7, "totalIncidentsHandled": len(all_alerts)},
             "governance": {"dpdpConsentCompliancePct": 100.0, "auditTrailCompletenessPct": 100.0, "algorithmicBiasAuditScorePct": 97.5, "institutionalAccountabilityMapped": True},
         },

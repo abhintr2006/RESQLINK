@@ -21,7 +21,30 @@ export type AlertStatus =
 
 export type NetworkTier = '5G_HIGH_SPEED' | '3G_SPOTTY' | '2G_SMS_FALLBACK';
 
-export type LanguageCode = 'en' | 'kn' | 'hi';
+export type LanguageCode =
+  | 'en'   // English
+  | 'hi'   // Hindi
+  | 'kn'   // Kannada
+  | 'ta'   // Tamil
+  | 'te'   // Telugu
+  | 'ml'   // Malayalam
+  | 'mr'   // Marathi
+  | 'bn'   // Bengali
+  | 'gu'   // Gujarati
+  | 'pa'   // Punjabi
+  | 'or'   // Odia
+  | 'as'   // Assamese
+  | 'ur'   // Urdu
+  | 'sa'   // Sanskrit
+  | 'kok'  // Konkani
+  | 'mai'  // Maithili
+  | 'mni'  // Manipuri / Meitei
+  | 'ne'   // Nepali
+  | 'brx'  // Bodo
+  | 'doi'  // Dogri
+  | 'ks'   // Kashmiri
+  | 'sat'  // Santali
+  | 'sd';  // Sindhi
 
 export interface PresetLocation {
   name: string;
@@ -118,11 +141,7 @@ export interface EmergencyAlert {
     triageScore: number; // 1-100
     suggestedALS: boolean;
     firstAidInstructions: string[];
-    speechSummary: {
-      en: string;
-      kn: string;
-      hi: string;
-    };
+    speechSummary: Partial<Record<LanguageCode, string>> & { en: string };
   };
   equityMetadata: {
     deviceTier: 'SMARTPHONE' | 'FEATURE_2G';
@@ -158,7 +177,7 @@ export interface EEGMetrics {
   equity: {
     accessParity2Gvs5G: { rate2G: number; rate5G: number };
     peripheralWardCoverageRate: number;
-    multiLanguageUsagePct: { en: number; kn: number; hi: number };
+    multiLanguageUsagePct: Partial<Record<LanguageCode, number>>;
     vulnerableUserSuccessRate: number;
     affordabilityAvgCostRs: number;
   };

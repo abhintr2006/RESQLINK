@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EmergencyAlert, LanguageCode } from '../../types';
 import { audioService } from '../../services/audioService';
+import { useTranslation } from '../../i18n';
 import {
   HeartPulse,
   Volume2,
@@ -20,6 +21,7 @@ interface AIFirstAidGuidanceProps {
 export const AIFirstAidGuidance: React.FC<AIFirstAidGuidanceProps> = ({ alert, language }) => {
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const { aiTriage, category } = alert;
+  const { t: tr } = useTranslation();
 
   const handleToggleVoice = () => {
     if (isPlayingAudio) {
@@ -33,23 +35,6 @@ export const AIFirstAidGuidance: React.FC<AIFirstAidGuidanceProps> = ({ alert, l
     }
   };
 
-  const titlesByLang: Record<LanguageCode, { header: string; alertBanner: string }> = {
-    en: {
-      header: 'AI Emergency First-Aid Protocol (Pre-Arrival)',
-      alertBanner: 'Paramedics Dispatched • Execute Immediate First-Response:',
-    },
-    kn: {
-      header: 'ಎಐ ತುರ್ತು ಪ್ರಥಮ ಚಿಕಿತ್ಸೆ (ಆಂಬ್ಯುಲೆನ್ಸ್ ಬರುವವರೆಗೆ)',
-      alertBanner: 'ಆಂಬ್ಯುಲೆನ್ಸ್ ರವಾನೆಯಾಗಿದೆ • ಈ ಕೆಳಗಿನ ಕ್ರಮಗಳನ್ನು ತಕ್ಷಣ ಅನುಸರಿಸಿ:',
-    },
-    hi: {
-      header: 'एआई आपातकालीन प्राथमिक चिकित्सा निर्देश (आगमन पूर्व)',
-      alertBanner: 'एम्बुलेंस रवाना हो चुकी है • तुरंत इन निर्देशों का पालन करें:',
-    },
-  };
-
-  const langContent = titlesByLang[language] || titlesByLang.en;
-
   return (
     <div className="double-bezel shadow-xl">
       <div className="double-bezel-inner p-4 space-y-3">
@@ -61,7 +46,7 @@ export const AIFirstAidGuidance: React.FC<AIFirstAidGuidanceProps> = ({ alert, l
             </div>
             <div>
               <div className="flex items-center gap-1.5 font-bold text-xs text-white font-mono">
-                <span>{langContent.header}</span>
+                <span>{tr('aid.header')}</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/80">AI CO-PILOT</span>
               </div>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -93,7 +78,7 @@ export const AIFirstAidGuidance: React.FC<AIFirstAidGuidanceProps> = ({ alert, l
         <div className="bg-slate-950/90 rounded-xl p-3 border border-slate-800">
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 mb-2.5">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-            <span>{langContent.alertBanner}</span>
+            <span>{tr('aid.emergency_banner')}</span>
           </div>
 
           <ul className="space-y-2">
