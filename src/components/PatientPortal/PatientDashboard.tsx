@@ -15,8 +15,9 @@ import {
 } from 'lucide-react';
 
 export const PatientDashboard: React.FC = () => {
-  const { activeAlert, patientProfile } = useResqLink();
+  const { activeAlert, patientProfile, cancelSOS } = useResqLink();
   const [patientTab, setPatientTab] = useState<'sos' | 'healthCard' | 'hospitals' | 'history'>('sos');
+
 
   const tabs = [
     {
@@ -68,11 +69,20 @@ export const PatientDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {activeAlert && (
+              <button
+                onClick={() => cancelSOS(activeAlert.id)}
+                className="px-3.5 py-2 bg-rose-900/90 hover:bg-rose-800 text-rose-100 hover:text-white rounded-2xl text-xs font-black border border-rose-600 shadow-lg transition cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <span>✕ Start New SOS</span>
+              </button>
+            )}
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs font-bold shadow-sm">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>DPDP Act 2023 End-to-End Encrypted</span>
             </div>
           </div>
+
         </div>
       </div>
 
