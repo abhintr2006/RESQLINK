@@ -14,6 +14,7 @@ import {
   AlertOctagon,
   ChevronDown,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -38,38 +39,36 @@ export const HospitalDashboard: React.FC = () => {
       : 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto space-y-5">
       {/* Top Banner with Hospital Selector - Double Bezel */}
       <div className="double-bezel shadow-2xl">
-        <div className="double-bezel-inner p-6 md:p-8 flex flex-wrap items-center justify-between gap-6 bg-gradient-to-r from-indigo-950/30 via-slate-950 to-slate-950">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 flex items-center justify-center text-white shadow-xl shadow-indigo-600/30 ring-1 ring-white/20">
-              <Building2 className="w-8 h-8" />
+        <div className="double-bezel-inner p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 bg-slate-950">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-700/80 flex items-center justify-center text-indigo-400 shadow-xl">
+              <Building2 className="w-6 h-6" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-black text-white tracking-tight">{currentHospital.name}</h1>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                  Level {currentHospital.traumaLevel} Trauma Center
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold font-mono text-white tracking-tight">{currentHospital.name}</h1>
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/80">
+                  TRAUMA LEVEL {currentHospital.traumaLevel}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Emergency Department &amp; Trauma Intake Terminal • {currentHospital.area} • Direct Hotline: <span className="font-mono text-slate-200 font-bold">{currentHospital.contactNumber}</span>
+              <p className="text-xs text-slate-400 font-mono">
+                Emergency Department Terminal &bull; {currentHospital.area} &bull; Hotline: <span className="text-slate-200 font-bold">{currentHospital.contactNumber}</span>
               </p>
             </div>
           </div>
 
           {/* Hospital Switcher Selector Box */}
-          <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700/80 rounded-2xl p-2 shadow-inner">
-            <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-indigo-400">
-              <Building2 className="w-4 h-4" />
-            </div>
-            <div className="pr-2">
-              <div className="text-[9px] uppercase font-black tracking-widest text-slate-500">Selected Facility</div>
+          <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 shadow-inner">
+            <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+            <div>
+              <div className="text-[8px] font-mono uppercase tracking-widest text-slate-500">SELECT FACILITY</div>
               <select
                 value={selectedHospitalId}
                 onChange={(e) => setSelectedHospitalId(e.target.value)}
-                className="bg-transparent text-slate-100 text-xs font-black focus:outline-none cursor-pointer"
+                className="bg-transparent text-slate-100 text-xs font-mono font-bold focus:outline-none cursor-pointer"
               >
                 {hospitals.map((h) => (
                   <option key={h.id} value={h.id} className="bg-slate-900 text-slate-100">
@@ -83,65 +82,65 @@ export const HospitalDashboard: React.FC = () => {
       </div>
 
       {/* KPI Stat Cards Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="double-bezel">
-          <div className="double-bezel-inner p-5 flex items-center gap-4">
-            <div className="p-3.5 rounded-2xl bg-rose-950/60 border border-rose-800/80 text-rose-400 shadow-md">
-              <Activity className="w-6 h-6" />
-            </div>
+          <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Inbound Transports
+              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                INBOUND TRANSPORTS
               </div>
-              <div className="text-2xl font-black text-white mt-0.5">{totalInbound} Active</div>
+              <div className="text-xl font-mono font-extrabold text-rose-400 mt-0.5">{totalInbound} ACTIVE</div>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-rose-950/60 border border-rose-800/80 text-rose-400 flex items-center justify-center shadow-md">
+              <Activity className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         <div className="double-bezel">
-          <div className="double-bezel-inner p-5 flex items-center gap-4">
-            <div className="p-3.5 rounded-2xl bg-indigo-950/60 border border-indigo-800/80 text-indigo-400 shadow-md">
-              <Bed className="w-6 h-6" />
-            </div>
+          <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Available ICU Beds
+              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                AVAILABLE ICU BEDS
               </div>
-              <div className="text-2xl font-black text-indigo-400 mt-0.5">
-                {currentHospital.icuBedsAvailable} Beds
+              <div className="text-xl font-mono font-extrabold text-indigo-400 mt-0.5">
+                {currentHospital.icuBedsAvailable} BEDS
               </div>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-indigo-950/60 border border-indigo-800/80 text-indigo-400 flex items-center justify-center shadow-md">
+              <Bed className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         <div className="double-bezel">
-          <div className="double-bezel-inner p-5 flex items-center gap-4">
-            <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-800/80 text-amber-400 shadow-md">
-              <Flame className="w-6 h-6" />
-            </div>
+          <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Trauma Bay Status
+              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                TRAUMA BAY STATUS
               </div>
-              <div className="text-2xl font-black text-amber-300 mt-0.5">
-                {currentStatus?.traumaTeamStandby ? 'Standby' : 'General'}
+              <div className="text-xl font-mono font-extrabold text-amber-300 mt-0.5">
+                {currentStatus?.traumaTeamStandby ? 'STANDBY' : 'GENERAL'}
               </div>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-amber-950/60 border border-amber-800/80 text-amber-400 flex items-center justify-center shadow-md">
+              <Flame className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         <div className="double-bezel">
-          <div className="double-bezel-inner p-5 flex items-center gap-4">
-            <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 shadow-md">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
+          <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                ER Intake Gate
+              <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                ER INTAKE GATE
               </div>
-              <div className="text-2xl font-black text-emerald-400 mt-0.5">
-                {currentStatus?.divertStatus ? 'Diverting' : 'Open'}
+              <div className="text-xl font-mono font-extrabold text-emerald-400 mt-0.5">
+                {currentStatus?.divertStatus ? 'DIVERTING' : 'OPEN'}
               </div>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 flex items-center justify-center shadow-md">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
         </div>

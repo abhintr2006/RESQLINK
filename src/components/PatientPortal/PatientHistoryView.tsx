@@ -43,73 +43,73 @@ export const PatientHistoryView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 font-mono">
       {/* Header Banner - Double Bezel */}
       <div className="double-bezel shadow-xl">
-        <div className="double-bezel-inner p-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="double-bezel-inner p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-950">
           <div>
-            <h2 className="text-xl font-black text-white flex items-center gap-2.5">
-              <Clock className="w-5 h-5 text-rose-500" />
-              <span>Emergency Incident &amp; Care History</span>
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-rose-500" />
+              <span>EMERGENCY INCIDENT &amp; CARE HISTORY</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              End-to-end encrypted incident logs audited under DPDP Act 2023 &amp; MeitY AI Guidelines.
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Encrypted incident logs audited under DPDP Act 2023 &amp; MeitY AI Guidelines.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-4 py-2 rounded-2xl shadow-sm">
-            <Lock className="w-4 h-4" />
-            <span>Cryptographically Verified Trail</span>
+          <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-xl shadow-sm">
+            <Lock className="w-3.5 h-3.5" />
+            <span>CRYPTOGRAPHICALLY VERIFIED</span>
           </div>
         </div>
       </div>
 
       {/* Incident List */}
-      <div className="space-y-5">
+      <div className="space-y-3">
         {/* Dynamic Alerts from this session */}
         {alertHistory.map((alert) => (
           <div key={alert.id} className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-xl text-xs font-mono font-black bg-rose-950 border border-rose-800 text-rose-300 shadow-sm">
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-rose-950 border border-rose-800 text-rose-300 shadow-sm">
                     {alert.shortCode}
                   </span>
-                  <span className="text-base font-black text-white">{alert.category.replace('_', ' ')}</span>
+                  <span className="text-sm font-bold text-white">{alert.category.replace('_', ' ')}</span>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-slate-500" />
+                <div className="flex items-center gap-2.5 text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
                     {new Date(alert.timestamp).toLocaleDateString()} {new Date(alert.timestamp).toLocaleTimeString()}
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-950 border border-emerald-800 text-emerald-300">
+                  <span className="px-2 py-0.2 rounded text-[10px] font-bold bg-emerald-950 border border-emerald-800 text-emerald-300">
                     {alert.status}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <Building2 className="w-5 h-5 text-indigo-400 shrink-0" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+                <div className="flex items-center gap-2.5 bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl">
+                  <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Hospital Receiving</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">HOSPITAL RECEIVING</div>
                     <div className="font-bold text-slate-100 mt-0.5">{alert.assignedHospital?.name || 'Assigned ER'}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <Truck className="w-5 h-5 text-rose-400 shrink-0" />
+                <div className="flex items-center gap-2.5 bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl">
+                  <Truck className="w-4 h-4 text-rose-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Paramedic Unit</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">PARAMEDIC UNIT</div>
                     <div className="font-bold text-slate-100 mt-0.5">{alert.assignedResponder?.name || 'ALS Unit'}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div className="flex items-center gap-2.5 bg-slate-900/80 border border-slate-800 p-2.5 rounded-xl">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Data Privacy Audit</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">PRIVACY AUDIT</div>
                     <div className="font-bold text-emerald-300 mt-0.5">DPDP Consent Sealed</div>
                   </div>
                 </div>
@@ -121,50 +121,50 @@ export const PatientHistoryView: React.FC = () => {
         {/* Static Historical Incidents */}
         {samplePastIncidents.map((incident) => (
           <div key={incident.id} className="double-bezel opacity-90">
-            <div className="double-bezel-inner p-6 space-y-4 bg-slate-950/70">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-xl text-xs font-mono font-bold bg-slate-900 border border-slate-700 text-slate-300">
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-700 text-slate-300">
                     {incident.shortCode}
                   </span>
-                  <span className="text-sm font-bold text-slate-200">{incident.category.replace('_', ' ')}</span>
+                  <span className="text-xs font-bold text-slate-200">{incident.category.replace('_', ' ')}</span>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-slate-500" />
+                <div className="flex items-center gap-2.5 text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-500" />
                     {incident.date}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300">
+                  <span className="px-2 py-0.2 rounded text-[10px] font-bold bg-slate-900 border border-slate-700 text-slate-300">
                     {incident.status}
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-400">{incident.description}</p>
+              <p className="text-[11px] text-slate-400 font-sans">{incident.description}</p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="flex items-center gap-3 bg-slate-900/50 border border-slate-800/60 p-3 rounded-2xl">
-                  <Building2 className="w-4 h-4 text-indigo-400 shrink-0" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+                <div className="flex items-center gap-2.5 bg-slate-900/50 border border-slate-800/60 p-2.5 rounded-xl">
+                  <Building2 className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">Hospital Receiving</div>
-                    <div className="font-semibold text-slate-300">{incident.hospital}</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold">HOSPITAL RECEIVING</div>
+                    <div className="font-bold text-slate-300">{incident.hospital}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-900/50 border border-slate-800/60 p-3 rounded-2xl">
+                <div className="flex items-center gap-2.5 bg-slate-900/50 border border-slate-800/60 p-2.5 rounded-xl">
                   <Truck className="w-4 h-4 text-rose-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">Response Duration</div>
-                    <div className="font-semibold text-slate-300">{incident.dispatchTime}</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold">RESPONSE DURATION</div>
+                    <div className="font-bold text-slate-300">{incident.dispatchTime}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 bg-slate-900/50 border border-slate-800/60 p-3 rounded-2xl">
+                <div className="flex items-center gap-2.5 bg-slate-900/50 border border-slate-800/60 p-2.5 rounded-xl">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                   <div>
-                    <div className="text-[10px] text-slate-500 uppercase font-bold">Cryptographic Proof</div>
-                    <div className="font-mono text-[11px] text-emerald-400">{incident.hash}</div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold">CRYPTOGRAPHIC PROOF</div>
+                    <div className="font-mono text-[10px] text-emerald-400">{incident.hash}</div>
                   </div>
                 </div>
               </div>
