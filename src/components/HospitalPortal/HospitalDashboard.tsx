@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
 import { InboundAmbulanceRadar } from './InboundAmbulanceRadar';
 import { ERBedManager } from './ERBedManager';
@@ -14,6 +14,7 @@ import {
   AlertOctagon,
   ChevronDown,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -23,11 +24,28 @@ export const HospitalDashboard: React.FC = () => {
     setSelectedHospitalId,
     hospitalStatuses,
     activeAlert,
+    simulateExternalIncident,
   } = useResqLink();
 
   const currentHospital =
-    hospitals.find((h) => h.id === selectedHospitalId) || hospitals[0];
-  const currentStatus = hospitalStatuses[currentHospital.id];
+    hospitals.find((h) => h.id === selectedHospitalId) || hospitals[0] || {
+      id: 'HOSP-01',
+      name: 'KSSEM Medical & Emergency Center',
+      area: 'Kanakapura Road',
+      traumaLevel: 1,
+      icuBedsAvailable: 8,
+      oxygenAvailable: true,
+      contactNumber: '+91 80 2842 5012',
+    };
+
+  const currentStatus = hospitalStatuses[currentHospital.id] || {
+    hospitalId: currentHospital.id,
+    emergencyDepartmentOpen: true,
+    traumaTeamStandby: true,
+    otReady: true,
+    divertStatus: false,
+    activeAdmissionsCount: 4,
+  };
 
   const totalInbound =
     activeAlert &&
@@ -41,7 +59,7 @@ export const HospitalDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* Top Banner with Hospital Selector - Double Bezel */}
       <div className="double-bezel shadow-2xl">
-        <div className="double-bezel-inner p-6 md:p-8 flex flex-wrap items-center justify-between gap-6 bg-gradient-to-r from-indigo-950/30 via-slate-950 to-slate-950">
+        <div className="double-bezel-inner p-6 md:p-8 flex flex-wrap items-center justify-between gap-6 bg-gradient-to-r from-indigo-950/40 via-slate-950 to-slate-950">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 flex items-center justify-center text-white shadow-xl shadow-indigo-600/30 ring-1 ring-white/20">
               <Building2 className="w-8 h-8" />
@@ -72,7 +90,7 @@ export const HospitalDashboard: React.FC = () => {
                 className="bg-transparent text-slate-100 text-xs font-black focus:outline-none cursor-pointer"
               >
                 {hospitals.map((h) => (
-                  <option key={h.id} value={h.id} className="bg-slate-900 text-slate-100">
+                  <option key={h.id} value={h.id} className="bg-slate-900 text-slate-100 font-bold">
                     {h.name} ({h.area})
                   </option>
                 ))}
@@ -84,7 +102,7 @@ export const HospitalDashboard: React.FC = () => {
 
       {/* KPI Stat Cards Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="double-bezel">
+        <div className="double-bezel shadow-lg">
           <div className="double-bezel-inner p-5 flex items-center gap-4">
             <div className="p-3.5 rounded-2xl bg-rose-950/60 border border-rose-800/80 text-rose-400 shadow-md">
               <Activity className="w-6 h-6" />
@@ -98,7 +116,7 @@ export const HospitalDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="double-bezel">
+        <div className="double-bezel shadow-lg">
           <div className="double-bezel-inner p-5 flex items-center gap-4">
             <div className="p-3.5 rounded-2xl bg-indigo-950/60 border border-indigo-800/80 text-indigo-400 shadow-md">
               <Bed className="w-6 h-6" />
@@ -114,7 +132,7 @@ export const HospitalDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="double-bezel">
+        <div className="double-bezel shadow-lg">
           <div className="double-bezel-inner p-5 flex items-center gap-4">
             <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-800/80 text-amber-400 shadow-md">
               <Flame className="w-6 h-6" />
@@ -124,13 +142,13 @@ export const HospitalDashboard: React.FC = () => {
                 Trauma Bay Status
               </div>
               <div className="text-2xl font-black text-amber-300 mt-0.5">
-                {currentStatus?.traumaTeamStandby ? 'Standby' : 'General'}
+                {currentStatus.traumaTeamStandby ? 'Standby (Ready)' : 'General Shift'}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="double-bezel">
+        <div className="double-bezel shadow-lg">
           <div className="double-bezel-inner p-5 flex items-center gap-4">
             <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 shadow-md">
               <CheckCircle2 className="w-6 h-6" />
@@ -140,7 +158,7 @@ export const HospitalDashboard: React.FC = () => {
                 ER Intake Gate
               </div>
               <div className="text-2xl font-black text-emerald-400 mt-0.5">
-                {currentStatus?.divertStatus ? 'Diverting' : 'Open'}
+                {currentStatus.divertStatus ? 'Diverting CAD' : 'Receiving'}
               </div>
             </div>
           </div>

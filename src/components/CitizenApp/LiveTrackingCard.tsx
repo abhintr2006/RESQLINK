@@ -265,7 +265,7 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
         )}
 
         {/* Action buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
           <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Incident ID: <strong className="text-white font-mono">{alert.id}</strong></span>
@@ -273,13 +273,14 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
 
           <button
             onClick={() => onCancel(alert.id)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-300 rounded-lg text-xs font-semibold border border-slate-700 flex items-center gap-1 transition"
+            className="px-4 py-2 bg-rose-950/80 hover:bg-rose-900 border border-rose-700/80 text-rose-200 hover:text-white rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer shadow-md active:scale-95"
           >
-            <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />
-            <span>Cancel SOS</span>
+            <AlertOctagon className="w-4 h-4 text-rose-400" />
+            <span>Cancel Alert &amp; Return to SOS</span>
           </button>
         </div>
       </div>
     </div>
   );
 };
+
