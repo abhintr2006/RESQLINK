@@ -26,6 +26,12 @@
 
 Aligned with **UN SDG 3: Good Health and Well-being** and **UN SDG 11: Sustainable Cities and Communities**
 
+<br/>
+
+![RESQLINK Command Center Dashboard](public/dashboard.png)
+
+*Tactical command center dashboard featuring real-time GIS fleet tracking, multi-portal triage, and live emergency telemetry.*
+
 </div>
 
 ---
@@ -122,7 +128,7 @@ Decoded server-side and routed directly into the CAD incident queue with high de
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/srushtiv83-ux/RESQLINK.git
+https://github.com/abhintr2006/RESQLINK.git
 cd RESQLINK
 ```
 
