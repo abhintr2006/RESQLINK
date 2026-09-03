@@ -29,6 +29,7 @@ class SmsResult:
     raw_payload: str
     latency_ms: int
     status: str  # "DELIVERED" | "FAILED" | "SIMULATED"
+    recipient_number: str = ""
 
 
 class SmsAdapter(ABC):
@@ -42,11 +43,13 @@ class SimulatedSmsAdapter(SmsAdapter):
 
     def send(self, alert_id: str, coord: dict[str, Any], category: str, name: str) -> SmsResult:
         payload = _encode_sms(alert_id, coord, category, name)
+        from app.core.config import get_settings
         return SmsResult(
             message_sid=f"SM{uuid.uuid4().hex[:10]}",
             raw_payload=payload,
             latency_ms=random.randint(1200, 2000),
             status="SIMULATED",
+            recipient_number=get_settings().SOS_RECIPIENT_NUMBER,
         )
 
 
@@ -61,8 +64,8 @@ class TwilioSmsAdapter(SmsAdapter):
     def send(self, alert_id: str, coord: dict[str, Any], category: str, name: str) -> SmsResult:
         import time
         payload = _encode_sms(alert_id, coord, category, name)
-        # In production supply a real `to` number from the citizen profile
-        to_number = "+918000000000"
+        from app.core.config import get_settings
+        to_number = get_settings().SOS_RECIPIENT_NUMBER
         t0 = time.monotonic()
         msg = self._client.messages.create(body=payload, from_=self._from, to=to_number)
         latency = round((time.monotonic() - t0) * 1000)
@@ -71,6 +74,7 @@ class TwilioSmsAdapter(SmsAdapter):
             raw_payload=payload,
             latency_ms=latency,
             status="DELIVERED" if msg.status in ("sent", "delivered", "queued") else "FAILED",
+            recipient_number=to_number,
         )
 
 

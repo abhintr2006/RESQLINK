@@ -9,7 +9,7 @@ import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
 import { LoginScreen } from './components/Auth/LoginScreen';
 
 export const MainLayout: React.FC = () => {
-  const { userRole, adminViewTab, authUser, authLoading } = useResqLink();
+  const { userRole, adminViewTab, authUser, authLoading, emergencyLaunch, dismissEmergencyLaunch } = useResqLink();
   const [isDPDPOpen, setIsDPDPOpen] = useState<boolean>(false);
 
   if (authLoading) {
@@ -44,6 +44,20 @@ export const MainLayout: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
       {/* Top Floating Evaluation Simulation Bar (Visible across all roles for evaluation) */}
       <SimulationBar />
+
+      {emergencyLaunch && (
+        <div className="fixed inset-x-0 top-[41px] z-50 mx-auto max-w-3xl px-4 pt-3">
+          <div className="rounded-2xl border border-rose-400/50 bg-rose-950/95 px-4 py-3 shadow-2xl shadow-rose-950/50 backdrop-blur-xl" role="alert">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wider text-rose-100">Emergency workflow launched</p>
+                <p className="text-xs text-rose-200/80">{emergencyLaunch.patient.name} • AI voice call and hospital locator queued</p>
+              </div>
+              <button onClick={dismissEmergencyLaunch} className="rounded-xl border border-rose-300/30 px-3 py-1.5 text-xs font-bold text-rose-100 hover:bg-rose-500/20">Acknowledge</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main App Navigation with Role Switcher */}
       <Navigation onOpenDPDPModal={() => setIsDPDPOpen(true)} />
