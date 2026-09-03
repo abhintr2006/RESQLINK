@@ -31,6 +31,11 @@ interface TokenResponse {
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace(/\/$/, '');
+
+export const realtimeUrl = (token: string) => {
+  const base = API_BASE_URL.replace(/^http/, 'ws');
+  return `${base}/ws?token=${encodeURIComponent(token)}`;
+};
 const TOKEN_STORAGE_KEY = 'resqlink_access_token';
 
 export const authStorage = {
