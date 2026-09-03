@@ -136,6 +136,23 @@ export const CitizenSOSView: React.FC = () => {
       {/* ACTIVE EMERGENCY VIEW vs IDLE SOS TRIGGER */}
       {activeAlert ? (
         <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Active Emergency Top Control Bar */}
+          <div className="bg-gradient-to-r from-rose-950/90 via-slate-950 to-slate-950 border border-rose-700/80 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
+              <div>
+                <div className="text-xs font-black text-white">Active Emergency #{activeAlert.shortCode} • {activeAlert.category.replace('_', ' ')}</div>
+                <div className="text-[11px] text-rose-300">Paramedic unit dispatched and en route</div>
+              </div>
+            </div>
+            <button
+              onClick={() => cancelSOS(activeAlert.id)}
+              className="px-3.5 py-1.5 bg-rose-900 hover:bg-rose-800 text-rose-100 hover:text-white rounded-xl text-xs font-black border border-rose-600 transition cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
+            >
+              <span>✕ Return to SOS Ready Screen</span>
+            </button>
+          </div>
+
           {/* Location Lock Feedback */}
           {activeAlert.locationLockState && (
             <LocationLockIndicator
