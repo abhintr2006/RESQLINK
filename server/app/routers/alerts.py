@@ -167,7 +167,7 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     sms_payload: str | None = None
     if body.networkTier == "2G_SMS_FALLBACK":
         adapter = get_sms_adapter()
-        sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName)
+        sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName, body.citizenPhone)
         sms_payload = sms_result.raw_payload
 
     alert = Alert(
