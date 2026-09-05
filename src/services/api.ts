@@ -30,7 +30,14 @@ interface TokenResponse {
   user: AuthUser;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace(/\/$/, '');
+function getApiBaseUrl(): string {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+  if (!envUrl) return 'http://localhost:8000/api';
+  const clean = envUrl.replace(/\/+$/, '');
+  return clean.endsWith('/api') ? clean : `${clean}/api`;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 const TOKEN_STORAGE_KEY = 'resqlink_access_token';
 
 export const authStorage = {
