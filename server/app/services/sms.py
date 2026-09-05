@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import random
+import time
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def _encode_sms(alert_id: str, coord: dict[str, Any], category: str, name: str = "CITIZEN") -> str:
@@ -60,9 +65,6 @@ class TwilioSmsAdapter(SmsAdapter):
         self._to = to_number
 
     def send(self, alert_id: str, coord: dict[str, Any], category: str, name: str, citizen_phone: str = "") -> SmsResult:
-        import time
-        from app.core.logging import get_logger
-        logger = get_logger(__name__)
         payload = _encode_sms(alert_id, coord, category, name)
         target_number = citizen_phone if (citizen_phone and citizen_phone.startswith("+")) else self._to
         t0 = time.monotonic()
