@@ -35,6 +35,16 @@ Aligned with **UN SDG 3: Good Health and Well-being** and **UN SDG 11: Sustainab
 
 *Tactical command center dashboard featuring real-time GIS fleet tracking, multi-portal triage, and live emergency telemetry.*
 
+<br/>
+
+![RESQLINK Patient Portal and Medical ID](public/patient.png)
+
+*Ultra-accessible citizen SOS interface with ABDM/ABHA medical profile integration, emergency contacts, and dual-reading GPS lock.*
+
+<br/>
+
+🌐 **Live Deployment**: [https://resqlink-nine.vercel.app](https://resqlink-nine.vercel.app)
+
 </div>
 
 ---
