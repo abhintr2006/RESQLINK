@@ -2,7 +2,8 @@
 
 <div align="center">
 
-![CI](https://github.com/srushtiv83-ux/RESQLINK/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/abhintr2006/RESQLINK/actions/workflows/ci.yml/badge.svg)
+![CodeQL](https://github.com/abhintr2006/RESQLINK/actions/workflows/codeql.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
@@ -10,8 +11,9 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite_6-646CFF?logo=vite&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy_2-D71F00?logo=sqlalchemy&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-4169E1?logo=postgresql&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 ![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-8A2BE2?logo=socketdotio&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-Map-199900?logo=leaflet&logoColor=white)
 ![Twilio](https://img.shields.io/badge/Twilio-SMS_Fallback-F22F46?logo=twilio&logoColor=white)
