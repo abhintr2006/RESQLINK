@@ -80,7 +80,7 @@ def create_app() -> FastAPI:
 
     # ── Rate limiting ─────────────────────────────────────────────────────────
     application.state.limiter = limiter
-    application.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    application.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler) # pyright: ignore[reportArgumentType]
 
     # ── Routers ───────────────────────────────────────────────────────────────
     application.include_router(auth.router)
@@ -101,6 +101,31 @@ def create_app() -> FastAPI:
             "version": settings.APP_VERSION,
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         }
+
+    # ── Static / Frontend SPA Mounting ───────────────────────────────────────
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "..", "..", "dist"),
+        os.path.join(os.getcwd(), "dist"),
+        "/app/dist",
+    ]
+    dist_dir = next((os.path.abspath(c) for c in candidates if os.path.isdir(c)), None)
+
+    if dist_dir and os.path.isfile(os.path.join(dist_dir, "index.html")):
+        from fastapi.responses import FileResponse
+        from fastapi.staticfiles import StaticFiles
+
+        assets_dir = os.path.join(dist_dir, "assets")
+        if os.path.isdir(assets_dir):
+            application.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+        @application.get("/{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str):
+            if full_path.startswith("api/") or full_path == "api":
+                return None
+            target = os.path.join(dist_dir, full_path)
+            if full_path and os.path.isfile(target):
+                return FileResponse(target)
+            return FileResponse(os.path.join(dist_dir, "index.html"))
 
     return application
 

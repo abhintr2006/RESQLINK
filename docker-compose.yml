@@ -1,0 +1,18 @@
+services:
+  resqlink:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/abhintr2006/resqlink:latest
+    container_name: resqlink-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./resqlink.db}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-resqlink-production-secret-CHANGE-ME}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER:-}
+      - TWILIO_TO_NUMBER=${TWILIO_TO_NUMBER:-+918000000000}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}

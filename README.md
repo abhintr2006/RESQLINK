@@ -17,6 +17,7 @@
 ![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-8A2BE2?logo=socketdotio&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-Map-199900?logo=leaflet&logoColor=white)
 ![Twilio](https://img.shields.io/badge/Twilio-SMS_Fallback-F22F46?logo=twilio&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Container_Package-2496ED?logo=docker&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
@@ -163,6 +164,18 @@ pnpm install
 pnpm run dev
 ```
 - **App URL**: `http://localhost:3000`
+
+### 4. Or Run with Docker (All-in-One Container)
+Run the entire platform (Frontend UI + FastAPI Backend + Real-time WebSockets) in one single container:
+```bash
+# Pull and run directly from GitHub Packages (GHCR)
+docker run -d -p 8000:8000 --name resqlink ghcr.io/abhintr2006/resqlink:latest
+
+# Or run locally via Docker Compose:
+docker compose up --build
+```
+- **Unified App & Command Center**: `http://localhost:8000`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
 
 ---
 
