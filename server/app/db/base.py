@@ -52,7 +52,13 @@ def _normalize_database_url(raw_url: str) -> tuple[str, dict, dict]:
 
     host = (parsed.hostname or "").lower()
     # Supabase hosts always require SSL; disable statement cache for transaction pooler (port 6543)
-    if "supabase.co" in host or "supabase.com" in host or is_ssl:
+    is_supabase = (
+        host == "supabase.co"
+        or host.endswith(".supabase.co")
+        or host == "supabase.com"
+        or host.endswith(".supabase.com")
+    )
+    if is_supabase or is_ssl:
         connect_args["ssl"] = "require"
         connect_args["statement_cache_size"] = 0
         connect_args["prepared_statement_cache_size"] = 0
