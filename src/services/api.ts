@@ -32,9 +32,14 @@ interface TokenResponse {
 
 function getApiBaseUrl(): string {
   const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
-  if (!envUrl) return 'http://localhost:8000/api';
-  const clean = envUrl.replace(/\/+$/, '');
-  return clean.endsWith('/api') ? clean : `${clean}/api`;
+  if (envUrl) {
+    const clean = envUrl.replace(/\/+$/, '');
+    return clean.endsWith('/api') ? clean : `${clean}/api`;
+  }
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:8000/api';
 }
 
 const API_BASE_URL = getApiBaseUrl();
