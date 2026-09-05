@@ -66,11 +66,14 @@ def create_app() -> FastAPI:
     )
 
     # ── Middleware ────────────────────────────────────────────────────────────
+    cors_origins = settings.cors_origins_list
+    allow_all = "*" in cors_origins
     application.add_middleware(RequestIDMiddleware)
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins_list,
-        allow_credentials=True,
+        allow_origins=["*"] if allow_all else cors_origins,
+        allow_credentials=not allow_all,
+        allow_origin_regex=r"^https:\/\/.*\.vercel\.app$" if not allow_all else None,
         allow_methods=["*"],
         allow_headers=["*"],
     )
