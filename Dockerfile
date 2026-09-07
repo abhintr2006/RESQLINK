@@ -2,8 +2,8 @@
 FROM node:22-alpine AS frontend-builder
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin the package-manager version so builds are reproducible.
+RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
 
 # Cache dependencies
 COPY package.json pnpm-lock.yaml ./
@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python requirements
 COPY server/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 
 # Copy backend code
 COPY server/ ./server/
@@ -38,6 +38,13 @@ COPY --from=frontend-builder /app/dist ./server/dist
 ENV PORT=8000 \
     HOST=0.0.0.0 \
     PYTHONUNBUFFERED=1
+
+# Run as an unprivileged user. The data directory is writable for the
+# default SQLite database used by local/container demos.
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /app/server/data \
+    && chown -R appuser:appuser /app/server
+USER appuser
 
 EXPOSE 8000
 
