@@ -74,8 +74,8 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans relative overflow-hidden selection:bg-rose-500 selection:text-white">
       {/* Ambient background glows */}
-      <div className="absolute top-10 left-1/4 -translate-x-1/2 w-[500px] h-[500px] bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-10 left-1/4 -translate-x-1/2 w-125 h-125 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-125 h-125 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header */}
       <header className="relative z-10 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
@@ -221,7 +221,7 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
 
               <button
                 onClick={() => handleLaunchPersona('patient')}
-                className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/30 cursor-pointer"
+                className="mt-6 w-full py-3 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/30 cursor-pointer"
               >
                 <span>ENTER CITIZEN LIFELINE</span>
                 <ArrowRight className="size-4" />
@@ -275,7 +275,7 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
 
               <button
                 onClick={() => handleLaunchPersona('admin')}
-                className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-safety-orange to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-orange-600/30 cursor-pointer"
+                className="mt-6 w-full py-3 rounded-xl bg-linear-to-r from-safety-orange to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-orange-600/30 cursor-pointer"
               >
                 <span>LAUNCH COMMAND CAD</span>
                 <ArrowRight className="size-4" />
@@ -325,7 +325,7 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
 
               <button
                 onClick={() => handleLaunchPersona('hospital')}
-                className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/30 cursor-pointer"
+                className="mt-6 w-full py-3 rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/30 cursor-pointer"
               >
                 <span>ACCESS HOSPITAL TERMINAL</span>
                 <ArrowRight className="size-4" />
@@ -398,7 +398,7 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-mono font-bold shadow-lg shadow-rose-600/30 transition cursor-pointer disabled:opacity-60"
+                  className="w-full py-3 rounded-xl bg-linear-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-mono font-bold shadow-lg shadow-rose-600/30 transition cursor-pointer disabled:opacity-60"
                 >
                   {isSubmitting ? 'AUTHENTICATING...' : 'SIGN IN SECURE SESSION'}
                 </button>
