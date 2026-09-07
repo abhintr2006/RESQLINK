@@ -6,6 +6,7 @@ import { EEGDashboard } from './components/EEGDashboard/EEGDashboard';
 import { AboutPaperView } from './components/AboutPaper/AboutPaperView';
 import { HomePageView } from './components/Home/HomePageView';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
+import { AuthGatewayScreen } from './components/Auth/AuthGatewayScreen';
 import { LanguageCode, UserRole } from './types';
 import {
   Activity,
@@ -25,6 +26,7 @@ import {
   Home,
   Layers3,
   LifeBuoy,
+  LogOut,
   MapPin,
   Maximize2,
   Menu,
@@ -156,6 +158,8 @@ export const MainLayout: React.FC = () => {
     triggerSOS,
     language,
     setLanguage,
+    isGatewayActive,
+    exitToGateway,
   } = useResqLink();
 
   const [activeNav, setActiveNav] = useState('Live operations');
@@ -178,6 +182,16 @@ export const MainLayout: React.FC = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (userRole === 'hospital') {
+      setActiveNav('Hospital ER');
+    } else if (userRole === 'patient') {
+      setActiveNav('Citizen Lifeline');
+    } else {
+      setActiveNav('Live operations');
+    }
+  }, [userRole]);
 
   const incidents = useMemo(() => {
     if (activeAlert) {
@@ -247,6 +261,15 @@ export const MainLayout: React.FC = () => {
   };
 
   const currentProfile = roleProfiles[userRole] || roleProfiles.admin;
+
+  if (isGatewayActive) {
+    return (
+      <>
+        <AuthGatewayScreen onOpenDPDPModal={() => setIsDPDPOpen(true)} />
+        <DPDPNoticeModal isOpen={isDPDPOpen} onClose={() => setIsDPDPOpen(false)} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -367,6 +390,18 @@ export const MainLayout: React.FC = () => {
                       <div className="text-[10px] text-sidebar-muted">{p.sub}</div>
                     </button>
                   ))}
+                  <div className="pt-1 mt-1 border-t border-sidebar-border">
+                    <button
+                      onClick={() => {
+                        setIsRoleDropdownOpen(false);
+                        exitToGateway();
+                      }}
+                      className="w-full text-left px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10 transition cursor-pointer flex items-center gap-2 font-medium"
+                    >
+                      <LogOut className="size-3.5" />
+                      <span>Lock / Exit to Gateway</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -464,6 +499,16 @@ export const MainLayout: React.FC = () => {
               >
                 <Bell className="size-[18px]" />
                 <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-safety-orange" />
+              </button>
+
+              {/* Lock Station / Exit to Gateway */}
+              <button
+                onClick={exitToGateway}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                title="Lock Terminal & Return to Gateway"
+              >
+                <LogOut className="size-3.5" />
+                <span className="hidden xl:inline">Lock Station</span>
               </button>
             </div>
           </header>
