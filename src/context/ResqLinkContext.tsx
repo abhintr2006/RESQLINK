@@ -45,6 +45,11 @@ interface ResqLinkContextType {
   setAdminViewTab: (tab: 'admin' | 'hospital' | 'patient') => void;
   selectedHospitalId: string;
   setSelectedHospitalId: (id: string) => void;
+  activeAppTab: 'dashboard' | 'homepage';
+  setActiveAppTab: (tab: 'dashboard' | 'homepage') => void;
+  isGatewayActive: boolean;
+  enterGatewayWithRole: (role: UserRole) => void;
+  exitToGateway: () => void;
 
   activeAlert: EmergencyAlert | null;
   alertHistory: EmergencyAlert[];
@@ -101,12 +106,46 @@ const initialStatuses = (): Record<string, HospitalEmergencyStatus> => {
   return statuses;
 };
 
+const DEFAULT_AUTH_USERS: Record<UserRole, AuthUser> = {
+  admin: { username: 'admin', role: 'admin', displayName: 'Admin Dispatcher' },
+  hospital: { username: 'hospital', role: 'hospital', displayName: 'ER Medical Staff', hospitalId: 'HOSP-01' },
+  patient: { username: 'patient', role: 'patient', displayName: 'Citizen Lifeline' },
+};
+
 export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [userRole, setUserRole] = useState<UserRole>('admin');
+  const [authUser, setAuthUser] = useState<AuthUser | null>(DEFAULT_AUTH_USERS.admin);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [userRole, setUserRoleState] = useState<UserRole>('admin');
   const [adminViewTab, setAdminViewTab] = useState<'admin' | 'hospital' | 'patient'>('admin');
   const [selectedHospitalId, setSelectedHospitalId] = useState('HOSP-01');
+  const [activeAppTab, setActiveAppTab] = useState<'dashboard' | 'homepage'>('dashboard');
+  const [isGatewayActive, setIsGatewayActive] = useState<boolean>(true);
+
+  const enterGatewayWithRole = useCallback((role: UserRole) => {
+    setUserRoleState(role);
+    setAuthUser(DEFAULT_AUTH_USERS[role]);
+    if (role === 'admin') {
+      setAdminViewTab('admin');
+    } else if (role === 'hospital') {
+      setAdminViewTab('hospital');
+      setSelectedHospitalId('HOSP-01');
+    } else {
+      setAdminViewTab('patient');
+    }
+    setIsGatewayActive(false);
+  }, []);
+
+  const exitToGateway = useCallback(() => {
+    setIsGatewayActive(true);
+  }, []);
+
+  const setUserRole = useCallback((role: UserRole) => {
+    setUserRoleState(role);
+    setAuthUser(DEFAULT_AUTH_USERS[role]);
+    if (role === 'admin') {
+      setAdminViewTab('admin');
+    }
+  }, []);
 
   const [activeAlert, setActiveAlert] = useState<EmergencyAlert | null>(null);
   const [alertHistory, setAlertHistory] = useState<EmergencyAlert[]>([]);
@@ -157,18 +196,21 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     if (!authStorage.hasToken()) {
+      setAuthUser(DEFAULT_AUTH_USERS[userRole]);
       setAuthLoading(false);
+      void hydrate();
       return;
     }
 
     void api.me().then((user) => {
       setAuthUser(user);
+      setUserRoleState(user.role);
       return hydrate();
     }).catch(() => {
       authStorage.clear();
-      setAuthUser(null);
+      setAuthUser(DEFAULT_AUTH_USERS[userRole]);
     }).finally(() => setAuthLoading(false));
-  }, [hydrate]);
+  }, [hydrate, userRole]);
 
   useEffect(() => {
     if (!currentLocation) {
@@ -188,15 +230,21 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setUserRole(response.user.role);
     setAdminViewTab(response.user.role === 'admin' ? 'admin' : response.user.role);
     setSelectedHospitalId(response.user.hospitalId || 'HOSP-01');
+    setIsGatewayActive(false);
     await hydrate();
   };
 
   const logout = async () => {
-    await api.logout();
-    setAuthUser(null);
-    setActiveAlert(null);
-    setAlertHistory([]);
-    setAuditLogs([]);
+    try {
+      await api.logout();
+    } catch {
+      authStorage.clear();
+    }
+    // Switch to default admin session and return to gateway
+    setAuthUser(DEFAULT_AUTH_USERS.admin);
+    setUserRoleState('admin');
+    setAdminViewTab('admin');
+    setIsGatewayActive(true);
   };
 
   const triggerSOS = async (category: EmergencyCategory = 'CARDIAC') => {
@@ -365,6 +413,11 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setAdminViewTab,
       selectedHospitalId,
       setSelectedHospitalId,
+      activeAppTab,
+      setActiveAppTab,
+      isGatewayActive,
+      enterGatewayWithRole,
+      exitToGateway,
       activeAlert,
       alertHistory,
       currentLocation,

@@ -179,13 +179,29 @@ pnpm run dev
 Run the entire platform (Frontend UI + FastAPI Backend + Real-time WebSockets) in one single container:
 ```bash
 # Pull and run directly from GitHub Packages (GHCR)
-docker run -d -p 8000:8000 --name resqlink ghcr.io/abhintr2006/resqlink:latest
+docker run -d -p 8000:8000 \
+  -e JWT_SECRET_KEY="$(openssl rand -hex 32)" \
+  --name resqlink ghcr.io/abhintr2006/resqlink:latest
 
 # Or run locally via Docker Compose:
+export JWT_SECRET_KEY="$(openssl rand -hex 32)"
 docker compose up --build
 ```
 - **Unified App & Command Center**: `http://localhost:8000`
 - **Interactive Swagger Docs**: `http://localhost:8000/docs`
+
+The container runs as a non-root user and persists the SQLite database in the
+`resqlink-data` volume. For production, set `DATABASE_URL` to PostgreSQL and
+provide a unique secret through the deployment platform's secret manager.
+
+### 5. Vercel Frontend Deployment
+Vercel hosts the React frontend only; it does not run the FastAPI API or the
+WebSocket endpoint. Set `VITE_API_BASE_URL` in the Vercel project to the public
+URL of a separately deployed RESQLINK backend, for example
+`https://api.example.com/api`, then redeploy. If this variable is omitted, the
+frontend uses the Vercel origin (`/api`), which is only correct when a reverse
+proxy routes that path to the backend. The Docker deployment is the simplest
+way to run the frontend and backend together.
 
 ---
 
