@@ -13,6 +13,7 @@ lerna-debug.log*
 # Dependencies
 # ============================================================
 node_modules/
+.pnpm-store/
 
 # ============================================================
 # Frontend - Vite / React / TypeScript
