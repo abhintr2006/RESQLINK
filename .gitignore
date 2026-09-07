@@ -99,6 +99,8 @@ ehthumbs.db
 .agents/
 .claude/
 skills-lock.json
+.gemini/
+AGENTS.md
 
 # ============================================================
 # Testing / Coverage
