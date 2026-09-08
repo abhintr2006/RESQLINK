@@ -96,13 +96,13 @@ export const CitizenSOSView: React.FC = () => {
 
   return (
     <div
-      className={`max-w-3xl mx-auto space-y-5 transition-colors duration-200 ${
+      className={`citizen-surface max-w-3xl mx-auto space-y-5 rounded-3xl p-3 sm:p-5 transition-colors duration-200 ${
         assistiveHighContrast ? 'bg-black text-yellow-300' : ''
       }`}
     >
       {/* Top Telemetry & Location Bar */}
       <div className="double-bezel shadow-xl">
-        <div className="double-bezel-inner p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-950/90">
+        <div className="double-bezel-inner p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-rose-950/80 border border-rose-700/60 flex items-center justify-center text-rose-400 shadow-md">
               <MapPin className="w-4.5 h-4.5" />
@@ -116,7 +116,7 @@ export const CitizenSOSView: React.FC = () => {
                   {selectedPreset.isPeripheral ? 'PERIPHERAL WARD' : 'CORE WARD'}
                 </span>
               </div>
-              <div className="text-sm font-bold text-white font-mono tracking-tight">
+              <div className="text-sm font-bold text-slate-900 font-mono tracking-tight">
                 {selectedPreset.name} <span className="text-slate-500 text-xs font-normal">({selectedPreset.ward})</span>
               </div>
             </div>
@@ -174,14 +174,14 @@ export const CitizenSOSView: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {/* Emergency Category Selector */}
-          <div className="space-y-2.5">
+          <div className="care-panel space-y-2.5 rounded-2xl border p-4">
             <div className="flex items-center justify-between px-1">
-              <label className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+              <label className="text-xs font-mono font-bold text-slate-700 uppercase tracking-widest flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
                 <span>1. SELECT EMERGENCY CLASSIFICATION:</span>
               </label>
-              <span className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                AI TRIAGE ENGINE
+              <span className="text-[10px] font-mono text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                OPTIONAL DETAIL
               </span>
             </div>
 
@@ -195,8 +195,8 @@ export const CitizenSOSView: React.FC = () => {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`p-3 rounded-2xl border text-left transition-all duration-200 relative overflow-hidden flex flex-col justify-between min-h-[90px] cursor-pointer active:scale-[0.98] ${
                       isSelected
-                        ? 'bg-slate-900 border-rose-500 shadow-lg shadow-rose-500/20 ring-1 ring-rose-500'
-                        : 'bg-slate-900/70 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/60'
+                        ? 'bg-rose-50 border-rose-500 shadow-md ring-1 ring-rose-500'
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full mb-1">
@@ -204,19 +204,19 @@ export const CitizenSOSView: React.FC = () => {
                         className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
                           isSelected
                             ? 'bg-rose-600 text-white shadow-md'
-                            : 'bg-slate-800 text-slate-400'
+                            : 'bg-slate-100 text-slate-500'
                         }`}
                       >
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-                        isSelected ? 'bg-rose-950/80 border-rose-600 text-rose-300' : 'bg-slate-800 border-slate-700 text-slate-400'
+                        isSelected ? 'bg-rose-100 border-rose-600 text-rose-700' : 'bg-slate-100 border-slate-200 text-slate-500'
                       }`}>
                         {cat.badge}
                       </span>
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-white leading-tight">
+                      <div className="font-bold text-xs text-slate-900 leading-tight">
                         {cat.label[language] || cat.label.en}
                       </div>
                     </div>
@@ -238,7 +238,7 @@ export const CitizenSOSView: React.FC = () => {
               <button
                 onClick={handleSOSTrigger}
                 disabled={isSimulating}
-                className={`relative w-48 h-48 rounded-full bg-gradient-to-tr from-rose-700 via-rose-600 to-red-500 text-white font-black shadow-2xl shadow-rose-600/60 border-4 border-white/30 active:scale-95 transition-all duration-200 transform flex flex-col items-center justify-center gap-1 cursor-pointer group hover:scale-105 hover:from-rose-600 hover:to-red-400 ${
+                className={`relative w-48 h-48 rounded-full bg-rose-600 text-white font-black shadow-xl shadow-rose-600/35 border-4 border-white active:scale-95 transition-all duration-200 transform flex flex-col items-center justify-center gap-1 cursor-pointer group hover:bg-rose-700 ${
                   isSimulating ? 'opacity-70 animate-pulse' : ''
                 }`}
                 aria-label="One-tap SOS Emergency Button"
@@ -250,28 +250,28 @@ export const CitizenSOSView: React.FC = () => {
                   {sosButtonTextByLang[language] || sosButtonTextByLang.en}
                 </span>
                 <span className="text-[8px] text-white/90 font-mono tracking-widest font-bold mt-0.5 bg-black/30 px-2 py-0.5 rounded-full border border-white/20">
-                  INSTANT CAD ALLOCATION
+                  GET HELP NOW
                 </span>
               </button>
             </div>
 
-            <p className="text-xs text-slate-400 max-w-lg mt-6 text-center leading-relaxed font-mono">
-              Pressing SOS locks GPS coordinates, verifies signal triangulation, allocates nearest ALS/BLS fleet, and alerts Bengaluru hospital trauma units under DPDP Act 2023.
+            <p className="text-xs text-slate-600 max-w-lg mt-6 text-center leading-relaxed">
+              Request help first. RESQLINK will share your location with the response team. You can add more detail if you are able.
             </p>
           </div>
 
           {/* Quick Voice & Accessibility Help Banner */}
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs text-slate-300 shadow-sm">
+          <div className="care-panel p-3.5 rounded-2xl border flex items-center justify-between text-xs text-slate-700 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-indigo-950 border border-indigo-800 text-indigo-400 flex items-center justify-center shrink-0">
                 <Volume2 className="w-4 h-4" />
               </div>
               <div>
-                <strong className="text-white block font-bold text-xs">
-                  Multilingual AI Audio Guidance
+                  <strong className="text-slate-900 block font-bold text-xs">
+                  Voice and accessibility support
                 </strong>
-                <span className="text-[11px] text-slate-400">
-                  Voice guidance in English, ಕನ್ನಡ, and हिन्दी triggers automatically during dispatch.
+                  <span className="text-[11px] text-slate-600">
+                  Guidance is available in English, ಕನ್ನಡ, and हिन्दी during an active response.
                 </span>
               </div>
             </div>
