@@ -38,28 +38,25 @@ export const HomePageView: React.FC = () => {
   const totalBeds = hospitals.reduce((acc, h) => acc + h.icuBedsAvailable, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    <div className="public-overview max-w-7xl mx-auto px-4 py-8 space-y-12">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 p-8 md:p-12 shadow-2xl">
+      <section className="public-hero relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 md:p-12 shadow-sm">
         {/* Glow gradients */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-100/70 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-sky-100/70 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-600/40 text-[11px] font-mono font-bold text-rose-300 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-600/40 text-[11px] font-mono font-bold text-amber-300 shadow-sm">
             <span className="size-2 rounded-full bg-rose-400 animate-pulse" />
-            <span>BENGALURU URBAN EMERGENCY RESPONSE NETWORK • KSSEM</span>
+            <span>DEMO ENVIRONMENT • BENGALURU RESPONSE NETWORK • KSSEM</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Instant Emergency Coordination,{' '}
-            <span className="bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
-              Powered by Autonomous AI
-            </span>
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+            One response network for the moment help is needed.
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
-            RESQLINK synchronizes citizens in distress, emergency medical dispatchers, and trauma bay hospitals across Bengaluru with sub-second latency, multi-tier failover (5G to 2G Twilio SMS), and India DPDP Act 2023 compliance.
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl font-normal">
+            RESQLINK connects citizens, dispatch teams, ambulances and trauma centres in one workflow. This interactive overview uses simulated Bengaluru data for demonstration.
           </p>
 
           {/* Quick Launch Role Pill Buttons */}
@@ -95,7 +92,7 @@ export const HomePageView: React.FC = () => {
           <div className="flex flex-wrap items-center gap-6 pt-4 text-xs text-slate-400 font-mono">
             <span className="flex items-center gap-1.5 text-status-green">
               <span className="size-2 rounded-full bg-status-green animate-pulse" />
-              All CAD Systems Operational
+              Demo network status
             </span>
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="size-4 text-emerald-400" />
@@ -109,19 +106,27 @@ export const HomePageView: React.FC = () => {
         </div>
       </section>
 
-      {/* Real-time Telemetry Metrics Strip */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4" aria-label="System Metrics">
+      {/* Demo snapshot metrics */}
+      <section aria-labelledby="demo-snapshot-heading">
+        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">DEMO SNAPSHOT</div>
+            <h2 id="demo-snapshot-heading" className="mt-1 text-xl font-bold text-slate-950">What the network can show</h2>
+          </div>
+          <p className="text-xs text-slate-500">Values below are simulated and may not represent live operations.</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg">
           <div className="flex items-center justify-between text-safety-orange">
             <div className="size-9 rounded-xl bg-safety-orange/10 flex items-center justify-center">
               <ShieldAlert className="size-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">STATUS</span>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">DEMO STATUS</span>
           </div>
           <div className="mt-3 text-2xl font-black font-mono text-white">
             {activeAlert ? '1 ACTIVE' : '0 ACTIVE'}
           </div>
-          <div className="mt-1 text-xs font-medium text-slate-400">Live emergency queue</div>
+          <div className="mt-1 text-xs font-medium text-slate-500">Simulated emergency queue</div>
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg">
@@ -129,12 +134,12 @@ export const HomePageView: React.FC = () => {
             <div className="size-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
               <Ambulance className="size-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">FLEET</span>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">DEMO FLEET</span>
           </div>
           <div className="mt-3 text-2xl font-black font-mono text-white">
             {availableUnits} / {responders.length}
           </div>
-          <div className="mt-1 text-xs font-medium text-slate-400">Available ALS/BLS fleet</div>
+          <div className="mt-1 text-xs font-medium text-slate-500">Available ALS/BLS units in demo</div>
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg">
@@ -142,12 +147,12 @@ export const HomePageView: React.FC = () => {
             <div className="size-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
               <Building2 className="size-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">CAPACITY</span>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">DEMO CAPACITY</span>
           </div>
           <div className="mt-3 text-2xl font-black font-mono text-white">
             {totalBeds} BEDS
           </div>
-          <div className="mt-1 text-xs font-medium text-slate-400">Across {hospitals.length} trauma centers</div>
+          <div className="mt-1 text-xs font-medium text-slate-500">Across simulated trauma centres</div>
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg">
@@ -155,12 +160,13 @@ export const HomePageView: React.FC = () => {
             <div className="size-9 rounded-xl bg-amber-500/10 flex items-center justify-center">
               <Gauge className="size-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">RESPONSE</span>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">DEMO RESPONSE</span>
           </div>
           <div className="mt-3 text-2xl font-black font-mono text-white">
             &lt; 08:45
           </div>
-          <div className="mt-1 text-xs font-medium text-slate-400">Avg Bengaluru arrival time</div>
+          <div className="mt-1 text-xs font-medium text-slate-500">Illustrative Bengaluru arrival time</div>
+        </div>
         </div>
       </section>
 
@@ -171,11 +177,11 @@ export const HomePageView: React.FC = () => {
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400">
               TRIPARTITE ARCHITECTURE
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-950 tracking-tight mt-1">
               Select Your Operational Portal
             </h2>
           </div>
-          <p className="text-xs text-slate-400 max-w-md">
+          <p className="text-xs text-slate-600 max-w-md">
             RESQLINK unifies the emergency response lifecycle. Each portal is tailored with specialized controls, real-time sync, and end-to-end audit logging.
           </p>
         </div>
