@@ -262,6 +262,18 @@ export const MainLayout: React.FC = () => {
 
   const currentProfile = roleProfiles[userRole] || roleProfiles.admin;
 
+  const visibleNavItems = navItems.filter((item) => {
+    if (userRole === 'admin') return true;
+    if (userRole === 'hospital') return ['Hospital ER', 'Platform Overview'].includes(item.label);
+    return ['Citizen Lifeline', 'Platform Overview'].includes(item.label);
+  });
+
+  const workspaceLabel = userRole === 'admin'
+    ? 'Command workspace'
+    : userRole === 'hospital'
+    ? 'Clinical workspace'
+    : 'Citizen workspace';
+
   if (isGatewayActive) {
     return (
       <>
@@ -273,10 +285,10 @@ export const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
-      <div className="flex min-h-screen flex-col lg:flex-row">
+      <div className="product-shell flex min-h-screen flex-col lg:flex-row">
         {/* Left Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 flex w-[min(88vw,320px)] -translate-x-full flex-col bg-sidebar text-sidebar-foreground shadow-2xl transition-transform lg:static lg:w-[246px] lg:translate-x-0 lg:shadow-none ${
+          className={`product-shell-sidebar fixed inset-y-0 left-0 z-40 flex w-[min(88vw,320px)] -translate-x-full flex-col shadow-2xl transition-transform lg:static lg:w-[246px] lg:translate-x-0 lg:shadow-none ${
             isSidebarOpen ? 'translate-x-0' : ''
           }`}
         >
@@ -310,10 +322,10 @@ export const MainLayout: React.FC = () => {
           {/* Navigation Items */}
           <div className="px-3 pt-6 flex-1 overflow-y-auto">
             <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-muted">
-              Command center
+              {workspaceLabel}
             </p>
             <nav className="space-y-1" aria-label="Main navigation">
-              {navItems.map((item) => {
+              {visibleNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeNav === item.label;
                 return (
@@ -442,6 +454,9 @@ export const MainLayout: React.FC = () => {
                 <h1 className="truncate font-display text-lg font-bold sm:mt-1 sm:text-[23px]">
                   {activeNav}
                 </h1>
+                <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">
+                  {workspaceLabel} <span className="mx-1 text-border">·</span> Demo environment
+                </span>
               </div>
             </div>
 
@@ -454,15 +469,17 @@ export const MainLayout: React.FC = () => {
                 <span>IST</span>
               </div>
 
-              {/* Inject SOS trigger for testing */}
-              <button
-                onClick={handleInjectEmergency}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
-                title="Simulate incoming emergency incident"
-              >
-                <Zap className="size-3.5 text-safety-orange" />
-                <span>Inject SOS</span>
-              </button>
+              {/* Simulation controls are dispatcher-only. */}
+              {userRole === 'admin' && (
+                <button
+                  onClick={handleInjectEmergency}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                  title="Simulate incoming emergency incident"
+                >
+                  <Zap className="size-3.5 text-safety-orange" />
+                  <span className="hidden sm:inline">New intake</span>
+                </button>
+              )}
 
               {/* Multilingual Selector */}
               <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-xs font-mono font-bold">
@@ -525,360 +542,38 @@ export const MainLayout: React.FC = () => {
               <AboutPaperView />
             ) : activeNav === 'Platform Overview' ? (
               <HomePageView />
+            ) : activeNav === 'Incident queue' ? (
+              <IncidentQueueWorkspace
+                incidents={filteredIncidents}
+                totalIncidents={incidents.length}
+                selectedId={selectedId}
+                selectedIncident={selectedIncident}
+                activeFilter={activeFilter}
+                dispatchedUnits={dispatchedUnits}
+                onSelect={setSelectedId}
+                onFilter={handleFilter}
+                dispatched={Boolean(dispatchedUnits[selectedIncident.id])}
+                onDispatch={handleDispatch}
+              />
             ) : (
-              /* Premier Command Center View (Live operations / Incident queue / Fleet control) */
-              <div className="space-y-4 sm:space-y-5">
-                {/* Live notice bar + Search / Controls */}
-                <div className="flex flex-col justify-between gap-3 xl:flex-row xl:items-center">
-                  <div>
-                    <div className="flex items-center gap-2 text-[11px] font-semibold text-status-green">
-                      <span className="size-2 rounded-full bg-status-green shadow-[0_0_0_4px_var(--color-status-green-soft)] animate-pulse" />
-                      {notice}
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Bengaluru Metropolitan Sector <span className="mx-2 text-border">•</span> Shift A
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-                    <div className="relative hidden min-w-[205px] md:block">
-                      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <input
-                        className="h-9 w-full rounded-md border border-input bg-card pl-9 pr-3 text-xs outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20"
-                        placeholder="Search incident ID or location"
-                        aria-label="Search incidents"
-                      />
-                    </div>
-                    <button
-                      className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-md border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
-                      onClick={() => setNotice('Filters refreshed · All triage queues up to date')}
-                    >
-                      <SlidersHorizontal className="size-4" />
-                      <span className="hidden sm:inline">Filters</span>
-                    </button>
-                    <button
-                      className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-md border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
-                      onClick={handleInjectEmergency}
-                    >
-                      <Zap className="size-4 text-safety-orange" />
-                      <span className="hidden sm:inline">New intake</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4 Operations Metric Cards */}
-                <section className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4" aria-label="Operations metrics">
-                  <MetricCard
-                    icon={Siren}
-                    label="Active incidents"
-                    value={filteredIncidents.length < 10 ? `0${filteredIncidents.length}` : `${filteredIncidents.length}`}
-                    sub="2 critical · 4 moderate"
-                    tone="orange"
-                    trend="+2 today"
-                  />
-                  <MetricCard
-                    icon={Ambulance}
-                    label="Units available"
-                    value="14 / 22"
-                    sub="64% fleet readiness"
-                    tone="blue"
-                    trend="+3 since 08:00"
-                  />
-                  <MetricCard
-                    icon={Gauge}
-                    label="Avg. response time"
-                    value="08:42"
-                    sub="Target under 10 min"
-                    tone="green"
-                    trend="12% faster"
-                  />
-                  <MetricCard
-                    icon={Building2}
-                    label="Hospital capacity"
-                    value="72%"
-                    sub="31 ICU beds available"
-                    tone="violet"
-                    trend="Across 12 facilities"
-                  />
-                </section>
-
-                {/* Response Grid: Left Map + Fleet readiness, Right Queue + Detail */}
-                <div className="grid gap-4 sm:gap-5 2xl:grid-cols-[minmax(0,1.45fr)_minmax(310px,0.7fr)]">
-                  {/* Left Column: Response Map and Fleet Readiness */}
-                  <section className="min-w-0 space-y-4 sm:space-y-5">
-                    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
-                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border px-3 py-3 sm:px-5 sm:py-4">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h2 className="font-display text-sm font-bold">Response map</h2>
-                            <span className="rounded-full bg-status-green-soft px-2 py-0.5 text-[10px] font-bold text-status-green">
-                              LIVE
-                            </span>
-                          </div>
-                          <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">
-                            Bengaluru urban response zone · 22 active units
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="relative">
-                            <button
-                              className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
-                              onClick={() => setLayersOpen(!layersOpen)}
-                            >
-                              <Layers3 className="size-4" />
-                              <span className="hidden sm:inline">Layers</span>
-                              <ChevronDown className="size-3.5" />
-                            </button>
-                            {layersOpen && (
-                              <div className="absolute right-0 top-10 z-20 w-44 rounded-md border border-border bg-card p-2 text-xs shadow-lg space-y-1">
-                                <label className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted cursor-pointer">
-                                  <input type="checkbox" defaultChecked className="accent-primary" /> Traffic layer
-                                </label>
-                                <label className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted cursor-pointer">
-                                  <input type="checkbox" defaultChecked className="accent-primary" /> Hospital capacity
-                                </label>
-                                <label className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted cursor-pointer">
-                                  <input type="checkbox" defaultChecked className="accent-primary" /> Fleet units
-                                </label>
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            className="p-2 rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition cursor-pointer"
-                            aria-label="Center map"
-                            title="Center map"
-                            onClick={() => setNotice('Map centered on active incidents')}
-                          >
-                            <Crosshair className="size-4" />
-                          </button>
-                          <button
-                            className="hidden sm:inline-flex p-2 rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition cursor-pointer"
-                            aria-label="Expand map"
-                            title="Expand map"
-                          >
-                            <Maximize2 className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Map View */}
-                      <div className="relative h-[245px] overflow-hidden bg-map-surface min-[390px]:h-[275px] sm:h-[385px]">
-                        <MapIllustration selectedId={selectedIncident.id} onSelect={setSelectedId} />
-                        <div className="absolute left-2 top-2 rounded-md border border-border bg-card/95 p-2 shadow-sm backdrop-blur-sm sm:left-4 sm:top-4 sm:p-2.5">
-                          <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-                            Map layers
-                          </div>
-                          <div className="space-y-1.5 text-[10px] font-medium">
-                            <LegendDot color="bg-safety-orange" label="Critical incident" />
-                            <LegendDot color="bg-primary" label="Available unit" />
-                            <LegendDot color="bg-status-green" label="Hospital" />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-2 left-2 rounded-md border border-border bg-card/95 px-2 py-1.5 text-[9px] text-muted-foreground shadow-sm backdrop-blur-sm sm:bottom-4 sm:left-4 sm:px-3 sm:py-2 sm:text-[10px]">
-                          <span className="font-semibold text-foreground">Traffic</span> · Moderate <span className="mx-1 text-border">|</span> <span className="font-semibold text-foreground">Coverage</span> · 96%
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Fleet Readiness */}
-                    <div className="rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
-                      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                        <div>
-                          <h2 className="font-display text-sm font-bold">Fleet readiness</h2>
-                          <p className="mt-1 text-xs text-muted-foreground">Current field availability by vehicle type</p>
-                        </div>
-                        <button
-                          className="self-start text-xs text-primary inline-flex items-center gap-1 hover:underline cursor-pointer"
-                          onClick={() => setActiveNav('Fleet control')}
-                        >
-                          View fleet control <ArrowUpRight className="size-3.5" />
-                        </button>
-                      </div>
-                      <div className="grid gap-4 px-4 py-4 sm:grid-cols-3 sm:px-5">
-                        <FleetItem label="Advanced life support" value="6 / 8" percent={75} tone="primary" icon={Stethoscope} />
-                        <FleetItem label="Basic life support" value="8 / 12" percent={67} tone="orange" icon={Ambulance} />
-                        <FleetItem label="Rapid response bikes" value="4 / 6" percent={66} tone="green" icon={NavIcon} />
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Right Column: Incident Queue & Response Detail */}
-                  <aside className="flex min-w-0 flex-col gap-4 sm:gap-5">
-                    {/* Incident Queue */}
-                    <div className="order-2 rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)] 2xl:order-1">
-                      <div className="border-b border-border px-4 py-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h2 className="font-display text-sm font-bold">Incident queue</h2>
-                            <p className="mt-1 text-xs text-muted-foreground">Prioritized by triage severity</p>
-                          </div>
-                          <button className="p-1 rounded text-muted-foreground hover:bg-muted" title="Filter incident queue">
-                            <Filter className="size-4" />
-                          </button>
-                        </div>
-                        <div className="mt-4 flex gap-1 rounded-md bg-muted p-1">
-                          {(['All', 'Critical', 'Moderate', 'Minor'] as const).map((filter) => (
-                            <button
-                              key={filter}
-                              className={`flex-1 rounded px-2 py-1.5 text-[10px] font-bold transition-colors cursor-pointer ${
-                                activeFilter === filter
-                                  ? 'bg-card text-foreground shadow-sm'
-                                  : 'text-muted-foreground hover:text-foreground'
-                              }`}
-                              onClick={() => handleFilter(filter)}
-                            >
-                              {filter}
-                              {filter === 'All' && <span className="ml-1 text-muted-foreground">{incidents.length}</span>}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="max-h-[381px] overflow-y-auto">
-                        {filteredIncidents.map((incident) => (
-                          <IncidentRow
-                            key={incident.id}
-                            incident={incident}
-                            selected={incident.id === selectedId}
-                            onClick={() => setSelectedId(incident.id)}
-                          />
-                        ))}
-                      </div>
-                      <div className="border-t border-border px-4 py-3">
-                        <button
-                          className="h-8 w-full text-xs text-primary inline-flex items-center justify-center gap-1 hover:underline cursor-pointer"
-                          onClick={() => {
-                            setActiveFilter('All');
-                            setNotice('Showing all active incidents');
-                          }}
-                        >
-                          View all incidents <ArrowUpRight className="size-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Response Detail */}
-                    <div className="order-1 rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)] 2xl:order-2">
-                      <div className="flex items-start justify-between border-b border-border px-4 py-4">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h2 className="font-display text-sm font-bold">Response detail</h2>
-                            <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${priorityClass(selectedIncident.priority)}`}>
-                              {selectedIncident.priority}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-[11px] font-semibold text-muted-foreground">
-                            {selectedIncident.id} <span className="mx-1 text-border">·</span> {selectedIncident.time}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-3 p-3 sm:space-y-4 sm:p-4">
-                        <div>
-                          <h3 className="text-sm font-bold">{selectedIncident.type}</h3>
-                          <div className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
-                            <MapPin className="mt-0.5 size-3.5 shrink-0 text-safety-orange" />
-                            {selectedIncident.location}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <InfoCell label="Patients" value={selectedIncident.patient} />
-                          <InfoCell label="Distance" value={selectedIncident.distance} />
-                          <InfoCell label="Location lock" value="Verified" icon={<Check className="size-3 text-status-green" />} />
-                          <InfoCell label="GPS reading" value={selectedIncident.coordinates} />
-                        </div>
-                        <div className="rounded-md bg-muted p-3 text-[11px] leading-relaxed text-muted-foreground">
-                          <span className="font-bold text-foreground">Dispatch note: </span>
-                          {selectedIncident.detail}
-                        </div>
-                        <div className="flex items-center justify-between border-y border-border py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-                              <Ambulance className="size-4" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold">{selectedIncident.unit}</div>
-                              <div className="text-[10px] text-muted-foreground">Advanced life support</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-safety-orange">{selectedIncident.eta}</div>
-                            <div className="text-[10px] text-muted-foreground">Est. arrival</div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <Building2 className="mt-0.5 size-4 text-primary shrink-0" />
-                          <div>
-                            <div className="text-xs font-semibold">{selectedIncident.hospital}</div>
-                            <div className="mt-0.5 text-[10px] text-muted-foreground">Trauma center · ICU capacity available</div>
-                          </div>
-                        </div>
-                        <button
-                          className={`h-10 w-full rounded-md text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
-                            dispatchedUnits[selectedIncident.id]
-                              ? 'bg-status-green text-white'
-                              : 'bg-safety-orange text-safety-orange-foreground shadow-[0_8px_18px_-10px_var(--color-safety-orange)] hover:bg-safety-orange/90'
-                          }`}
-                          onClick={handleDispatch}
-                          disabled={dispatchedUnits[selectedIncident.id]}
-                        >
-                          {dispatchedUnits[selectedIncident.id] ? (
-                            <>
-                              <Check className="size-4" /> Unit {selectedIncident.unit} Dispatched
-                            </>
-                          ) : (
-                            <>
-                              <Siren className="size-4" /> Authorize &amp; Dispatch {selectedIncident.unit}
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* System Activity Feed */}
-                    <div className="order-3 rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
-                      <div className="flex items-center justify-between border-b border-border px-4 py-4">
-                        <div>
-                          <h2 className="font-display text-sm font-bold">System activity</h2>
-                          <p className="mt-1 text-xs text-muted-foreground">Latest operational events</p>
-                        </div>
-                        <span className="size-2 rounded-full bg-status-green" />
-                      </div>
-                      <div className="space-y-3 p-4">
-                        {activities.map((activity) => {
-                          const Icon = activity.icon;
-                          return (
-                            <div key={activity.text} className="flex items-center gap-2.5">
-                              <Icon className={`size-3.5 ${activity.tone}`} />
-                              <span className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground">
-                                {activity.text}
-                              </span>
-                              <span className="text-[10px] font-medium text-muted-foreground/70">
-                                {activity.time}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </aside>
-                </div>
-
-                {/* Footer */}
-                <footer className="flex flex-col gap-2 border-t border-border pt-4 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="size-1.5 rounded-full bg-status-green" />
-                    All systems operational <span className="text-border">·</span> WebSocket connected
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setIsDPDPOpen(true)}
-                      className="hover:underline cursor-pointer text-muted-foreground"
-                    >
-                      DPDP compliant
-                    </button>
-                    <span className="text-border">·</span>
-                    <span>Last audit sync 09:36</span>
-                  </div>
-                </footer>
-              </div>
+              <LiveOperationsWorkspace
+                incidents={incidents}
+                filteredIncidents={filteredIncidents}
+                selectedId={selectedId}
+                selectedIncident={selectedIncident}
+                activeFilter={activeFilter}
+                layersOpen={layersOpen}
+                notice={notice}
+                dispatchedUnits={dispatchedUnits}
+                onSelect={setSelectedId}
+                onFilter={handleFilter}
+                onToggleLayers={() => setLayersOpen((open) => !open)}
+                onDispatch={handleDispatch}
+                onNotice={setNotice}
+                onNewIntake={handleInjectEmergency}
+                onFleet={() => setActiveNav('Fleet control')}
+                onPrivacy={() => setIsDPDPOpen(true)}
+              />
             )}
           </div>
         </main>
@@ -889,6 +584,284 @@ export const MainLayout: React.FC = () => {
     </div>
   );
 };
+
+function LiveOperationsWorkspace({
+  incidents,
+  filteredIncidents,
+  selectedId,
+  selectedIncident,
+  activeFilter,
+  layersOpen,
+  notice,
+  dispatchedUnits,
+  onSelect,
+  onFilter,
+  onToggleLayers,
+  onDispatch,
+  onNotice,
+  onNewIntake,
+  onFleet,
+  onPrivacy,
+}: {
+  incidents: Incident[];
+  filteredIncidents: Incident[];
+  selectedId: string;
+  selectedIncident: Incident;
+  activeFilter: Priority | 'All';
+  layersOpen: boolean;
+  notice: string;
+  dispatchedUnits: Record<string, boolean>;
+  onSelect: (id: string) => void;
+  onFilter: (filter: Priority | 'All') => void;
+  onToggleLayers: () => void;
+  onDispatch: () => void;
+  onNotice: (message: string) => void;
+  onNewIntake: () => void;
+  onFleet: () => void;
+  onPrivacy: () => void;
+}) {
+  const availableUnits = 14;
+  const totalBeds = 31;
+  const criticalCount = incidents.filter((incident) => incident.priority === 'Critical').length;
+  const dispatchedCount = Object.values(dispatchedUnits).filter(Boolean).length;
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-xl border border-slate-800 bg-[#111827] p-4 text-slate-100 shadow-xl sm:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-400">
+              <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.12)]" />
+              Network posture · nominal
+            </div>
+            <h2 className="mt-2 font-display text-2xl font-bold tracking-tight">Live operations</h2>
+            <p className="mt-1 text-sm text-slate-400">Situational awareness across Bengaluru response zones. Triage decisions live in Incident queue.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-semibold text-slate-300">{notice}</span>
+            <button onClick={onNewIntake} className="inline-flex items-center gap-1.5 rounded-md bg-safety-orange px-3 py-2 font-bold text-white transition hover:bg-orange-600 active:scale-[0.98] cursor-pointer">
+              <Zap className="size-3.5" /> Simulate intake
+            </button>
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-800 bg-slate-800 sm:grid-cols-4">
+          <OpsMetric label="Critical now" value={`${criticalCount}`} detail="Needs triage" tone="text-red-300" />
+          <OpsMetric label="Fleet ready" value={`${availableUnits}/22`} detail="64% availability" tone="text-blue-300" />
+          <OpsMetric label="ICU capacity" value={`${totalBeds}`} detail="Beds network-wide" tone="text-emerald-300" />
+          <OpsMetric label="Dispatches today" value={`${dispatchedCount + 18}`} detail="Since 06:00 IST" tone="text-amber-300" />
+        </div>
+      </section>
+
+      <div className="grid gap-5 2xl:grid-cols-[minmax(0,1.5fr)_minmax(330px,0.7fr)]">
+        <section className="overflow-hidden rounded-xl border border-slate-800 bg-[#0b1220] shadow-xl">
+          <div className="flex flex-col gap-3 border-b border-slate-800 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-sm font-bold text-white">Response map</h3>
+                <span className="rounded bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">LIVE FEED</span>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">Bengaluru metropolitan response grid · {incidents.length} tracked incidents</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <button onClick={onToggleLayers} className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 cursor-pointer">
+                  <Layers3 className="size-3.5" /> Layers <ChevronDown className="size-3.5" />
+                </button>
+                {layersOpen && <div className="absolute right-0 top-10 z-20 w-48 space-y-1 rounded-md border border-slate-700 bg-slate-900 p-2 text-xs text-slate-300 shadow-2xl">
+                  {['Traffic flow', 'Hospital capacity', 'Available units'].map((layer) => <label key={layer} className="flex items-center gap-2 rounded px-2 py-2 hover:bg-slate-800"><input type="checkbox" defaultChecked className="accent-orange-500" />{layer}</label>)}
+                </div>}
+              </div>
+              <button onClick={() => onNotice('Map centered on active response zones')} className="rounded-md border border-slate-700 p-2 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer" aria-label="Center map"><Crosshair className="size-4" /></button>
+            </div>
+          </div>
+          <div className="relative h-[300px] bg-map-surface sm:h-[420px]">
+            <MapIllustration selectedId={selectedId} onSelect={onSelect} />
+            <div className="absolute left-3 top-3 rounded-md border border-slate-700 bg-slate-950/90 p-3 text-[10px] text-slate-300 shadow-lg">
+              <div className="mb-2 font-bold uppercase tracking-wider text-slate-500">Operational layers</div>
+              <div className="space-y-1.5"><LegendDot color="bg-safety-orange" label="Critical incident" /><LegendDot color="bg-primary" label="Available unit" /><LegendDot color="bg-status-green" label="Receiving hospital" /></div>
+            </div>
+            <div className="absolute bottom-3 right-3 rounded-md border border-slate-700 bg-slate-950/90 px-3 py-2 text-[10px] text-slate-400">Traffic <span className="font-bold text-amber-300">moderate</span> · Coverage <span className="font-bold text-emerald-300">96%</span></div>
+          </div>
+        </section>
+
+        <aside className="space-y-5">
+          <section className="rounded-xl border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
+            <div className="flex items-center justify-between border-b border-border px-4 py-4">
+              <div><h3 className="font-display text-sm font-bold">Network readiness</h3><p className="mt-1 text-xs text-muted-foreground">Resources available for the next call</p></div>
+              <button onClick={onFleet} className="text-xs font-semibold text-primary hover:underline cursor-pointer">Fleet control <ArrowUpRight className="inline size-3.5" /></button>
+            </div>
+            <div className="space-y-4 p-4">
+              <ReadinessBar label="ALS ambulances" value="6 / 8" percent={75} tone="bg-primary" />
+              <ReadinessBar label="BLS ambulances" value="8 / 12" percent={67} tone="bg-safety-orange" />
+              <ReadinessBar label="Rapid response bikes" value="4 / 6" percent={66} tone="bg-status-green" />
+              <div className="grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs"><InfoCell label="Dispatch latency" value="420 ms" /><InfoCell label="CAD coverage" value="96%" /></div>
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
+            <div className="border-b border-border px-4 py-4"><h3 className="font-display text-sm font-bold">Network events</h3><p className="mt-1 text-xs text-muted-foreground">Recent signals, not a triage queue</p></div>
+            <div className="divide-y divide-border">{activities.slice(0, 4).map((activity) => { const Icon = activity.icon; return <div key={activity.text} className="flex items-center gap-3 px-4 py-3"><Icon className={`size-4 ${activity.tone}`} /><span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{activity.text}</span><span className="text-[10px] text-muted-foreground/70">{activity.time}</span></div>; })}</div>
+            <button onClick={onPrivacy} className="w-full border-t border-border px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground hover:bg-muted cursor-pointer">Audit chain synced · View governance records <ArrowUpRight className="inline size-3.5" /></button>
+          </section>
+        </aside>
+      </div>
+
+      <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-[10px] text-muted-foreground"><span>Demo operations feed · simulated Bengaluru data</span><span>{filteredIncidents.length} incidents currently visible in triage filters</span></footer>
+    </div>
+  );
+}
+
+function OpsMetric({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: string }) {
+  return <div className="bg-[#111827] p-3 sm:p-4"><div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</div><div className={`mt-2 font-mono text-xl font-bold ${tone}`}>{value}</div><div className="mt-1 text-[10px] text-slate-500">{detail}</div></div>;
+}
+
+function ReadinessBar({ label, value, percent, tone }: { label: string; value: string; percent: number; tone: string }) {
+  return <div><div className="flex items-center justify-between text-xs"><span className="font-semibold text-foreground">{label}</span><span className="font-mono text-muted-foreground">{value}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className={`h-full rounded-full ${tone}`} style={{ width: `${percent}%` }} /></div></div>;
+}
+
+function IncidentQueueWorkspace({
+  incidents,
+  totalIncidents,
+  selectedId,
+  selectedIncident,
+  activeFilter,
+  dispatchedUnits,
+  onSelect,
+  onFilter,
+  dispatched,
+  onDispatch,
+}: {
+  incidents: Incident[];
+  totalIncidents: number;
+  selectedId: string;
+  selectedIncident: Incident;
+  activeFilter: Priority | 'All';
+  dispatchedUnits: Record<string, boolean>;
+  onSelect: (id: string) => void;
+  onFilter: (filter: Priority | 'All') => void;
+  dispatched: boolean;
+  onDispatch: () => void;
+}) {
+  return (
+    <div className="space-y-5">
+      <section className="rounded-lg border border-border bg-card p-4 shadow-[0_10px_30px_-24px_var(--color-shadow)] sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-[11px] font-semibold text-safety-orange">
+              <Siren className="size-4" />
+              TRIAGE WORKSPACE
+            </div>
+            <h2 className="mt-1 font-display text-xl font-bold">Incident queue</h2>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              Review, prioritise and dispatch active emergency requests. The live map is available under Live operations.
+            </p>
+          </div>
+          <div className="rounded-md bg-muted px-3 py-2 text-right">
+            <div className="text-2xl font-bold leading-none">{totalIncidents}</div>
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">active requests</div>
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border pt-4 sm:grid-cols-4">
+          <QueueSignal label="Needs triage" value={`${incidents.filter((incident) => incident.priority === 'Critical').length}`} tone="status-critical" />
+          <QueueSignal label="Awaiting unit" value={`${incidents.filter((incident) => !dispatchedUnits[incident.id]).length}`} tone="status-attention" />
+          <QueueSignal label="Units committed" value={`${Object.values(dispatchedUnits).filter(Boolean).length}`} tone="status-ready" />
+          <QueueSignal label="Oldest request" value={incidents[incidents.length - 1]?.time || '—'} tone="bg-muted text-foreground" />
+        </div>
+        <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Filter incidents by priority">
+          {(['All', 'Critical', 'Moderate', 'Minor'] as const).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => onFilter(filter)}
+              className={`rounded-md border px-3 py-2 text-xs font-bold transition cursor-pointer ${
+                activeFilter === filter
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+        <section className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
+          <div className="border-b border-border px-4 py-4">
+            <h3 className="font-display text-sm font-bold">Requests awaiting action</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Sorted by triage priority and arrival time</p>
+          </div>
+          <div className="divide-y divide-border">
+            {incidents.length ? incidents.map((incident) => (
+              <IncidentRow
+                key={incident.id}
+                incident={incident}
+                selected={incident.id === selectedId}
+                onClick={() => onSelect(incident.id)}
+              />
+            )) : (
+              <div className="p-8 text-center text-sm text-muted-foreground">No incidents match this priority.</div>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-border bg-card shadow-[0_10px_30px_-24px_var(--color-shadow)]">
+          <div className="border-b border-border px-4 py-4">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="font-display text-sm font-bold">Selected request</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{selectedIncident.id} · {selectedIncident.time}</p>
+              </div>
+              <span className={`rounded px-2 py-1 text-[10px] font-bold uppercase ${priorityClass(selectedIncident.priority)}`}>
+                {selectedIncident.priority}
+              </span>
+            </div>
+          </div>
+          <div className="space-y-4 p-4">
+            <div>
+              <h4 className="text-base font-bold">{selectedIncident.type}</h4>
+              <p className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="mt-0.5 size-3.5 shrink-0 text-safety-orange" />
+                {selectedIncident.location}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <InfoCell label="Patients" value={selectedIncident.patient} />
+              <InfoCell label="Distance" value={selectedIncident.distance} />
+              <InfoCell label="Location lock" value="Verified" icon={<Check className="size-3 text-status-green" />} />
+              <InfoCell label="ETA" value={selectedIncident.eta} />
+            </div>
+            <div className="rounded-md bg-muted p-3 text-xs leading-relaxed text-muted-foreground">
+              <span className="font-bold text-foreground">Dispatch note: </span>{selectedIncident.detail}
+            </div>
+            <div className="flex items-center justify-between border-y border-border py-3">
+              <div className="flex items-center gap-2">
+                <Ambulance className="size-4 text-primary" />
+                <div>
+                  <div className="text-xs font-bold">{selectedIncident.unit}</div>
+                  <div className="text-[10px] text-muted-foreground">Assigned response unit</div>
+                </div>
+              </div>
+              <div className="text-right text-xs text-muted-foreground">{selectedIncident.hospital}</div>
+            </div>
+            <button
+              onClick={onDispatch}
+              disabled={dispatched}
+              className={`h-10 w-full rounded-md text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                dispatched ? 'bg-status-green text-white' : 'bg-safety-orange text-safety-orange-foreground hover:bg-safety-orange/90'
+              }`}
+            >
+              {dispatched ? <><Check className="size-4" /> Unit dispatched</> : <><Siren className="size-4" /> Authorize dispatch</>}
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function QueueSignal({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return <div className={`rounded-md px-3 py-2 ${tone}`}><div className="text-lg font-bold leading-none">{value}</div><div className="mt-1 text-[10px] font-semibold uppercase tracking-wide opacity-75">{label}</div></div>;
+}
 
 export default function App() {
   return (
