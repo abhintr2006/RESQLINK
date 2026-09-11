@@ -213,7 +213,7 @@ export const CitizenSOSView: React.FC = () => {
                     </div>
                     <div>
                       <div className="font-bold text-xs text-white leading-tight">
-                        {cat.label[language] || cat.label.en}
+                        {cat.label}
                       </div>
                     </div>
                   </button>
