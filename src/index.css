@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   /* Tactical Emergency Command Color Tokens */
   --color-resq-50: #fff1f2;
   --color-resq-100: #ffe4e6;
@@ -45,26 +45,28 @@
   --color-map-label: #94a3b8;
 
   /* Reslink-Redux Shell & Sidebar Tokens */
-  --color-sidebar: #0f1523;
-  --color-sidebar-foreground: #f1f5f9;
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
   --color-sidebar-primary: #f97316;
   --color-sidebar-primary-foreground: #ffffff;
   --color-sidebar-accent: #192237;
   --color-sidebar-accent-foreground: #ffffff;
-  --color-sidebar-border: #1e293b;
+  --color-sidebar-border: var(--color-sidebar-border);
   --color-sidebar-muted: #94a3b8;
   --color-sidebar-badge: #1e293b;
 
-  --color-background: #090d16;
-  --color-foreground: #f8fafc;
-  --color-card: #0f1422;
-  --color-card-foreground: #f8fafc;
-  --color-border: #1e293b;
-  --color-muted: #172033;
-  --color-muted-foreground: #94a3b8;
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-border: var(--color-border);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
   --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
-  --color-input: #1e293b;
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-input: var(--color-input);
 
   /* Product semantics: use these names for new UI instead of raw accents. */
   --color-action: #c2410c;
@@ -82,13 +84,13 @@
   --color-info: #1d4ed8;
   --color-info-foreground: #ffffff;
   --color-info-soft: #eff6ff;
-  --color-surface-app: #f8fafc;
-  --color-surface-panel: #ffffff;
-  --color-surface-raised: #ffffff;
-  --color-border-subtle: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-ink: #172033;
-  --color-ink-muted: #526176;
+  --color-surface-app: var(--color-background);
+  --color-surface-panel: var(--color-card);
+  --color-surface-raised: var(--color-card);
+  --color-border-subtle: var(--color-border);
+  --color-border-strong: var(--color-muted-foreground);
+  --color-ink: var(--color-foreground);
+  --color-ink-muted: var(--color-muted-foreground);
   --color-focus: #c2410c;
 
   /* Custom high-performance animations */
@@ -120,16 +122,50 @@
 }
 
 @layer base {
+  :root {
+    --color-background: #f4f7fb;
+    --color-foreground: #0f172a;
+    --color-card: #ffffff;
+    --color-card-foreground: #0f172a;
+    --color-border: #e2e8f0;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #0f172a;
+    --color-input: #e2e8f0;
+    --color-sidebar: #f8fafc;
+    --color-sidebar-foreground: #0f172a;
+    --color-sidebar-border: #e2e8f0;
+  }
+
+  html.dark,
+  .dark {
+    --color-background: #090d16;
+    --color-foreground: #f8fafc;
+    --color-card: #0f1422;
+    --color-card-foreground: #f8fafc;
+    --color-border: #1e293b;
+    --color-muted: #172033;
+    --color-muted-foreground: #94a3b8;
+    --color-popover: #0f1422;
+    --color-popover-foreground: #f8fafc;
+    --color-input: #1e293b;
+    --color-sidebar: #0f1523;
+    --color-sidebar-foreground: #f1f5f9;
+    --color-sidebar-border: #1e293b;
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #030712;
-    color: #f1f5f9;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     overflow-x: hidden;
     letter-spacing: -0.01em;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -153,7 +189,7 @@
   }
 }
 
-/* Care-facing portals use calm surfaces; the command centre remains dark. */
+/* Care-facing portals use calm surfaces in light mode, and tactical surfaces in dark mode */
 .citizen-surface,
 .hospital-surface {
   --care-bg: #f4f7fb;
@@ -162,6 +198,14 @@
   --care-ink: #172033;
   background: var(--care-bg);
   color: var(--care-ink);
+}
+
+.dark .citizen-surface,
+.dark .hospital-surface {
+  --care-bg: #090d16;
+  --care-panel: #0f1422;
+  --care-border: #1e293b;
+  --care-ink: #f8fafc;
 }
 
 .citizen-surface .double-bezel,
@@ -188,40 +232,43 @@
   border-color: var(--care-border);
 }
 
-.public-overview [class*='bg-slate-900/70'],
-.public-overview [class*='bg-slate-900/60'] {
+:not(.dark) .public-overview [class*='bg-slate-900/70'],
+:not(.dark) .public-overview [class*='bg-slate-900/60'] {
   background: #ffffff !important;
   border-color: #d8e1eb !important;
   box-shadow: 0 10px 24px -20px rgba(23, 32, 51, 0.4);
 }
 
-.public-overview h2,
-.public-overview h3 {
+:not(.dark) .public-overview h2,
+:not(.dark) .public-overview h3 {
   color: #172033;
 }
 
-.public-overview [class*='bg-slate-900/60'] p,
-.public-overview [class*='bg-slate-900/60'] li {
+:not(.dark) .public-overview [class*='bg-slate-900/60'] p,
+:not(.dark) .public-overview [class*='bg-slate-900/60'] li {
   color: #526176;
 }
 
-.public-overview [class*='font-black'][class*='text-white'] {
+:not(.dark) .public-overview [class*='font-black'][class*='text-white'] {
   color: #172033 !important;
 }
 
 .product-shell {
-  background: var(--color-surface-app);
-  color: var(--color-ink);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .product-shell-sidebar {
-  background: #172033;
-  color: #f8fafc;
+  background: var(--color-sidebar);
+  color: var(--color-sidebar-foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .product-shell-panel {
-  background: var(--color-surface-panel);
-  border-color: var(--color-border-subtle);
+  background: var(--color-card);
+  border-color: var(--color-border);
+  transition: background-color 0.2s ease;
 }
 
 .status-ready {
