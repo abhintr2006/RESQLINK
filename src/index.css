@@ -122,16 +122,50 @@
 }
 
 @layer base {
+  :root {
+    --color-background: #f4f7fb;
+    --color-foreground: #0f172a;
+    --color-card: #ffffff;
+    --color-card-foreground: #0f172a;
+    --color-border: #e2e8f0;
+    --color-muted: #f1f5f9;
+    --color-muted-foreground: #64748b;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #0f172a;
+    --color-input: #e2e8f0;
+    --color-sidebar: #f8fafc;
+    --color-sidebar-foreground: #0f172a;
+    --color-sidebar-border: #e2e8f0;
+  }
+
+  html.dark,
+  .dark {
+    --color-background: #090d16;
+    --color-foreground: #f8fafc;
+    --color-card: #0f1422;
+    --color-card-foreground: #f8fafc;
+    --color-border: #1e293b;
+    --color-muted: #172033;
+    --color-muted-foreground: #94a3b8;
+    --color-popover: #0f1422;
+    --color-popover-foreground: #f8fafc;
+    --color-input: #1e293b;
+    --color-sidebar: #0f1523;
+    --color-sidebar-foreground: #f1f5f9;
+    --color-sidebar-border: #1e293b;
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #030712;
-    color: #f1f5f9;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     overflow-x: hidden;
     letter-spacing: -0.01em;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -155,7 +189,7 @@
   }
 }
 
-/* Care-facing portals use calm surfaces; the command centre remains dark. */
+/* Care-facing portals use calm surfaces in light mode, and tactical surfaces in dark mode */
 .citizen-surface,
 .hospital-surface {
   --care-bg: #f4f7fb;
@@ -164,6 +198,14 @@
   --care-ink: #172033;
   background: var(--care-bg);
   color: var(--care-ink);
+}
+
+.dark .citizen-surface,
+.dark .hospital-surface {
+  --care-bg: #090d16;
+  --care-panel: #0f1422;
+  --care-border: #1e293b;
+  --care-ink: #f8fafc;
 }
 
 .citizen-surface .double-bezel,
@@ -190,24 +232,24 @@
   border-color: var(--care-border);
 }
 
-.public-overview [class*='bg-slate-900/70'],
-.public-overview [class*='bg-slate-900/60'] {
+:not(.dark) .public-overview [class*='bg-slate-900/70'],
+:not(.dark) .public-overview [class*='bg-slate-900/60'] {
   background: #ffffff !important;
   border-color: #d8e1eb !important;
   box-shadow: 0 10px 24px -20px rgba(23, 32, 51, 0.4);
 }
 
-.public-overview h2,
-.public-overview h3 {
+:not(.dark) .public-overview h2,
+:not(.dark) .public-overview h3 {
   color: #172033;
 }
 
-.public-overview [class*='bg-slate-900/60'] p,
-.public-overview [class*='bg-slate-900/60'] li {
+:not(.dark) .public-overview [class*='bg-slate-900/60'] p,
+:not(.dark) .public-overview [class*='bg-slate-900/60'] li {
   color: #526176;
 }
 
-.public-overview [class*='font-black'][class*='text-white'] {
+:not(.dark) .public-overview [class*='font-black'][class*='text-white'] {
   color: #172033 !important;
 }
 

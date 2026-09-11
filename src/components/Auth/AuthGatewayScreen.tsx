@@ -15,8 +15,10 @@ import {
   Languages,
   LifeBuoy,
   LockKeyhole,
+  Moon,
   Radio,
   ShieldCheck,
+  Sun,
   Users,
 } from 'lucide-react';
 
@@ -34,7 +36,7 @@ const accentClasses = {
 };
 
 export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDPModal }) => {
-  const { login, language, setLanguage, enterGatewayWithRole } = useResqLink();
+  const { login, language, setLanguage, enterGatewayWithRole, theme, toggleTheme } = useResqLink();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'personas' | 'credentials'>('personas');
   const [username, setUsername] = useState('admin');
@@ -110,8 +112,8 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] text-[#172033] font-sans selection:bg-orange-200">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-[#f4f7fb] dark:bg-[#090d16] text-[#172033] dark:text-[#f8fafc] font-sans selection:bg-orange-200 dark:selection:bg-orange-950 transition-colors duration-200">
+      <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1422] transition-colors duration-200">
         <div className="mx-auto flex min-h-[68px] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-lg bg-orange-600 text-white shadow-sm">
@@ -119,27 +121,29 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-display text-base font-bold tracking-tight">RESQLINK</span>
-                <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-500">Demo</span>
+                <span className="font-display text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">RESQLINK</span>
+                <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Demo</span>
               </div>
-              <div className="text-[10px] text-slate-500">Emergency response network · Bengaluru</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Emergency response network · Bengaluru</div>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden items-center gap-2 text-xs text-slate-500 sm:flex">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden items-center gap-2 text-xs text-slate-500 dark:text-slate-400 sm:flex">
               <Clock3 className="size-3.5" />
-              <span className="font-mono font-semibold text-slate-700">{currentTime}</span>
+              <span className="font-mono font-semibold text-slate-700 dark:text-slate-300">{currentTime}</span>
             </div>
 
             {/* Language Switcher: Quick Pills + 23 Indian Languages Dropdown */}
             <div className="flex items-center gap-1.5">
-              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[10px] font-bold shadow-xs">
+              <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-0.5 text-[10px] font-bold shadow-xs">
                 {(['en', 'kn', 'hi'] as LanguageCode[]).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => setLanguage(lang)}
                     className={`rounded-md px-2 py-1 cursor-pointer transition ${
-                      language === lang ? 'bg-slate-900 text-white font-extrabold shadow-xs' : 'text-slate-600 hover:text-slate-950'
+                      language === lang
+                        ? 'bg-slate-900 dark:bg-orange-600 text-white font-extrabold shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-100'
                     }`}
                   >
                     {lang.toUpperCase()}
@@ -150,11 +154,11 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
               <div className="relative">
                 <button
                   onClick={() => setIsLangDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-xs"
                   title={t('nav.select_language', 'Select Language')}
                   aria-label="Select Indian Language"
                 >
-                  <Languages className="size-3.5 text-orange-600" />
+                  <Languages className="size-3.5 text-orange-600 dark:text-orange-500" />
                   <span className="hidden sm:inline font-mono text-[10px]">{language.toUpperCase()}</span>
                   <ChevronDown className="size-3 text-slate-400" />
                 </button>
@@ -196,9 +200,23 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
               </div>
             </div>
 
+            {/* Dark / Light Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center size-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-xs"
+              title={theme === 'dark' ? t('theme.light_mode', 'Switch to Light Mode') : t('theme.dark_mode', 'Switch to Dark Mode')}
+              aria-label={t('theme.toggle', 'Toggle Theme')}
+            >
+              {theme === 'dark' ? (
+                <Sun className="size-4 text-amber-400 animate-in spin-in-180 duration-300" />
+              ) : (
+                <Moon className="size-4 text-slate-600 animate-in spin-in-180 duration-300" />
+              )}
+            </button>
+
             <button
               onClick={onOpenDPDPModal}
-              className="hidden items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100 md:flex cursor-pointer transition"
+              className="hidden items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 md:flex cursor-pointer transition"
             >
               <ShieldCheck className="size-3.5" />
               <span>{t('gateway.dpdp_notice', 'DPDP notice')}</span>
@@ -209,13 +227,13 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
 
       <main className="mx-auto grid min-h-[calc(100dvh-125px)] max-w-[1400px] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:px-8 lg:py-14">
         <section className="max-w-xl">
-          <h1 className="max-w-lg text-4xl font-bold leading-[1.05] tracking-[-0.045em] text-slate-950 sm:text-5xl">
+          <h1 className="max-w-lg text-4xl font-bold leading-[1.05] tracking-[-0.045em] text-slate-950 dark:text-white sm:text-5xl">
             {t('gateway.headline', 'Start in the workspace that matches your role.')}
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-600">
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-400">
             {t('gateway.subheadline', 'RESQLINK connects the people who request help with the teams who coordinate and deliver it. Choose a workspace to explore the response journey.')}
           </p>
-          <div className="mt-8 grid gap-3 border-t border-slate-200 pt-6 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="mt-8 grid gap-3 border-t border-slate-200 dark:border-slate-800 pt-6 sm:grid-cols-3 lg:grid-cols-1">
             <GatewayPrinciple
               icon={<Radio className="size-4" />}
               title={t('gateway.principle_coord_title', 'Coordinate')}
@@ -234,21 +252,23 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_45px_-30px_rgba(23,32,51,0.35)] sm:p-6">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <section className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1422] p-4 shadow-[0_18px_45px_-30px_rgba(23,32,51,0.35)] dark:shadow-none sm:p-6 transition-colors duration-200">
+          <div className="flex flex-col gap-4 border-b border-slate-200 dark:border-slate-800 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              <div className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                 {t('gateway.access_workspace', 'Access workspace')}
               </div>
-              <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
                 {t('gateway.how_will_you_use', 'How will you use RESQLINK?')}
               </h2>
             </div>
-            <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs font-bold">
+            <div className="flex rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 p-1 text-xs font-bold">
               <button
                 onClick={() => setActiveTab('personas')}
                 className={`rounded-md px-3 py-2 cursor-pointer transition ${
-                  activeTab === 'personas' ? 'bg-white text-slate-950 shadow-sm font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'personas'
+                    ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm font-extrabold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {t('gateway.choose_role', 'Choose role')}
@@ -256,7 +276,9 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
               <button
                 onClick={() => setActiveTab('credentials')}
                 className={`rounded-md px-3 py-2 cursor-pointer transition ${
-                  activeTab === 'credentials' ? 'bg-white text-slate-950 shadow-sm font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                  activeTab === 'credentials'
+                    ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm font-extrabold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {t('gateway.sign_in', 'Sign In')}
@@ -265,25 +287,25 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
           </div>
 
           {activeTab === 'personas' ? (
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-200 dark:divide-slate-800/80">
               {personas.map((persona) => {
                 const Icon = persona.icon;
                 const styles = accentClasses[persona.accent];
                 return (
                   <article key={persona.role} className="group relative grid gap-4 py-5 first:pt-0 last:pb-0 sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                    <div className={`flex size-11 items-center justify-center rounded-xl border ${styles.icon}`}>
+                    <div className={`flex size-11 items-center justify-center rounded-xl border dark:bg-orange-950/40 dark:border-orange-800/60 dark:text-orange-400 ${styles.icon}`}>
                       <Icon className="size-5" />
                     </div>
                     <div className="min-w-0">
-                      <div className={`text-[10px] font-bold uppercase tracking-[0.12em] ${styles.label}`}>
+                      <div className={`text-[10px] font-bold uppercase tracking-[0.12em] dark:text-orange-400 ${styles.label}`}>
                         {persona.label}
                       </div>
-                      <h3 className="mt-1 text-lg font-bold text-slate-950">{persona.title}</h3>
-                      <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600">{persona.description}</p>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+                      <h3 className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{persona.title}</h3>
+                      <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">{persona.description}</p>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
                         {persona.capabilities.map((capability) => (
                           <span key={capability} className="inline-flex items-center gap-1">
-                            <Check className={`size-3 ${styles.label}`} />
+                            <Check className={`size-3 text-orange-600 dark:text-orange-400`} />
                             {capability}
                           </span>
                         ))}
@@ -291,7 +313,7 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                     </div>
                     <button
                       onClick={() => enterGatewayWithRole(persona.role)}
-                      className={`inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white transition active:scale-[0.98] cursor-pointer ${styles.action}`}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-xs font-bold text-white transition active:scale-[0.98] cursor-pointer bg-slate-900 dark:bg-orange-600 hover:bg-slate-800 dark:hover:bg-orange-500 shadow-sm"
                     >
                       <span className="sm:hidden">{t('common.open', 'Open')}</span>
                       <span className="hidden sm:inline">{persona.action}</span>
@@ -303,19 +325,19 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
             </div>
           ) : (
             <div className="mx-auto max-w-md py-5">
-              <div className="mb-5 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-slate-800 text-white">
+              <div className="mb-5 flex items-start gap-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-3">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-slate-800 dark:bg-slate-700 text-white">
                   <LockKeyhole className="size-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-900">{t('gateway.operator_signin', 'Operator sign in')}</div>
-                  <p className="mt-0.5 text-xs text-slate-500">{t('gateway.operator_signin_desc', 'Use a demo account to enter a workspace.')}</p>
+                  <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{t('gateway.operator_signin', 'Operator sign in')}</div>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t('gateway.operator_signin_desc', 'Use a demo account to enter a workspace.')}</p>
                 </div>
               </div>
-              {authError && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">{authError}</div>}
+              {authError && <div className="mb-4 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-medium text-red-700 dark:text-red-400">{authError}</div>}
               <form onSubmit={handleCredentialSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="gateway-username" className="mb-1.5 block text-xs font-bold text-slate-700">
+                  <label htmlFor="gateway-username" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Username
                   </label>
                   <input
@@ -324,11 +346,11 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                     value={username}
                     onChange={(event) => setUsername(event.target.value)}
                     required
-                    className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
+                    className="h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-950"
                   />
                 </div>
                 <div>
-                  <label htmlFor="gateway-password" className="mb-1.5 block text-xs font-bold text-slate-700">
+                  <label htmlFor="gateway-password" className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
                     Password
                   </label>
                   <div className="relative">
@@ -338,12 +360,12 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       required
-                      className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 pr-10 text-sm text-slate-900 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
+                      className="h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 pr-10 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-950"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((visible) => !visible)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-2 text-slate-500 hover:text-slate-900 cursor-pointer"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 cursor-pointer"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -353,14 +375,14 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-60 cursor-pointer"
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 dark:bg-orange-600 text-sm font-bold text-white hover:bg-slate-800 dark:hover:bg-orange-500 disabled:opacity-60 cursor-pointer transition shadow-sm"
                 >
                   {isSubmitting ? 'Signing in…' : t('gateway.signin_btn', 'Sign in to workspace')}
                   <ArrowRight className="size-4" />
                 </button>
               </form>
-              <div className="mt-5 border-t border-slate-200 pt-4">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="mt-5 border-t border-slate-200 dark:border-slate-800 pt-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   {t('gateway.demo_accounts', 'Demo accounts')}
                 </div>
                 <div className="mt-2 grid grid-cols-3 gap-2">
@@ -371,10 +393,10 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
                         setUsername(demoUser);
                         setPassword(demoPassword);
                       }}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-left text-[11px] font-semibold text-slate-700 hover:border-slate-400 cursor-pointer"
+                      className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-2 py-2 text-left text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-600 cursor-pointer transition"
                     >
                       <div className="capitalize">{demoUser}</div>
-                      <div className="mt-0.5 font-mono text-[9px] text-slate-500">{demoPassword}</div>
+                      <div className="mt-0.5 font-mono text-[9px] text-slate-500 dark:text-slate-400">{demoPassword}</div>
                     </button>
                   ))}
                 </div>
@@ -384,48 +406,48 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white px-4 py-8 text-sm text-slate-600 sm:px-6 lg:px-8">
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1422] px-4 py-8 text-sm text-slate-600 dark:text-slate-400 sm:px-6 lg:px-8 transition-colors duration-200">
         <div className="mx-auto grid max-w-[1400px] gap-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2 text-slate-950">
+            <div className="flex items-center gap-2 text-slate-950 dark:text-white">
               <div className="flex size-7 items-center justify-center rounded-md bg-orange-600 text-white">
                 <LifeBuoy className="size-4" />
               </div>
               <span className="font-display font-bold">RESQLINK</span>
             </div>
-            <p className="mt-3 max-w-xs text-xs leading-relaxed text-slate-500">
+            <p className="mt-3 max-w-xs text-xs leading-relaxed text-slate-500 dark:text-slate-400">
               {t('gateway.footer_desc', 'A demonstration emergency response network connecting citizens, dispatch teams and hospitals across Bengaluru.')}
             </p>
-            <p className="mt-4 text-[11px] text-slate-400">© 2026 KS School of Engineering and Management</p>
+            <p className="mt-4 text-[11px] text-slate-400 dark:text-slate-500">© 2026 KS School of Engineering and Management</p>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900">{t('gateway.legal', 'Legal')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900 dark:text-slate-100">{t('gateway.legal', 'Legal')}</h2>
             <div className="mt-3 space-y-2">
-              <button onClick={() => setLegalPanel('terms')} className="block text-left text-xs hover:text-orange-700 hover:underline cursor-pointer">
+              <button onClick={() => setLegalPanel('terms')} className="block text-left text-xs hover:text-orange-700 dark:hover:text-orange-400 hover:underline cursor-pointer">
                 {t('gateway.terms', 'Terms and conditions')}
               </button>
-              <button onClick={() => setLegalPanel('privacy')} className="block text-left text-xs hover:text-orange-700 hover:underline cursor-pointer">
+              <button onClick={() => setLegalPanel('privacy')} className="block text-left text-xs hover:text-orange-700 dark:hover:text-orange-400 hover:underline cursor-pointer">
                 {t('gateway.privacy', 'Privacy policy')}
               </button>
-              <button onClick={() => setLegalPanel('cookies')} className="block text-left text-xs hover:text-orange-700 hover:underline cursor-pointer">
+              <button onClick={() => setLegalPanel('cookies')} className="block text-left text-xs hover:text-orange-700 dark:hover:text-orange-400 hover:underline cursor-pointer">
                 {t('gateway.cookies', 'Cookie policy')}
               </button>
             </div>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900">{t('gateway.data_trust', 'Data and trust')}</h2>
+            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900 dark:text-slate-100">{t('gateway.data_trust', 'Data and trust')}</h2>
             <div className="mt-3 space-y-2">
-              <button onClick={onOpenDPDPModal} className="block text-left text-xs hover:text-orange-700 hover:underline cursor-pointer">
+              <button onClick={onOpenDPDPModal} className="block text-left text-xs hover:text-orange-700 dark:hover:text-orange-400 hover:underline cursor-pointer">
                 {t('gateway.dpdp_notice', 'DPDP Act 2023 notice')}
               </button>
-              <span className="block text-xs text-slate-500">Demo environment</span>
-              <span className="block text-xs text-slate-500">Simulated Bengaluru data</span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400">Demo environment</span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400">Simulated Bengaluru data</span>
             </div>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900">{t('gateway.contact', 'Contact')}</h2>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">Questions about this demonstration or the project?</p>
-            <a href="mailto:abhintr13@gmail.com" className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-orange-700 hover:text-orange-800 hover:underline">
+            <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-900 dark:text-slate-100">{t('gateway.contact', 'Contact')}</h2>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Questions about this demonstration or the project?</p>
+            <a href="mailto:abhintr13@gmail.com" className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 hover:underline">
               <span>abhintr13@gmail.com</span>
               <ArrowRight className="size-3.5" />
             </a>
@@ -445,9 +467,9 @@ function LegalNoticePanel({ kind, onClose }: { kind: 'terms' | 'privacy' | 'cook
     cookies: { title: 'Cookie policy', body: 'This demonstration may use local browser storage to preserve session and interface state. It does not represent a production cookie or tracking configuration.' },
   }[kind];
 
-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="legal-notice-title" onClick={onClose}><div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><div className="text-[10px] font-bold uppercase tracking-[0.14em] text-orange-700">RESQLINK notice</div><h2 id="legal-notice-title" className="mt-1 text-xl font-bold text-slate-950">{content.title}</h2></div><button onClick={onClose} className="rounded-md px-2 py-1 text-xl leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-900 cursor-pointer" aria-label="Close notice">×</button></div><p className="mt-5 text-sm leading-relaxed text-slate-600">{content.body}</p><button onClick={onClose} className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800 cursor-pointer">Close notice</button></div></div>;
+  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="legal-notice-title" onClick={onClose}><div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><div className="text-[10px] font-bold uppercase tracking-[0.14em] text-orange-700 dark:text-orange-400">RESQLINK notice</div><h2 id="legal-notice-title" className="mt-1 text-xl font-bold text-slate-950 dark:text-white">{content.title}</h2></div><button onClick={onClose} className="rounded-md px-2 py-1 text-xl leading-none text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white cursor-pointer" aria-label="Close notice">×</button></div><p className="mt-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{content.body}</p><button onClick={onClose} className="mt-6 inline-flex h-10 items-center justify-center rounded-lg bg-slate-900 dark:bg-orange-600 px-4 text-xs font-bold text-white hover:bg-slate-800 dark:hover:bg-orange-500 cursor-pointer transition">Close notice</button></div></div>;
 }
 
 function GatewayPrinciple({ icon, title, detail }: { icon: React.ReactNode; title: string; detail: string }) {
-  return <div className="flex items-start gap-3"><div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-orange-700 shadow-sm ring-1 ring-slate-200">{icon}</div><div><div className="text-sm font-bold text-slate-900">{title}</div><div className="mt-0.5 text-xs leading-relaxed text-slate-500">{detail}</div></div></div>;
+  return <div className="flex items-start gap-3"><div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-800">{icon}</div><div><div className="text-sm font-bold text-slate-900 dark:text-slate-100">{title}</div><div className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{detail}</div></div></div>;
 }

@@ -33,6 +33,7 @@ import {
   MapPin,
   Maximize2,
   Menu,
+  Moon,
   Navigation as NavIcon,
   Radio,
   Search,
@@ -40,6 +41,7 @@ import {
   Siren,
   SlidersHorizontal,
   Stethoscope,
+  Sun,
   Users,
   X,
   Zap,
@@ -161,6 +163,8 @@ export const MainLayout: React.FC = () => {
     triggerSOS,
     language,
     setLanguage,
+    theme,
+    toggleTheme,
     isGatewayActive,
     exitToGateway,
   } = useResqLink();
@@ -555,6 +559,20 @@ export const MainLayout: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center size-8 rounded-lg border border-border bg-card text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                title={theme === 'dark' ? t('theme.light_mode', 'Switch to Light Mode') : t('theme.dark_mode', 'Switch to Dark Mode')}
+                aria-label={t('theme.toggle', 'Toggle Theme')}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="size-4 text-amber-400 animate-in spin-in-180 duration-300" />
+                ) : (
+                  <Moon className="size-4 text-slate-600 animate-in spin-in-180 duration-300" />
+                )}
+              </button>
 
               {/* DPDP Pill */}
               <button
