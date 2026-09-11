@@ -64,6 +64,8 @@
   --color-muted-foreground: #94a3b8;
   --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
+  --color-popover: #0f1422;
+  --color-popover-foreground: #f8fafc;
   --color-input: #1e293b;
 
   /* Product semantics: use these names for new UI instead of raw accents. */
