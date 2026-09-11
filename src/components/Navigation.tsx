@@ -17,9 +17,8 @@ import {
   Activity,
   Sparkles,
   LogOut,
-  Zap,
 } from 'lucide-react';
-import { INDIAN_LANGUAGES, getLanguageLabel } from '../i18n';
+import { INDIAN_LANGUAGES } from '../i18n';
 
 interface NavigationProps {
   onOpenDPDPModal: () => void;

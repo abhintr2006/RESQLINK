@@ -36,11 +36,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_SOS: str = "5/minute"
     RATE_LIMIT_LOGIN: str = "10/minute"
 
-    # ── Twilio SMS (optional) ─────────────────────────────────────────────────
+    # ── Twilio SMS & Voice (optional) ─────────────────────────────────────────
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
     TWILIO_TO_NUMBER: str = "+918000000000"
+    TWILIO_VOICE_FROM_NUMBER: str = ""
+    SOS_VOICE_MESSAGE: str = "Emergency SOS Alert triggered. Immediate medical assistance required."
 
     # ── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
