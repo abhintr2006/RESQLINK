@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AuditLogEntry } from '../../types';
+import { formatISTTime12h } from '../../utils/timeFormat';
 import {
   FileText,
   Search,
@@ -127,8 +128,7 @@ export const AuditLogViewer: React.FC<AuditLogViewerProps> = ({ logs }) => {
                 {filteredLogs.map((entry) => (
                   <tr key={entry.id} className="hover:bg-slate-900/60">
                     <td className="p-2 text-slate-400 whitespace-nowrap text-[10px]">
-                      {new Date(entry.timestamp).toLocaleTimeString()}.
-                      {new Date(entry.timestamp).getMilliseconds().toString().padStart(3, '0')}
+                      {formatISTTime12h(entry.timestamp)}
                     </td>
                     <td className="p-2 font-bold text-white whitespace-nowrap text-[10px]">
                       {entry.alertId}

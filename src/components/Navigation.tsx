@@ -19,6 +19,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { INDIAN_LANGUAGES } from '../i18n';
+import { formatISTTime12h } from '../utils/timeFormat';
 
 interface NavigationProps {
   onOpenDPDPModal: () => void;
@@ -43,10 +44,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
-  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  const [currentTime, setCurrentTime] = useState(() => formatISTTime12h());
 
   useEffect(() => {
-    const timer = window.setInterval(() => setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })), 1000);
+    const timer = window.setInterval(() => setCurrentTime(formatISTTime12h()), 1000);
     return () => window.clearInterval(timer);
   }, []);
 

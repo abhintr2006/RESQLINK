@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
 import { LanguageCode, UserRole } from '../../types';
+import { formatISTTime12h } from '../../utils/timeFormat';
 import {
   ArrowRight,
   Building2,
@@ -82,10 +83,10 @@ export const AuthGatewayScreen: React.FC<AuthGatewayScreenProps> = ({ onOpenDPDP
   const [authError, setAuthError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [legalPanel, setLegalPanel] = useState<'terms' | 'privacy' | 'cookies' | null>(null);
-  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }));
+  const [currentTime, setCurrentTime] = useState(() => formatISTTime12h());
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false })), 1000);
+    const timer = setInterval(() => setCurrentTime(formatISTTime12h()), 1000);
     return () => clearInterval(timer);
   }, []);
 

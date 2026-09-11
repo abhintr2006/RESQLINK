@@ -106,10 +106,10 @@ export const CitizenSOSView: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-slate-400">
-                  GPS TELEMETRY
+                  {t('sos.gps_telemetry', 'GPS TELEMETRY')}
                 </span>
                 <span className="text-[9px] font-mono text-emerald-400 font-bold px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-800/60">
-                  {selectedPreset.isPeripheral ? 'PERIPHERAL WARD' : 'CORE WARD'}
+                  {selectedPreset.isPeripheral ? t('sos.peripheral_ward', 'PERIPHERAL WARD') : t('sos.core_ward', 'CORE WARD')}
                 </span>
               </div>
               <div className="text-sm font-bold text-slate-900 font-mono tracking-tight">
@@ -123,19 +123,19 @@ export const CitizenSOSView: React.FC = () => {
             {networkTier === '5G_HIGH_SPEED' && (
               <>
                 <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-300">5G BROADBAND</span>
+                <span className="text-emerald-300">{t('sos.broadband_5g', '5G BROADBAND')}</span>
               </>
             )}
             {networkTier === '3G_SPOTTY' && (
               <>
                 <Signal className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-amber-300">3G SPOTTY (JITTER)</span>
+                <span className="text-amber-300">{t('sos.spotty_3g', '3G SPOTTY (JITTER)')}</span>
               </>
             )}
             {networkTier === '2G_SMS_FALLBACK' && (
               <>
                 <WifiOff className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-                <span className="text-rose-300">2G SMS FALLBACK ACTIVE</span>
+                <span className="text-rose-300">{t('sos.fallback_2g', '2G SMS FALLBACK ACTIVE')}</span>
               </>
             )}
           </div>
@@ -174,10 +174,10 @@ export const CitizenSOSView: React.FC = () => {
             <div className="flex items-center justify-between px-1">
               <label className="text-xs font-mono font-bold text-slate-700 uppercase tracking-widest flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-                <span>1. SELECT EMERGENCY CLASSIFICATION:</span>
+                <span>{t('sos.select_classification', '1. SELECT EMERGENCY CLASSIFICATION:')}</span>
               </label>
               <span className="text-[10px] font-mono text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                OPTIONAL DETAIL
+                {t('sos.optional_detail', 'OPTIONAL DETAIL')}
               </span>
             </div>
 
@@ -212,7 +212,7 @@ export const CitizenSOSView: React.FC = () => {
                       </span>
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-white leading-tight">
+                      <div className={`font-bold text-xs leading-tight ${isSelected ? 'text-rose-950 font-extrabold' : 'text-slate-900'}`}>
                         {cat.label}
                       </div>
                     </div>
@@ -246,13 +246,13 @@ export const CitizenSOSView: React.FC = () => {
                   {t('sos.activate')}
                 </span>
                 <span className="text-[8px] text-white/90 font-mono tracking-widest font-bold mt-0.5 bg-black/30 px-2 py-0.5 rounded-full border border-white/20">
-                  GET HELP NOW
+                  {t('sos.get_help_now', 'GET HELP NOW')}
                 </span>
               </button>
             </div>
 
             <p className="text-xs text-slate-600 max-w-lg mt-6 text-center leading-relaxed">
-              Request help first. RESQLINK will share your location with the response team. You can add more detail if you are able.
+              {t('sos.helper_note', 'Request help first. RESQLINK will share your location with the response team. You can add more detail if you are able.')}
             </p>
           </div>
 
@@ -263,11 +263,11 @@ export const CitizenSOSView: React.FC = () => {
                 <Volume2 className="w-4 h-4" />
               </div>
               <div>
-                  <strong className="text-slate-900 block font-bold text-xs">
-                  Voice and accessibility support
+                <strong className="text-slate-900 block font-bold text-xs">
+                  {t('sos.voice_support_title', 'Voice and accessibility support')}
                 </strong>
-                  <span className="text-[11px] text-slate-600">
-                  Guidance is available in English, ಕನ್ನಡ, and हिन्दी during an active response.
+                <span className="text-[11px] text-slate-600">
+                  {t('sos.voice_support_desc', 'Guidance is available in English, ಕನ್ನಡ, and हिन्दी during an active response.')}
                 </span>
               </div>
             </div>
