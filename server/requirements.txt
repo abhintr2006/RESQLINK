@@ -26,6 +26,6 @@ twilio>=9.11.0,<10.0
 pytest>=9.1.1,<10.0
 pytest-asyncio>=1.4.0,<2.0
 httpx>=0.28.1,<1.0
-anyio>=4.14.2,<5.0
+anyio>=4.15.1,<5.0
 
 # python -m uvicorn app.main:app --reload --port 8000
