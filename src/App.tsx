@@ -516,35 +516,42 @@ export const MainLayout: React.FC = () => {
                   </button>
 
                   {isLangDropdownOpen && (
-                    <div className="absolute right-0 mt-1.5 w-64 max-h-72 overflow-y-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                      <div className="px-2 py-1 text-[10px] font-mono font-bold text-muted-foreground uppercase border-b border-border mb-1 flex items-center justify-between">
-                        <span>Pan-India Languages (23)</span>
-                        <Languages className="size-3 text-primary" />
-                      </div>
-                      {INDIAN_LANGUAGES.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => {
-                            setLanguage(lang.code);
-                            setIsLangDropdownOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-left transition cursor-pointer ${
-                            language === lang.code
-                              ? 'bg-primary/15 text-primary font-bold'
-                              : 'hover:bg-muted text-foreground'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[10px] text-muted-foreground w-6">{lang.code.toUpperCase()}</span>
-                            <div>
-                              <span className="font-semibold">{lang.nativeName}</span>
-                              <span className="ml-1 text-[10px] text-muted-foreground">({lang.name})</span>
+                    <>
+                      {/* Fixed backdrop to close dropdown on outside click */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsLangDropdownOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-1.5 w-64 max-h-72 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-white/10">
+                        <div className="px-2 py-1 text-[10px] font-mono font-bold text-slate-400 uppercase border-b border-slate-800 mb-1 flex items-center justify-between">
+                          <span>Pan-India Languages (23)</span>
+                          <Languages className="size-3 text-primary" />
+                        </div>
+                        {INDIAN_LANGUAGES.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => {
+                              setLanguage(lang.code);
+                              setIsLangDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-left transition cursor-pointer ${
+                              language === lang.code
+                                ? 'bg-primary/20 text-primary font-bold border border-primary/30'
+                                : 'hover:bg-slate-800 text-slate-200 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[10px] text-slate-400 w-6">{lang.code.toUpperCase()}</span>
+                              <div>
+                                <span className="font-semibold text-slate-100">{lang.nativeName}</span>
+                                <span className="ml-1 text-[10px] text-slate-400">({lang.name})</span>
+                              </div>
                             </div>
-                          </div>
-                          {language === lang.code && <Check className="size-3.5 text-primary" />}
-                        </button>
-                      ))}
-                    </div>
+                            {language === lang.code && <Check className="size-3.5 text-primary" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
