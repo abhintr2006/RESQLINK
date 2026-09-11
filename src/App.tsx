@@ -8,6 +8,8 @@ import { HomePageView } from './components/Home/HomePageView';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
 import { AuthGatewayScreen } from './components/Auth/AuthGatewayScreen';
 import { LanguageCode, UserRole } from './types';
+import { useTranslation, INDIAN_LANGUAGES, getLanguageLabel } from './i18n';
+import { formatISTTime12h } from './utils/timeFormat';
 import {
   Activity,
   Ambulance,
@@ -24,6 +26,7 @@ import {
   Filter,
   Gauge,
   Home,
+  Languages,
   Layers3,
   LifeBuoy,
   LogOut,
@@ -133,14 +136,14 @@ const initialIncidents: [Incident, ...Incident[]] = [
 ];
 
 const navItems = [
-  { label: 'Live operations', icon: Radio },
-  { label: 'Incident queue', icon: Siren, count: '08' },
-  { label: 'Fleet control', icon: Ambulance },
-  { label: 'Hospital ER', icon: Building2 },
-  { label: 'Citizen Lifeline', icon: Users },
-  { label: 'Governance', icon: FileClock },
-  { label: 'Research Paper', icon: FileText },
-  { label: 'Platform Overview', icon: Home },
+  { id: 'Live operations', label: 'Live operations', labelKey: 'nav.live_ops', icon: Radio },
+  { id: 'Incident queue', label: 'Incident queue', labelKey: 'nav.incident_queue', count: '08', icon: Siren },
+  { id: 'Fleet control', label: 'Fleet control', labelKey: 'nav.fleet_control', icon: Ambulance },
+  { id: 'Hospital ER', label: 'Hospital ER', labelKey: 'nav.hospital_er', icon: Building2 },
+  { id: 'Citizen Lifeline', label: 'Citizen Lifeline', labelKey: 'nav.citizen_lifeline', icon: Users },
+  { id: 'Governance', label: 'Governance', labelKey: 'nav.governance', icon: FileClock },
+  { id: 'Research Paper', label: 'Research Paper', labelKey: 'nav.research_paper', icon: FileText },
+  { id: 'Platform Overview', label: 'Platform Overview', labelKey: 'nav.platform_overview', icon: Home },
 ];
 
 const activities = [
@@ -161,6 +164,7 @@ export const MainLayout: React.FC = () => {
     isGatewayActive,
     exitToGateway,
   } = useResqLink();
+  const { t } = useTranslation();
 
   const [activeNav, setActiveNav] = useState('Live operations');
   const [activeFilter, setActiveFilter] = useState<Priority | 'All'>('All');
@@ -169,16 +173,15 @@ export const MainLayout: React.FC = () => {
   const [dispatchedUnits, setDispatchedUnits] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isDPDPOpen, setIsDPDPOpen] = useState(false);
   const [notice, setNotice] = useState('Live sync active · Last update 12 sec ago');
 
-  const [currentTime, setCurrentTime] = useState(() => {
-    return new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
-  });
+  const [currentTime, setCurrentTime] = useState(() => formatISTTime12h());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }));
+      setCurrentTime(formatISTTime12h());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -269,10 +272,10 @@ export const MainLayout: React.FC = () => {
   });
 
   const workspaceLabel = userRole === 'admin'
-    ? 'Command workspace'
+    ? t('nav.command_workspace', 'Command workspace')
     : userRole === 'hospital'
-    ? 'Clinical workspace'
-    : 'Citizen workspace';
+    ? t('nav.clinical_workspace', 'Clinical workspace')
+    : t('nav.citizen_workspace', 'Citizen workspace');
 
   if (isGatewayActive) {
     return (
@@ -343,7 +346,7 @@ export const MainLayout: React.FC = () => {
                     }}
                   >
                     <Icon className={`size-[17px] ${isActive ? 'text-safety-orange' : ''}`} />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey, item.label)}</span>
                     {item.count && (
                       <span className="ml-auto rounded bg-sidebar-badge px-1.5 py-0.5 text-[10px] font-bold text-sidebar-muted">
                         {item.count}
@@ -449,13 +452,13 @@ export const MainLayout: React.FC = () => {
                 <div className="hidden items-center gap-2 text-xs text-muted-foreground min-[390px]:flex">
                   <span className="font-medium text-primary">Bengaluru</span>
                   <span>/</span>
-                  <span>{activeNav}</span>
+                  <span>{navItems.find((n) => n.label === activeNav) ? t(navItems.find((n) => n.label === activeNav)!.labelKey, activeNav) : activeNav}</span>
                 </div>
                 <h1 className="truncate font-display text-lg font-bold sm:mt-1 sm:text-[23px]">
-                  {activeNav}
+                  {navItems.find((n) => n.label === activeNav) ? t(navItems.find((n) => n.label === activeNav)!.labelKey, activeNav) : activeNav}
                 </h1>
                 <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">
-                  {workspaceLabel} <span className="mx-1 text-border">·</span> Demo environment
+                  {workspaceLabel} <span className="mx-1 text-border">·</span> {t('nav.demo_env', 'Demo environment')}
                 </span>
               </div>
             </div>
@@ -477,25 +480,73 @@ export const MainLayout: React.FC = () => {
                   title="Simulate incoming emergency incident"
                 >
                   <Zap className="size-3.5 text-safety-orange" />
-                  <span className="hidden sm:inline">New intake</span>
+                  <span className="hidden sm:inline">{t('nav.new_intake', 'New intake')}</span>
                 </button>
               )}
 
               {/* Multilingual Selector */}
-              <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-xs font-mono font-bold">
-                {(['en', 'kn', 'hi'] as LanguageCode[]).map((lang) => (
+              <div className="relative flex items-center gap-1">
+                <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-xs font-mono font-bold">
+                  {(['en', 'kn', 'hi'] as LanguageCode[]).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setLanguage(lang)}
+                      className={`px-2 py-1 rounded transition cursor-pointer ${
+                        language === lang
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title={getLanguageLabel(lang)}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
                   <button
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    className={`px-2 py-1 rounded transition cursor-pointer ${
-                      language === lang
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    onClick={() => setIsLangDropdownOpen((prev) => !prev)}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-border bg-card text-xs font-bold text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                    title="All 23 Indian Languages"
+                    aria-label="Select Indian Language"
                   >
-                    {lang.toUpperCase()}
+                    <Languages className="size-3.5 text-primary" />
+                    <span className="hidden sm:inline font-mono text-[10px]">{language.toUpperCase()}</span>
+                    <ChevronDown className="size-3 text-muted-foreground" />
                   </button>
-                ))}
+
+                  {isLangDropdownOpen && (
+                    <div className="absolute right-0 mt-1.5 w-64 max-h-72 overflow-y-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="px-2 py-1 text-[10px] font-mono font-bold text-muted-foreground uppercase border-b border-border mb-1 flex items-center justify-between">
+                        <span>Pan-India Languages (23)</span>
+                        <Languages className="size-3 text-primary" />
+                      </div>
+                      {INDIAN_LANGUAGES.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setLanguage(lang.code);
+                            setIsLangDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-left transition cursor-pointer ${
+                            language === lang.code
+                              ? 'bg-primary/15 text-primary font-bold'
+                              : 'hover:bg-muted text-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] text-muted-foreground w-6">{lang.code.toUpperCase()}</span>
+                            <div>
+                              <span className="font-semibold">{lang.nativeName}</span>
+                              <span className="ml-1 text-[10px] text-muted-foreground">({lang.name})</span>
+                            </div>
+                          </div>
+                          {language === lang.code && <Check className="size-3.5 text-primary" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* DPDP Pill */}
@@ -504,7 +555,7 @@ export const MainLayout: React.FC = () => {
                 className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/30 text-[11px] font-mono font-bold text-emerald-400 hover:bg-emerald-900/30 transition cursor-pointer"
               >
                 <ShieldCheck className="size-3.5" />
-                <span>DPDP 2023</span>
+                <span>{t('nav.dpdp_2023', 'DPDP 2023')}</span>
               </button>
 
               {/* Notifications */}
@@ -525,7 +576,7 @@ export const MainLayout: React.FC = () => {
                 title="Lock Terminal & Return to Gateway"
               >
                 <LogOut className="size-3.5" />
-                <span className="hidden xl:inline">Lock Station</span>
+                <span className="hidden xl:inline">{t('nav.lock_station', 'Lock Station')}</span>
               </button>
             </div>
           </header>

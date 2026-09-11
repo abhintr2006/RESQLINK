@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
+import { formatISTTime12h } from '../../utils/timeFormat';
 import {
   Clock,
   ShieldCheck,
@@ -81,7 +82,7 @@ export const PatientHistoryView: React.FC = () => {
                 <div className="flex items-center gap-2.5 text-[11px] text-slate-400">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                    {new Date(alert.timestamp).toLocaleDateString()} {new Date(alert.timestamp).toLocaleTimeString()}
+                    {new Date(alert.timestamp).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })} {formatISTTime12h(alert.timestamp)}
                   </span>
                   <span className="px-2 py-0.2 rounded text-[10px] font-bold bg-emerald-950 border border-emerald-800 text-emerald-300">
                     {alert.status}
