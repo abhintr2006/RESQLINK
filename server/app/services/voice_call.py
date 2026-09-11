@@ -35,7 +35,6 @@ class TwilioVoiceAdapter:
         self.to_number = settings.TWILIO_TO_NUMBER
 
     async def place_call(self, message: str) -> VoiceCallResult:
-        settings = get_settings()
         twiml = f'<Response><Say language="en-IN">{html.escape(message)}</Say></Response>'
         try:
             call = await asyncio.to_thread(
