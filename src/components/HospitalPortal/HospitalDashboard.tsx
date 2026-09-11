@@ -1,20 +1,15 @@
 import React from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
+import { useTranslation } from '../../i18n';
 import { InboundAmbulanceRadar } from './InboundAmbulanceRadar';
 import { ERBedManager } from './ERBedManager';
 import { PreArrivalTriageCard } from './PreArrivalTriageCard';
 import {
   Building2,
   Bed,
-  Shield,
   Activity,
-  Phone,
   Flame,
   CheckCircle2,
-  AlertOctagon,
-  ChevronDown,
-  Sparkles,
-  Zap,
 } from 'lucide-react';
 
 export const HospitalDashboard: React.FC = () => {
@@ -25,6 +20,7 @@ export const HospitalDashboard: React.FC = () => {
     hospitalStatuses,
     activeAlert,
   } = useResqLink();
+  const { t } = useTranslation();
 
   const currentHospital =
     hospitals.find((h) => h.id === selectedHospitalId) || hospitals[0];
@@ -51,11 +47,11 @@ export const HospitalDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold font-mono text-slate-900 tracking-tight">{currentHospital.name}</h1>
                 <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/80">
-                  TRAUMA LEVEL {currentHospital.traumaLevel}
+                  {t('hospital.trauma_level', 'TRAUMA LEVEL')} {currentHospital.traumaLevel}
                 </span>
               </div>
               <p className="text-xs text-slate-600 font-mono">
-                Emergency Department Terminal &bull; {currentHospital.area} &bull; Hotline: <span className="text-slate-200 font-bold">{currentHospital.contactNumber}</span>
+                {t('hospital.er_department', 'Emergency Department')} Terminal &bull; {currentHospital.area} &bull; {t('hospital.hotline', 'Hotline')}: <span className="text-slate-200 font-bold">{currentHospital.contactNumber}</span>
               </p>
             </div>
           </div>
@@ -64,7 +60,9 @@ export const HospitalDashboard: React.FC = () => {
           <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-1.5 shadow-inner">
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             <div>
-              <div className="text-[8px] font-mono uppercase tracking-widest text-slate-500">SELECT FACILITY</div>
+              <div className="text-[8px] font-mono uppercase tracking-widest text-slate-500">
+                {t('hospital.select_facility', 'SELECT FACILITY')}
+              </div>
               <select
                 value={selectedHospitalId}
                 onChange={(e) => setSelectedHospitalId(e.target.value)}
@@ -87,7 +85,7 @@ export const HospitalDashboard: React.FC = () => {
           <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
               <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                INBOUND TRANSPORTS
+                {t('hospital.inbound_transports', 'INBOUND TRANSPORTS')}
               </div>
               <div className="text-xl font-mono font-extrabold text-rose-400 mt-0.5">{totalInbound} ACTIVE</div>
             </div>
@@ -101,7 +99,7 @@ export const HospitalDashboard: React.FC = () => {
           <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
               <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                AVAILABLE ICU BEDS
+                {t('hospital.available_icu_beds', 'AVAILABLE ICU BEDS')}
               </div>
               <div className="text-xl font-mono font-extrabold text-indigo-400 mt-0.5">
                 {currentHospital.icuBedsAvailable} BEDS
@@ -117,10 +115,12 @@ export const HospitalDashboard: React.FC = () => {
           <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
               <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                TRAUMA BAY STATUS
+                {t('hospital.trauma_bay_status', 'TRAUMA BAY STATUS')}
               </div>
               <div className="text-xl font-mono font-extrabold text-amber-300 mt-0.5">
-                {currentStatus?.traumaTeamStandby ? 'STANDBY' : 'GENERAL'}
+                {currentStatus?.traumaTeamStandby
+                  ? t('hospital.standby', 'STANDBY')
+                  : t('hospital.general', 'GENERAL')}
               </div>
             </div>
             <div className="w-8 h-8 rounded-xl bg-amber-950/60 border border-amber-800/80 text-amber-400 flex items-center justify-center shadow-md">
@@ -133,10 +133,12 @@ export const HospitalDashboard: React.FC = () => {
           <div className="double-bezel-inner p-3.5 flex items-center justify-between">
             <div>
               <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                ER INTAKE GATE
+                {t('hospital.er_intake_gate', 'ER INTAKE GATE')}
               </div>
               <div className="text-xl font-mono font-extrabold text-emerald-400 mt-0.5">
-                {currentStatus?.divertStatus ? 'DIVERTING' : 'OPEN'}
+                {currentStatus?.divertStatus
+                  ? t('hospital.diverting', 'DIVERTING')
+                  : t('hospital.open', 'OPEN')}
               </div>
             </div>
             <div className="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 flex items-center justify-center shadow-md">
