@@ -2,7 +2,8 @@
 
 <div align="center">
 
-![CI](https://github.com/srushtiv83-ux/RESQLINK/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/abhintr2006/RESQLINK/actions/workflows/ci.yml/badge.svg)
+![CodeQL](https://github.com/abhintr2006/RESQLINK/actions/workflows/codeql.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
@@ -10,11 +11,13 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?logo=tailwindcss&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite_6-646CFF?logo=vite&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy_2-D71F00?logo=sqlalchemy&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-4169E1?logo=postgresql&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 ![WebSockets](https://img.shields.io/badge/WebSockets-Real--Time-8A2BE2?logo=socketdotio&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-Map-199900?logo=leaflet&logoColor=white)
 ![Twilio](https://img.shields.io/badge/Twilio-SMS_Fallback-F22F46?logo=twilio&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Container_Package-2496ED?logo=docker&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
@@ -31,6 +34,16 @@ Aligned with **UN SDG 3: Good Health and Well-being** and **UN SDG 11: Sustainab
 ![RESQLINK Command Center Dashboard](public/dashboard.png)
 
 *Tactical command center dashboard featuring real-time GIS fleet tracking, multi-portal triage, and live emergency telemetry.*
+
+<br/>
+
+![RESQLINK Patient Portal and Medical ID](public/patient.png)
+
+*Ultra-accessible citizen SOS interface with ABDM/ABHA medical profile integration, emergency contacts, and dual-reading GPS lock.*
+
+<br/>
+
+🌐 **Live Deployment**: [https://resqlink-nine.vercel.app](https://resqlink-nine.vercel.app)
 
 </div>
 
@@ -161,6 +174,34 @@ pnpm install
 pnpm run dev
 ```
 - **App URL**: `http://localhost:3000`
+
+### 4. Or Run with Docker (All-in-One Container)
+Run the entire platform (Frontend UI + FastAPI Backend + Real-time WebSockets) in one single container:
+```bash
+# Pull and run directly from GitHub Packages (GHCR)
+docker run -d -p 8000:8000 \
+  -e JWT_SECRET_KEY="$(openssl rand -hex 32)" \
+  --name resqlink ghcr.io/abhintr2006/resqlink:latest
+
+# Or run locally via Docker Compose:
+export JWT_SECRET_KEY="$(openssl rand -hex 32)"
+docker compose up --build
+```
+- **Unified App & Command Center**: `http://localhost:8000`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
+
+The container runs as a non-root user and persists the SQLite database in the
+`resqlink-data` volume. For production, set `DATABASE_URL` to PostgreSQL and
+provide a unique secret through the deployment platform's secret manager.
+
+### 5. Vercel Frontend Deployment
+Vercel hosts the React frontend only; it does not run the FastAPI API or the
+WebSocket endpoint. Set `VITE_API_BASE_URL` in the Vercel project to the public
+URL of a separately deployed RESQLINK backend, for example
+`https://api.example.com/api`, then redeploy. If this variable is omitted, the
+frontend uses the Vercel origin (`/api`), which is only correct when a reverse
+proxy routes that path to the backend. The Docker deployment is the simplest
+way to run the frontend and backend together.
 
 ---
 

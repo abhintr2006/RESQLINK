@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
 import {
   Bed,
@@ -34,6 +34,16 @@ export const ERBedManager: React.FC = () => {
     divertStatus: false,
     activeAdmissionsCount: 4,
   };
+
+  const [capacityFilter, setCapacityFilter] = useState<'all' | 'ready' | 'attention'>('all');
+  const resourceStatus = {
+    beds: hospital.icuBedsAvailable <= 2 ? 'attention' : 'ready',
+    oxygen: hospital.oxygenAvailable ? 'ready' : 'attention',
+    trauma: status.traumaTeamStandby ? 'ready' : 'attention',
+    intake: status.divertStatus ? 'attention' : 'ready',
+  } as const;
+  const showResource = (resource: keyof typeof resourceStatus) =>
+    capacityFilter === 'all' || capacityFilter === resourceStatus[resource];
 
   return (
     <div className="double-bezel shadow-2xl">
@@ -72,15 +82,45 @@ export const ERBedManager: React.FC = () => {
           </div>
         </div>
 
-        {/* 4 Hardware Tactical Controllers */}
+        {/* Capacity filters */}
+        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="text-xs font-bold text-slate-900">Capacity watch</div>
+            <p className="mt-0.5 text-[11px] text-slate-600">Filter resources that need attention before the next inbound patient.</p>
+          </div>
+          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1" role="group" aria-label="Filter hospital capacity resources">
+            {(['all', 'ready', 'attention'] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setCapacityFilter(filter)}
+                className={`rounded-md px-3 py-1.5 text-[11px] font-bold capitalize transition cursor-pointer ${
+                  capacityFilter === filter
+                    ? filter === 'attention'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-slate-900 text-white'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 4 Capacity controllers */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* 1. ICU Beds Controller */}
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between">
+          <div className={`${showResource('beds') ? '' : 'hidden'} bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between`}>
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 LIVE ICU BEDS
               </span>
-              <Bed className="w-4 h-4 text-indigo-400" />
+              <div className="flex items-center gap-2">
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${resourceStatus.beds === 'attention' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {resourceStatus.beds === 'attention' ? 'ATTENTION' : 'READY'}
+                </span>
+                <Bed className="w-4 h-4 text-indigo-400" />
+              </div>
             </div>
 
             <div className="flex items-center justify-between pt-0.5">
@@ -110,12 +150,17 @@ export const ERBedManager: React.FC = () => {
           </div>
 
           {/* 2. Liquid Oxygen Supply Toggle */}
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between">
+          <div className={`${showResource('oxygen') ? '' : 'hidden'} bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between`}>
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 OXYGEN PLANT
               </span>
-              <Wind className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center gap-2">
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${resourceStatus.oxygen === 'attention' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {resourceStatus.oxygen === 'attention' ? 'ATTENTION' : 'READY'}
+                </span>
+                <Wind className="w-4 h-4 text-emerald-400" />
+              </div>
             </div>
 
             <div className="flex items-center justify-between pt-0.5">
@@ -145,12 +190,17 @@ export const ERBedManager: React.FC = () => {
           </div>
 
           {/* 3. Trauma Team Standby Toggle */}
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between">
+          <div className={`${showResource('trauma') ? '' : 'hidden'} bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between`}>
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 TRAUMA TEAM STANDBY
               </span>
-              <Flame className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-2">
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${resourceStatus.trauma === 'attention' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {resourceStatus.trauma === 'attention' ? 'ATTENTION' : 'READY'}
+                </span>
+                <Flame className="w-4 h-4 text-amber-400" />
+              </div>
             </div>
 
             <div className="flex items-center justify-between pt-0.5">
@@ -180,12 +230,17 @@ export const ERBedManager: React.FC = () => {
           </div>
 
           {/* 4. Overload Diversion Toggle */}
-          <div className="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between">
+          <div className={`${showResource('intake') ? '' : 'hidden'} bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl space-y-2.5 shadow-sm flex flex-col justify-between`}>
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 OVERLOAD DIVERT
               </span>
-              <AlertOctagon className="w-4 h-4 text-rose-400" />
+              <div className="flex items-center gap-2">
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${resourceStatus.intake === 'attention' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {resourceStatus.intake === 'attention' ? 'ATTENTION' : 'READY'}
+                </span>
+                <AlertOctagon className="w-4 h-4 text-rose-400" />
+              </div>
             </div>
 
             <div className="flex items-center justify-between pt-0.5">

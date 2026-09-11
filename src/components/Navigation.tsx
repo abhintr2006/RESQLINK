@@ -14,7 +14,6 @@ import {
   Sparkles,
   LogOut,
   Zap,
-  Search,
 } from 'lucide-react';
 import { INDIAN_LANGUAGES, getLanguageLabel } from '../i18n';
 
@@ -32,19 +31,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
     setUserRole,
     adminViewTab,
     setAdminViewTab,
+    activeAppTab,
+    setActiveAppTab,
     authUser,
     logout,
   } = useResqLink();
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
-  const [langSearch, setLangSearch] = useState('');
-
-  const filteredLanguages = INDIAN_LANGUAGES.filter((l) =>
-    l.name.toLowerCase().includes(langSearch.toLowerCase()) ||
-    l.nativeName.toLowerCase().includes(langSearch.toLowerCase()) ||
-    l.code.toLowerCase().includes(langSearch.toLowerCase())
-  );
 
   const activeCount =
     (activeAlert && activeAlert.status !== 'RESOLVED' && activeAlert.status !== 'CANCELLED' ? 1 : 0) +
@@ -122,70 +115,103 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
           </div>
         </div>
 
-        {/* Center: Admin Dashboard Switcher (Visible ONLY for Admin) */}
-        {userRole === 'admin' ? (
-          <nav className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
-            <button
-              onClick={() => setAdminViewTab('admin')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
-                adminViewTab === 'admin'
-                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-1 ring-white/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Radio className="w-3.5 h-3.5" />
-              <span>Admin Hub</span>
-            </button>
-
-            <button
-              onClick={() => setAdminViewTab('hospital')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
-                adminViewTab === 'hospital'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-1 ring-white/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Hospital ER</span>
-            </button>
-
-            <button
-              onClick={() => setAdminViewTab('patient')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
-                adminViewTab === 'patient'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-white/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Patient Portal</span>
-            </button>
-          </nav>
-        ) : (
-          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-semibold shadow-inner">
-            {userRole === 'hospital' && (
-              <>
-                <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-indigo-300 font-bold">Hospital Emergency Portal</span>
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/40">
-                  Protected
-                </span>
-              </>
-            )}
-            {userRole === 'patient' && (
-              <>
-                <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-300 font-bold">Citizen Emergency Portal</span>
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/40">
-                  Citizen
-                </span>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Right Controls: Role Switcher Dropdown, DPDP, Language, Sign Out */}
+        {/* Center: View Switcher (Homepage vs Dashboard) & Role-specific Dashboard Tabs */}
         <div className="flex items-center gap-2">
+          {/* Primary View Toggle (Homepage vs Dashboard) */}
+          <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
+            <button
+              onClick={() => setActiveAppTab('homepage')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                activeAppTab === 'homepage'
+                  ? 'bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-md shadow-rose-600/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Overview</span>
+            </button>
+
+            <button
+              onClick={() => setActiveAppTab('dashboard')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                activeAppTab === 'dashboard'
+                  ? 'bg-slate-800 text-white shadow-md ring-1 ring-white/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </button>
+          </div>
+
+          {/* Role Dashboard Switcher (Visible when in Dashboard mode) */}
+          {activeAppTab === 'dashboard' && (
+            userRole === 'admin' ? (
+              <nav className="hidden sm:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
+                <button
+                  onClick={() => setAdminViewTab('admin')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    adminViewTab === 'admin'
+                      ? 'bg-rose-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Radio className="w-3 h-3" />
+                  <span>Admin Hub</span>
+                </button>
+
+                <button
+                  onClick={() => setAdminViewTab('hospital')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    adminViewTab === 'hospital'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Building2 className="w-3 h-3" />
+                  <span>Hospital ER</span>
+                </button>
+
+                <button
+                  onClick={() => setAdminViewTab('patient')}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+                    adminViewTab === 'patient'
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Users className="w-3 h-3" />
+                  <span>Patient</span>
+                </button>
+              </nav>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] font-semibold">
+                {userRole === 'hospital' && (
+                  <>
+                    <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-indigo-300 font-bold">Hospital ER Terminal</span>
+                  </>
+                )}
+                {userRole === 'patient' && (
+                  <>
+                    <Users className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-300 font-bold">Citizen SOS Lifeline</span>
+                  </>
+                )}
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Right Controls: IST Clock, Role Switcher Dropdown, DPDP, Language, Sign Out */}
+        <div className="flex items-center gap-2">
+          {/* Live IST Clock */}
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-mono text-slate-400">
+            <Clock3 className="size-3.5 text-slate-500" />
+            <span className="font-bold text-slate-200">{currentTime}</span>
+            <span className="text-[9px] text-slate-500">IST</span>
+          </div>
+
           {/* Interactive Role Switcher with Tactical HUD look */}
           <div className="relative">
             <button
@@ -212,7 +238,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                   <span>Switch Role View</span>
                   <Sparkles className="w-3 h-3 text-rose-400" />
                 </div>
-                {(userRole === 'admin' ? (['admin', 'hospital', 'patient'] as UserRole[]) : [userRole]).map((role) => {
+                {(['admin', 'hospital', 'patient'] as UserRole[]).map((role) => {
                   const cfg = roleConfigs[role];
                   const Icon = cfg.icon;
                   const isSelected = userRole === role;

@@ -27,6 +27,70 @@
   --color-emergency-blue: #3b82f6;
   --color-emergency-purple: #a855f7;
 
+  /* Reslink-Redux Tactical Command & Map Tokens */
+  --color-safety-orange: #f97316;
+  --color-safety-orange-foreground: #ffffff;
+  --color-safety-orange-soft: rgba(249, 115, 22, 0.15);
+  --color-status-green: #22c55e;
+  --color-status-green-soft: rgba(34, 197, 94, 0.15);
+  --color-chart-yellow: #eab308;
+  --color-chart-yellow-soft: rgba(234, 179, 8, 0.15);
+  --color-chart-yellow-foreground: #fef08a;
+  --color-chart-violet: #a855f7;
+  --color-chart-violet-soft: rgba(168, 85, 247, 0.15);
+  --color-map-surface: #090d16;
+  --color-map-road: #1e293b;
+  --color-map-minor: #0f172a;
+  --color-map-route: #f97316;
+  --color-map-label: #94a3b8;
+
+  /* Reslink-Redux Shell & Sidebar Tokens */
+  --color-sidebar: #0f1523;
+  --color-sidebar-foreground: #f1f5f9;
+  --color-sidebar-primary: #f97316;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #192237;
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: #1e293b;
+  --color-sidebar-muted: #94a3b8;
+  --color-sidebar-badge: #1e293b;
+
+  --color-background: #090d16;
+  --color-foreground: #f8fafc;
+  --color-card: #0f1422;
+  --color-card-foreground: #f8fafc;
+  --color-border: #1e293b;
+  --color-muted: #172033;
+  --color-muted-foreground: #94a3b8;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-input: #1e293b;
+
+  /* Product semantics: use these names for new UI instead of raw accents. */
+  --color-action: #c2410c;
+  --color-action-foreground: #ffffff;
+  --color-action-soft: #fff7ed;
+  --color-critical: #b91c1c;
+  --color-critical-foreground: #ffffff;
+  --color-critical-soft: #fef2f2;
+  --color-attention: #a16207;
+  --color-attention-foreground: #172033;
+  --color-attention-soft: #fefce8;
+  --color-ready: #15803d;
+  --color-ready-foreground: #ffffff;
+  --color-ready-soft: #f0fdf4;
+  --color-info: #1d4ed8;
+  --color-info-foreground: #ffffff;
+  --color-info-soft: #eff6ff;
+  --color-surface-app: #f8fafc;
+  --color-surface-panel: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-border-subtle: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-ink: #172033;
+  --color-ink-muted: #526176;
+  --color-focus: #c2410c;
+
   /* Custom high-performance animations */
   --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-ripple: ripple 1.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
@@ -74,9 +138,113 @@
     font-weight: 700;
   }
 
+  :focus-visible {
+    outline: 3px solid #f97316;
+    outline-offset: 3px;
+  }
+
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+
   code, pre, .font-mono, .hud-telemetry {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-feature-settings: "tnum" 1, "zero" 1;
+  }
+}
+
+/* Care-facing portals use calm surfaces; the command centre remains dark. */
+.citizen-surface,
+.hospital-surface {
+  --care-bg: #f4f7fb;
+  --care-panel: #ffffff;
+  --care-border: #d8e1eb;
+  --care-ink: #172033;
+  background: var(--care-bg);
+  color: var(--care-ink);
+}
+
+.citizen-surface .double-bezel,
+.hospital-surface .double-bezel {
+  background: var(--care-border);
+  box-shadow: 0 12px 28px -18px rgba(23, 32, 51, 0.35);
+}
+
+.citizen-surface .double-bezel-inner,
+.hospital-surface .double-bezel-inner {
+  background: var(--care-panel) !important;
+  color: var(--care-ink);
+  backdrop-filter: none;
+}
+
+.hospital-surface [class*='bg-slate-950'],
+.hospital-surface [class*='bg-slate-900'] {
+  background: var(--care-panel) !important;
+}
+
+.citizen-surface .care-panel,
+.hospital-surface .care-panel {
+  background: var(--care-panel);
+  border-color: var(--care-border);
+}
+
+.public-overview [class*='bg-slate-900/70'],
+.public-overview [class*='bg-slate-900/60'] {
+  background: #ffffff !important;
+  border-color: #d8e1eb !important;
+  box-shadow: 0 10px 24px -20px rgba(23, 32, 51, 0.4);
+}
+
+.public-overview h2,
+.public-overview h3 {
+  color: #172033;
+}
+
+.public-overview [class*='bg-slate-900/60'] p,
+.public-overview [class*='bg-slate-900/60'] li {
+  color: #526176;
+}
+
+.public-overview [class*='font-black'][class*='text-white'] {
+  color: #172033 !important;
+}
+
+.product-shell {
+  background: var(--color-surface-app);
+  color: var(--color-ink);
+}
+
+.product-shell-sidebar {
+  background: #172033;
+  color: #f8fafc;
+}
+
+.product-shell-panel {
+  background: var(--color-surface-panel);
+  border-color: var(--color-border-subtle);
+}
+
+.status-ready {
+  background: var(--color-ready-soft);
+  color: var(--color-ready);
+}
+
+.status-attention {
+  background: var(--color-attention-soft);
+  color: var(--color-attention);
+}
+
+.status-critical {
+  background: var(--color-critical-soft);
+  color: var(--color-critical);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
