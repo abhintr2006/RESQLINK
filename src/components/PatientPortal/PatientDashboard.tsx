@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
+import { useTranslation } from '../../i18n';
 import { CitizenSOSView } from '../CitizenApp/CitizenSOSView';
 import { DigitalHealthCard } from './DigitalHealthCard';
 import { NearbyHospitalDirectory } from './NearbyHospitalDirectory';
@@ -16,28 +17,29 @@ import {
 
 export const PatientDashboard: React.FC = () => {
   const { activeAlert, patientProfile } = useResqLink();
+  const { t } = useTranslation();
   const [patientTab, setPatientTab] = useState<'sos' | 'healthCard' | 'hospitals' | 'history'>('sos');
 
   const tabs = [
     {
       id: 'sos' as const,
-      label: 'EMERGENCY SOS',
+      label: t('patient.tab_sos', 'EMERGENCY SOS'),
       icon: AlertOctagon,
       badge: activeAlert ? 'ACTIVE RADAR' : undefined,
     },
     {
       id: 'healthCard' as const,
-      label: 'DIGITAL HEALTH CARD',
+      label: t('patient.tab_health_card', 'DIGITAL HEALTH CARD'),
       icon: CreditCard,
     },
     {
       id: 'hospitals' as const,
-      label: 'NEARBY ER & ICU BEDS',
+      label: t('patient.tab_hospitals', 'NEARBY ER & ICU BEDS'),
       icon: Building2,
     },
     {
       id: 'history' as const,
-      label: 'EMERGENCY HISTORY',
+      label: t('patient.tab_history', 'EMERGENCY HISTORY'),
       icon: Clock,
     },
   ];
@@ -56,13 +58,13 @@ export const PatientDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold font-mono text-white tracking-tight">PATIENT EMERGENCY LIFELINE</h1>
+                <h1 className="text-base font-bold font-mono text-white tracking-tight">{t('patient.hero_title', 'PATIENT EMERGENCY LIFELINE')}</h1>
                 <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/80">
-                  CITIZEN PORTAL
+                  {t('patient.hero_badge', 'CITIZEN PORTAL')}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                Active Citizen: <strong className="text-slate-100">{patientProfile.name}</strong> &bull; ABHA ID: <span className="text-slate-300">{patientProfile.abhaId}</span> &bull; 108 CAD Synced
+                {t('patient.active_citizen', 'Active Citizen')}: <strong className="text-slate-100">{patientProfile.name}</strong> &bull; ABHA ID: <span className="text-slate-300">{patientProfile.abhaId}</span> &bull; 108 CAD Synced
               </p>
             </div>
           </div>
@@ -70,7 +72,7 @@ export const PatientDashboard: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 text-xs font-mono font-bold shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>DPDP ACT 2023 ENCRYPTED</span>
+              <span>{t('patient.dpdp_encrypted', 'DPDP ACT 2023 ENCRYPTED')}</span>
             </div>
           </div>
         </div>

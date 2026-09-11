@@ -21,6 +21,8 @@ export type AlertStatus =
 
 export type NetworkTier = '5G_HIGH_SPEED' | '3G_SPOTTY' | '2G_SMS_FALLBACK';
 
+export type ThemeMode = 'light' | 'dark';
+
 export type LanguageCode =
   | 'en'   // English
   | 'hi'   // Hindi

@@ -16,6 +16,7 @@ import {
   HospitalEmergencyStatus,
   HospitalAdmissionRecord,
   PresetLocation,
+  ThemeMode,
 } from '../types';
 import {
   BENGALURU_HOSPITALS,
@@ -31,6 +32,7 @@ import { TwilioSmsService } from '../services/twilioSmsService';
 import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
+import { getThemeCookie, setThemeCookie } from '../utils/themeCookie';
 
 import { api, authStorage, AuthUser } from '../services/api';
 
@@ -57,6 +59,9 @@ interface ResqLinkContextType {
   selectedPreset: PresetLocation;
   networkTier: NetworkTier;
   language: LanguageCode;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
   assistiveHighContrast: boolean;
   voiceGuidanceEnabled: boolean;
   responders: Responder[];
@@ -153,6 +158,56 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [currentLocation, setCurrentLocation] = useState<GeoCoordinate | null>(null);
   const [networkTier, setNetworkTier] = useState<NetworkTier>('5G_HIGH_SPEED');
   const [language, setLanguage] = useState<LanguageCode>('en');
+
+  // Theme mode: session cookie preference -> OS media query -> 'dark'
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const savedCookie = getThemeCookie();
+    if (savedCookie) return savedCookie;
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'dark';
+  });
+
+  // Sync theme class to document.documentElement and document.body
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    }
+  }, [theme]);
+
+  // Listen to OS theme changes if user hasn't explicitly set a session cookie
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only auto-switch if no session cookie has been set by the user
+      if (!getThemeCookie()) {
+        setThemeState(e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const setTheme = useCallback((newTheme: ThemeMode) => {
+    setThemeState(newTheme);
+    setThemeCookie(newTheme);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      setThemeCookie(nextTheme);
+      return nextTheme;
+    });
+  }, []);
+
   const [assistiveHighContrast, setAssistiveHighContrast] = useState(false);
   const [voiceGuidanceEnabled, setVoiceGuidanceEnabled] = useState(true);
   const [responders, setResponders] = useState<Responder[]>(INITIAL_RESPONDERS);
@@ -446,6 +501,9 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       updateAlertStatus,
       setNetworkTier,
       setLanguage,
+      theme,
+      setTheme,
+      toggleTheme,
       setSelectedPreset,
       toggleHighContrast: () => setAssistiveHighContrast((previous) => !previous),
       toggleVoiceGuidance: () => setVoiceGuidanceEnabled((previous) => !previous),

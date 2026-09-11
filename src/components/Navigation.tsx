@@ -18,7 +18,8 @@ import {
   Sparkles,
   LogOut,
 } from 'lucide-react';
-import { INDIAN_LANGUAGES } from '../i18n';
+import { INDIAN_LANGUAGES, useTranslation } from '../i18n';
+import { formatISTTime12h } from '../utils/timeFormat';
 
 interface NavigationProps {
   onOpenDPDPModal: () => void;
@@ -39,14 +40,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
     authUser,
     logout,
   } = useResqLink();
+  const { t } = useTranslation();
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
-  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  const [currentTime, setCurrentTime] = useState(() => formatISTTime12h());
 
   useEffect(() => {
-    const timer = window.setInterval(() => setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })), 1000);
+    const timer = window.setInterval(() => setCurrentTime(formatISTTime12h()), 1000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -145,7 +147,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
               }`}
             >
               <Home className="w-3.5 h-3.5" />
-              <span>Overview</span>
+              <span>{t('nav.overview', 'Overview')}</span>
             </button>
 
             <button
@@ -157,7 +159,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
               }`}
             >
               <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
+              <span>{t('nav.dashboard', 'Dashboard')}</span>
             </button>
           </div>
 
@@ -174,7 +176,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                   }`}
                 >
                   <Radio className="w-3 h-3" />
-                  <span>Admin Hub</span>
+                  <span>{t('nav.admin_hub', 'Admin Hub')}</span>
                 </button>
 
                 <button
@@ -186,7 +188,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                   }`}
                 >
                   <Building2 className="w-3 h-3" />
-                  <span>Hospital ER</span>
+                  <span>{t('nav.hospital_er', 'Hospital ER')}</span>
                 </button>
 
                 <button
@@ -198,7 +200,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                   }`}
                 >
                   <Users className="w-3 h-3" />
-                  <span>Patient</span>
+                  <span>{t('nav.patient', 'Patient')}</span>
                 </button>
               </nav>
             ) : (
@@ -206,13 +208,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
                 {userRole === 'hospital' && (
                   <>
                     <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="text-indigo-300 font-bold">Hospital ER Terminal</span>
+                    <span className="text-indigo-300 font-bold">{t('hospital.er_department', 'Hospital ER Terminal')}</span>
                   </>
                 )}
                 {userRole === 'patient' && (
                   <>
                     <Users className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-300 font-bold">Citizen SOS Lifeline</span>
+                    <span className="text-emerald-300 font-bold">{t('nav.citizen_lifeline', 'Citizen SOS Lifeline')}</span>
                   </>
                 )}
               </div>
