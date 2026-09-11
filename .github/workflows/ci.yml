@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: ["main", "feat/**", "fix/**"]
+    branches: ["main", "master", "feat/**", "fix/**"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "master"]
+
+permissions:
+  contents: read
 
 jobs:
   # ── Python backend ──────────────────────────────────────────────────────────
@@ -36,7 +39,7 @@ jobs:
       - name: Lint (ruff)
         run: |
           pip install ruff --quiet
-          ruff check app/ tests/ --select E,F,W,I --ignore E501
+          ruff check app/ tests/ --select E,F,W,I --ignore E501 --output-format=github
 
       - name: Type check (pyright)
         continue-on-error: true   # informational — not a gate yet

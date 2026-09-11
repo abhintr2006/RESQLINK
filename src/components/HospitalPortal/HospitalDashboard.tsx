@@ -39,22 +39,22 @@ export const HospitalDashboard: React.FC = () => {
       : 0;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-5">
+    <div className="hospital-surface max-w-7xl mx-auto space-y-5 rounded-3xl p-3 sm:p-5">
       {/* Top Banner with Hospital Selector - Double Bezel */}
       <div className="double-bezel shadow-2xl">
-        <div className="double-bezel-inner p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 bg-slate-950">
+        <div className="double-bezel-inner p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-700/80 flex items-center justify-center text-indigo-400 shadow-xl">
               <Building2 className="w-6 h-6" />
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold font-mono text-white tracking-tight">{currentHospital.name}</h1>
+                <h1 className="text-xl font-bold font-mono text-slate-900 tracking-tight">{currentHospital.name}</h1>
                 <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/80">
                   TRAUMA LEVEL {currentHospital.traumaLevel}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="text-xs text-slate-600 font-mono">
                 Emergency Department Terminal &bull; {currentHospital.area} &bull; Hotline: <span className="text-slate-200 font-bold">{currentHospital.contactNumber}</span>
               </p>
             </div>

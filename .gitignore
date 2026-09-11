@@ -13,6 +13,7 @@ lerna-debug.log*
 # Dependencies
 # ============================================================
 node_modules/
+.pnpm-store/
 
 # ============================================================
 # Frontend - Vite / React / TypeScript
@@ -98,6 +99,8 @@ ehthumbs.db
 .agents/
 .claude/
 skills-lock.json
+.gemini/
+AGENTS.md
 
 # ============================================================
 # Testing / Coverage
