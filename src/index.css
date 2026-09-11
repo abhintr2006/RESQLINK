@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+@theme inline {
   /* Tactical Emergency Command Color Tokens */
   --color-resq-50: #fff1f2;
   --color-resq-100: #ffe4e6;
@@ -45,28 +45,28 @@
   --color-map-label: #94a3b8;
 
   /* Reslink-Redux Shell & Sidebar Tokens */
-  --color-sidebar: #0f1523;
-  --color-sidebar-foreground: #f1f5f9;
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-foreground: var(--color-sidebar-foreground);
   --color-sidebar-primary: #f97316;
   --color-sidebar-primary-foreground: #ffffff;
   --color-sidebar-accent: #192237;
   --color-sidebar-accent-foreground: #ffffff;
-  --color-sidebar-border: #1e293b;
+  --color-sidebar-border: var(--color-sidebar-border);
   --color-sidebar-muted: #94a3b8;
   --color-sidebar-badge: #1e293b;
 
-  --color-background: #090d16;
-  --color-foreground: #f8fafc;
-  --color-card: #0f1422;
-  --color-card-foreground: #f8fafc;
-  --color-border: #1e293b;
-  --color-muted: #172033;
-  --color-muted-foreground: #94a3b8;
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-border: var(--color-border);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
   --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
-  --color-popover: #0f1422;
-  --color-popover-foreground: #f8fafc;
-  --color-input: #1e293b;
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-input: var(--color-input);
 
   /* Product semantics: use these names for new UI instead of raw accents. */
   --color-action: #c2410c;
@@ -84,13 +84,13 @@
   --color-info: #1d4ed8;
   --color-info-foreground: #ffffff;
   --color-info-soft: #eff6ff;
-  --color-surface-app: #f8fafc;
-  --color-surface-panel: #ffffff;
-  --color-surface-raised: #ffffff;
-  --color-border-subtle: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-ink: #172033;
-  --color-ink-muted: #526176;
+  --color-surface-app: var(--color-background);
+  --color-surface-panel: var(--color-card);
+  --color-surface-raised: var(--color-card);
+  --color-border-subtle: var(--color-border);
+  --color-border-strong: var(--color-muted-foreground);
+  --color-ink: var(--color-foreground);
+  --color-ink-muted: var(--color-muted-foreground);
   --color-focus: #c2410c;
 
   /* Custom high-performance animations */
@@ -254,18 +254,21 @@
 }
 
 .product-shell {
-  background: var(--color-surface-app);
-  color: var(--color-ink);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .product-shell-sidebar {
-  background: #172033;
-  color: #f8fafc;
+  background: var(--color-sidebar);
+  color: var(--color-sidebar-foreground);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .product-shell-panel {
-  background: var(--color-surface-panel);
-  border-color: var(--color-border-subtle);
+  background: var(--color-card);
+  border-color: var(--color-border);
+  transition: background-color 0.2s ease;
 }
 
 .status-ready {
