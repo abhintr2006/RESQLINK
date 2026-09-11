@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useResqLink } from '../context/ResqLinkContext';
 import { LanguageCode, UserRole } from '../types';
 import {
   ShieldAlert,
+  Home,
+  LayoutDashboard,
+  Clock3,
+  Search,
   Radio,
   Building2,
   Users,
@@ -38,6 +42,20 @@ export const Navigation: React.FC<NavigationProps> = ({ onOpenDPDPModal }) => {
   } = useResqLink();
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [langSearch, setLangSearch] = useState('');
+  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const filteredLanguages = useMemo(() => {
+    const query = langSearch.trim().toLowerCase();
+    if (!query) return INDIAN_LANGUAGES;
+    return INDIAN_LANGUAGES.filter((lang) => lang.name.toLowerCase().includes(query) || lang.nativeName.toLowerCase().includes(query) || lang.code.toLowerCase().includes(query));
+  }, [langSearch]);
 
   const activeCount =
     (activeAlert && activeAlert.status !== 'RESOLVED' && activeAlert.status !== 'CANCELLED' ? 1 : 0) +
