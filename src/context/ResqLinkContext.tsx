@@ -32,7 +32,6 @@ import { TwilioSmsService } from '../services/twilioSmsService';
 import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
-import { getThemeCookie, setThemeCookie } from '../utils/themeCookie';
 
 import { api, authStorage, AuthUser } from '../services/api';
 
@@ -159,54 +158,17 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [networkTier, setNetworkTier] = useState<NetworkTier>('5G_HIGH_SPEED');
   const [language, setLanguage] = useState<LanguageCode>('en');
 
-  // Theme mode: session cookie preference -> OS media query -> 'dark'
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const savedCookie = getThemeCookie();
-    if (savedCookie) return savedCookie;
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'dark';
-  });
+  // Theme locked to permanent tactical dark mode
+  const [theme] = useState<ThemeMode>('dark');
 
-  // Sync theme class to document.documentElement and document.body
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.remove('dark');
-      root.classList.add('light');
-    }
-  }, [theme]);
-
-  // Listen to OS theme changes if user hasn't explicitly set a session cookie
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-switch if no session cookie has been set by the user
-      if (!getThemeCookie()) {
-        setThemeState(e.matches ? 'dark' : 'light');
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    root.classList.add('dark');
+    root.classList.remove('light');
   }, []);
 
-  const setTheme = useCallback((newTheme: ThemeMode) => {
-    setThemeState(newTheme);
-    setThemeCookie(newTheme);
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const nextTheme = prev === 'dark' ? 'light' : 'dark';
-      setThemeCookie(nextTheme);
-      return nextTheme;
-    });
-  }, []);
+  const setTheme = useCallback((_newTheme: ThemeMode) => {}, []);
+  const toggleTheme = useCallback(() => {}, []);
 
   const [assistiveHighContrast, setAssistiveHighContrast] = useState(false);
   const [voiceGuidanceEnabled, setVoiceGuidanceEnabled] = useState(true);
