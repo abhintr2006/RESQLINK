@@ -53,34 +53,34 @@ export const NearbyHospitalDirectory: React.FC = () => {
     .sort((a, b) => a.distanceKm - b.distanceKm);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 font-mono">
       {/* Search & Filter Header Bar */}
       <div className="double-bezel shadow-xl">
-        <div className="double-bezel-inner p-4 md:p-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex-1 min-w-[280px] relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        <div className="double-bezel-inner p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-950">
+          <div className="flex-1 min-w-[240px] relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search Bengaluru ER centers, trauma hospitals, or areas..."
+              placeholder="Search Bengaluru ER centers, trauma hospitals, or wards..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700/80 text-slate-100 text-xs pl-11 pr-4 py-3 rounded-2xl focus:outline-none focus:border-rose-500 placeholder-slate-500 font-medium"
+              className="w-full bg-slate-900 border border-slate-700/80 text-slate-100 text-xs pl-9 pr-3 py-2 rounded-xl focus:outline-none focus:border-rose-500 placeholder-slate-500 font-mono"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Trauma Tier:</span>
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">TRAUMA TIER:</span>
             {(['ALL', 1, 2] as const).map((tier) => (
               <button
                 key={tier}
                 onClick={() => setFilterTraumaLevel(tier)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                   filterTraumaLevel === tier
-                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30'
+                    ? 'bg-rose-600 text-white shadow-md'
                     : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800'
                 }`}
               >
-                {tier === 'ALL' ? 'All Tiers' : `Level ${tier}`}
+                {tier === 'ALL' ? 'ALL TIERS' : `LEVEL ${tier}`}
               </button>
             ))}
           </div>
@@ -88,7 +88,7 @@ export const NearbyHospitalDirectory: React.FC = () => {
       </div>
 
       {/* Hospital Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {filteredHospitals.map((hospital) => {
           const isCriticalBed = hospital.icuBedsAvailable <= 3;
           const isFull = hospital.icuBedsAvailable === 0 || hospital.divertStatus;
@@ -96,40 +96,40 @@ export const NearbyHospitalDirectory: React.FC = () => {
           return (
             <div
               key={hospital.id}
-              className={`double-bezel transition-transform duration-300 hover:-translate-y-1 ${
+              className={`double-bezel transition-transform duration-200 hover:-translate-y-0.5 ${
                 isFull ? 'opacity-85' : ''
               }`}
             >
               <div
-                className={`double-bezel-inner p-6 flex flex-col justify-between h-full space-y-5 relative overflow-hidden ${
+                className={`double-bezel-inner p-4 flex flex-col justify-between h-full space-y-3.5 relative overflow-hidden ${
                   isFull ? 'bg-amber-950/20' : 'bg-slate-950'
                 }`}
               >
                 {/* Divert Warning Bar */}
                 {isFull && (
-                  <div className="absolute top-0 right-0 left-0 bg-amber-500/20 border-b border-amber-500/40 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300 flex items-center justify-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    <span>{hospital.divertStatus ? 'ER Under Diversion' : 'ICU Beds Full'}</span>
+                  <div className="absolute top-0 right-0 left-0 bg-amber-500/20 border-b border-amber-500/40 px-3 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-300 flex items-center justify-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{hospital.divertStatus ? 'ER UNDER DIVERSION' : 'ICU BEDS AT CAPACITY'}</span>
                   </div>
                 )}
 
-                <div className={`space-y-4 ${isFull ? 'pt-4' : ''}`}>
+                <div className={`space-y-3 ${isFull ? 'pt-3' : ''}`}>
                   {/* Top Meta */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <h3 className="text-base font-black text-white line-clamp-1">{hospital.name}</h3>
-                      <p className="text-xs text-slate-400">{hospital.area}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-0.5">
+                      <h3 className="text-sm font-bold text-white line-clamp-1">{hospital.name}</h3>
+                      <p className="text-[11px] text-slate-400">{hospital.area}</p>
                     </div>
-                    <span className="shrink-0 text-xs font-black px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-rose-400 shadow-sm">
+                    <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-rose-400 shadow-sm">
                       {hospital.distanceKm} km
                     </span>
                   </div>
 
                   {/* Bed & Trauma Badges */}
-                  <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="grid grid-cols-2 gap-2">
                     {/* ICU Beds Status */}
                     <div
-                      className={`p-3 rounded-2xl border flex items-center gap-2.5 ${
+                      className={`p-2.5 rounded-xl border flex items-center gap-2 ${
                         hospital.icuBedsAvailable > 8
                           ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
                           : hospital.icuBedsAvailable > 0
@@ -137,62 +137,60 @@ export const NearbyHospitalDirectory: React.FC = () => {
                           : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
                       }`}
                     >
-                      <Bed className="w-5 h-5 shrink-0" />
+                      <Bed className="w-4 h-4 shrink-0" />
                       <div>
-                        <div className="text-[9px] uppercase font-black tracking-widest opacity-80">
-                          ICU Beds
+                        <div className="text-[8px] uppercase font-bold tracking-wider opacity-80">
+                          ICU BEDS
                         </div>
-                        <div className="text-base font-black">{hospital.icuBedsAvailable} Open</div>
+                        <div className="text-sm font-bold">{hospital.icuBedsAvailable} OPEN</div>
                       </div>
                     </div>
 
                     {/* Trauma Tier */}
-                    <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex items-center gap-2.5 text-slate-200">
-                      <Shield className="w-5 h-5 text-indigo-400 shrink-0" />
+                    <div className="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl flex items-center gap-2 text-slate-200">
+                      <Shield className="w-4 h-4 text-cyan-400 shrink-0" />
                       <div>
-                        <div className="text-[9px] uppercase font-black tracking-widest text-slate-500">
-                          Trauma Tier
+                        <div className="text-[8px] uppercase font-bold tracking-wider text-slate-500">
+                          TRAUMA TIER
                         </div>
-                        <div className="text-xs font-bold text-indigo-300">
-                          Level {hospital.traumaLevel} {hospital.traumaLevel === 1 ? 'Tertiary' : 'Secondary'}
+                        <div className="text-[11px] font-bold text-cyan-300">
+                          LEVEL {hospital.traumaLevel} {hospital.traumaLevel === 1 ? 'TERTIARY' : 'SECONDARY'}
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Liquid Oxygen and ER Readiness */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <Wind className={`w-3.5 h-3.5 ${hospital.oxygenAvailable ? 'text-emerald-400' : 'text-rose-400'}`} />
-                      {hospital.oxygenAvailable ? 'Oxygen Ready' : 'Oxygen Limited'}
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                    <span className="flex items-center gap-1 font-medium">
+                      <Wind className={`w-3 h-3 ${hospital.oxygenAvailable ? 'text-emerald-400' : 'text-rose-400'}`} />
+                      {hospital.oxygenAvailable ? 'O2 PLANT READY' : 'O2 REFILL REQ'}
                     </span>
-                    <span className="flex items-center gap-1.5 font-medium text-slate-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      24x7 ER Active
+                    <span className="flex items-center gap-1 font-medium text-slate-300">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      24X7 ER INTAKE
                     </span>
                   </div>
                 </div>
 
-                {/* Action Buttons with Button-in-Button architecture */}
-                <div className="pt-2 flex items-center gap-2.5">
+                {/* Action Buttons */}
+                <div className="pt-1 flex items-center gap-2">
                   <a
                     href={`tel:${hospital.contactNumber}`}
-                    className="flex-1 flex items-center justify-between pl-4 pr-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-100 border border-slate-700/80 rounded-2xl text-xs font-bold transition-all duration-300 active:scale-[0.98] shadow-md"
+                    className="flex-1 flex items-center justify-between px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-100 border border-slate-700/80 rounded-xl text-[11px] font-bold transition active:scale-95 shadow-sm"
                   >
-                    <span>Emergency Hotline</span>
-                    <div className="w-7 h-7 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-300">
-                      <Phone className="w-3.5 h-3.5" />
-                    </div>
+                    <span>EMERGENCY HOTLINE</span>
+                    <Phone className="w-3 h-3 text-emerald-400" />
                   </a>
 
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-11 h-11 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-md hover:text-white"
+                    className="w-8 h-8 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-xl flex items-center justify-center transition shadow-sm hover:text-white"
                     title="Open in Maps"
                   >
-                    <ArrowUpRight className="w-4 h-4 text-rose-400" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />
                   </a>
                 </div>
               </div>

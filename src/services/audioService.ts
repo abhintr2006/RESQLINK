@@ -80,10 +80,30 @@ class AudioService {
       this.synth.cancel(); // Stop any pending speech
       const utterance = new SpeechSynthesisUtterance(text);
       
-      const langCodes: Record<LanguageCode, string> = {
+      const langCodes: Record<string, string> = {
         en: 'en-IN',
+        hi: 'hi-IN',
         kn: 'kn-IN',
-        hi: 'hi-IN'
+        ta: 'ta-IN',
+        te: 'te-IN',
+        ml: 'ml-IN',
+        mr: 'mr-IN',
+        bn: 'bn-IN',
+        gu: 'gu-IN',
+        pa: 'pa-IN',
+        or: 'or-IN',
+        as: 'as-IN',
+        ur: 'ur-IN',
+        sa: 'sa-IN',
+        kok: 'kok-IN',
+        mai: 'mai-IN',
+        mni: 'mni-IN',
+        ne: 'ne-IN',
+        brx: 'brx-IN',
+        doi: 'doi-IN',
+        ks: 'ks-IN',
+        sat: 'sat-IN',
+        sd: 'sd-IN',
       };
       utterance.lang = langCodes[lang] || 'en-IN';
       utterance.rate = 0.95;

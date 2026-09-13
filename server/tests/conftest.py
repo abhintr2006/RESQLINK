@@ -12,6 +12,10 @@ os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-ci-must-be-at-least-32-chars
 os.environ["LOG_LEVEL"] = "WARNING"
 os.environ["RATE_LIMIT_LOGIN"] = "1000/minute"
 os.environ["RATE_LIMIT_SOS"] = "1000/minute"
+os.environ["TWILIO_ACCOUNT_SID"] = ""
+os.environ["TWILIO_AUTH_TOKEN"] = ""
+os.environ["TWILIO_FROM_NUMBER"] = ""
+os.environ["TWILIO_VOICE_FROM_NUMBER"] = ""
 
 # Clear lru_cache so test overrides take effect
 from app.core.config import get_settings  # noqa: E402
