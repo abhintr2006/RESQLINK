@@ -214,7 +214,7 @@ export const INITIAL_EEG_DATA = {
   equity: {
     accessParity2Gvs5G: { rate2G: 96.8, rate5G: 99.4 },
     peripheralWardCoverageRate: 94.2,
-    multiLanguageUsagePct: { en: 38, kn: 46, hi: 16 },
+    multiLanguageUsagePct: { en: 28, kn: 34, hi: 14, ta: 8, te: 6, ml: 4, mr: 3, bn: 2, ur: 1 },
     vulnerableUserSuccessRate: 98.1,
     affordabilityAvgCostRs: 0.00, // Zero extra user burden
   },

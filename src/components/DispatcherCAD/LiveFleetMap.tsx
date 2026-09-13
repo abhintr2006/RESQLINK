@@ -159,6 +159,7 @@ export const LiveFleetMap: React.FC<LiveFleetMapProps> = ({
             color: '#10B981',
             weight: 3,
             dashArray: '6, 6',
+            opacity: 0.9,
           }
         );
         markersGroup.addLayer(route);
@@ -174,31 +175,31 @@ export const LiveFleetMap: React.FC<LiveFleetMapProps> = ({
   }, [alerts, responders, hospitals, selectedAlert]);
 
   return (
-    <div className="relative w-full h-full min-h-[480px] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
-      <div ref={mapContainerRef} className="w-full h-full min-h-[480px]" />
+    <div className="relative w-full h-full min-h-[440px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-xl">
+      <div ref={mapContainerRef} className="w-full h-full min-h-[440px]" />
 
       {/* Map Legend Overlay */}
-      <div className="absolute bottom-3 left-3 z-[400] bg-slate-900/90 backdrop-blur p-3 rounded-xl border border-slate-700 text-xs text-slate-300 shadow-lg space-y-1.5 pointer-events-auto">
-        <div className="font-bold text-[11px] uppercase tracking-wider text-slate-400 flex items-center gap-1">
-          <Layers className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Fleet CAD Map Legend</span>
+      <div className="absolute bottom-3 left-3 z-[400] bg-slate-900/95 backdrop-blur-md p-2.5 rounded-xl border border-slate-700 text-xs font-mono text-slate-300 shadow-xl space-y-1.5 pointer-events-auto">
+        <div className="font-bold text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-1.5 border-b border-slate-800 pb-1">
+          <Layers className="w-3.5 h-3.5 text-cyan-400" />
+          <span>FLEET CAD MAP TELEMETRY</span>
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-            <span>Active SOS (Locked)</span>
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>ACTIVE SOS (LOCKED)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span>Available Ambulance</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>PATROL AMBULANCE</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-            <span>Dispatched Unit</span>
+            <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+            <span>DISPATCHED UNIT</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span>🏥</span>
-            <span>Trauma Center</span>
+            <span>TRAUMA HUB</span>
           </div>
         </div>
       </div>

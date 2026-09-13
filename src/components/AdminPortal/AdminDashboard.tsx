@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
 import { CitizenSOSView } from '../CitizenApp/CitizenSOSView';
 import { DispatcherPortal } from '../DispatcherCAD/DispatcherPortal';
+import { ModernCommandCenter } from '../DispatcherCAD/ModernCommandCenter';
 import { EEGDashboard } from '../EEGDashboard/EEGDashboard';
 import { TwilioSMSView } from '../TwilioSimulator/TwilioSMSView';
 import { AboutPaperView } from '../AboutPaper/AboutPaperView';
@@ -15,10 +16,13 @@ import {
   Building2,
   Users,
   Sparkles,
+  Map,
+  Layers,
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const [adminTab, setAdminTab] = useState<'dispatcher' | 'citizen' | 'eeg' | 'twilio' | 'paper'>('dispatcher');
+  const [cadSubView, setCadSubView] = useState<'operations' | 'telemetry'>('operations');
   const { activeAlert, setAdminViewTab } = useResqLink();
 
   const navItems = [
@@ -125,7 +129,43 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Main View Area */}
       <div className="transition-all duration-300">
-        {adminTab === 'dispatcher' && <DispatcherPortal />}
+        {adminTab === 'dispatcher' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCadSubView('operations')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                    cadSubView === 'operations'
+                      ? 'bg-rose-600 text-white shadow-md'
+                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Layers className="size-3.5" />
+                  <span>Live Operations Center</span>
+                </button>
+
+                <button
+                  onClick={() => setCadSubView('telemetry')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                    cadSubView === 'telemetry'
+                      ? 'bg-rose-600 text-white shadow-md'
+                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Map className="size-3.5" />
+                  <span>Street Radar &amp; Telemetry</span>
+                </button>
+              </div>
+
+              <span className="text-[10px] font-mono text-slate-500 hidden sm:inline">
+                RESQLINK Autonomous CAD Grid v2.4
+              </span>
+            </div>
+
+            {cadSubView === 'operations' ? <ModernCommandCenter /> : <DispatcherPortal />}
+          </div>
+        )}
         {adminTab === 'citizen' && <CitizenSOSView />}
         {adminTab === 'eeg' && <EEGDashboard />}
         {adminTab === 'twilio' && <TwilioSMSView />}

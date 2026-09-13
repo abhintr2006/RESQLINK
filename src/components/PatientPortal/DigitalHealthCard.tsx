@@ -87,66 +87,58 @@ export const DigitalHealthCard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* ABHA National Health Card - Double Bezel */}
       <div className="double-bezel shadow-2xl">
-        <div className="double-bezel-inner p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative overflow-hidden">
-          {/* Subtle Ambient Background Orb */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-
-          <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
-            <div className="flex items-center gap-5">
-              <div className="w-18 h-18 rounded-3xl bg-gradient-to-br from-rose-500 via-rose-600 to-amber-500 flex flex-col items-center justify-center text-white font-black shadow-xl shadow-rose-600/30 ring-1 ring-white/30">
-                <span className="text-2xl">{patientProfile.bloodGroup.split(' ')[0]}</span>
-                <span className="text-[9px] uppercase tracking-widest opacity-90 font-bold">Blood</span>
+        <div className="double-bezel-inner p-4 sm:p-5 bg-slate-950 relative overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-600 via-rose-700 to-amber-600 flex flex-col items-center justify-center text-white font-mono font-extrabold shadow-lg">
+                <span className="text-xl leading-none">{patientProfile.bloodGroup.split(' ')[0]}</span>
+                <span className="text-[8px] uppercase tracking-widest opacity-90">BLOOD</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="text-2xl font-black text-white">{patientProfile.name}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center gap-1">
-                    <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" /> ABHA LINKED
+              <div className="space-y-0.5 font-mono">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-white">{patientProfile.name}</h2>
+                  <span className="px-2 py-0.2 rounded text-[9px] font-bold bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 flex items-center gap-1">
+                    <FileCheck2 className="w-3 h-3 text-emerald-400" /> ABHA LINKED
                   </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  Ayushman Bharat Health Account: <span className="font-mono font-bold text-white tracking-wider">{patientProfile.abhaId}</span>
+                  ABHA ID: <span className="font-bold text-white tracking-wider">{patientProfile.abhaId}</span>
                 </p>
-                <p className="text-[11px] text-slate-400">
-                  {patientProfile.age} Yrs • {patientProfile.gender} • Emergency Auto-Decryption on SOS
+                <p className="text-[10px] text-slate-400">
+                  {patientProfile.age} Yrs &bull; {patientProfile.gender} &bull; Emergency Auto-Decryption on SOS
                 </p>
               </div>
             </div>
 
-            {/* Action Buttons with Button-in-Button architecture */}
-            <div className="flex items-center gap-3">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 font-mono">
               {!isEditing ? (
                 <button
                   onClick={() => {
                     setEditForm(patientProfile);
                     setIsEditing(true);
                   }}
-                  className="flex items-center gap-3 pl-4 pr-2 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-100 border border-slate-700 rounded-2xl text-xs font-bold transition-all duration-300 cursor-pointer shadow-lg active:scale-[0.98]"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 rounded-xl text-xs font-bold transition cursor-pointer shadow-sm active:scale-95"
                 >
-                  <span>Edit Emergency Medical Card</span>
-                  <div className="w-7 h-7 rounded-xl bg-slate-900 flex items-center justify-center text-rose-400 border border-slate-700">
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </div>
+                  <Edit3 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>EDIT MEDICAL CARD</span>
                 </button>
               ) : (
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleCancel}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl text-xs font-bold transition cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition cursor-pointer"
                   >
-                    <X className="w-4 h-4" /> Cancel
+                    <X className="w-3.5 h-3.5" /> CANCEL
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 pl-4 pr-2 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 transition cursor-pointer"
                   >
-                    <span>Save Medical Card</span>
-                    <div className="w-7 h-7 rounded-xl bg-emerald-700 flex items-center justify-center">
-                      <Check className="w-4 h-4" />
-                    </div>
+                    <Check className="w-3.5 h-3.5" /> SAVE
                   </button>
                 </div>
               )}
@@ -156,31 +148,31 @@ export const DigitalHealthCard: React.FC = () => {
       </div>
 
       {/* Asymmetric 2-Column Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
         {/* Left Bento: Critical Emergency Indicators */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Blood & Organ Donation Card */}
           <div className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400 flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-rose-500" /> Life-Support Telemetry
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                  <Heart className="w-3.5 h-3.5 text-rose-500" /> LIFE-SUPPORT TELEMETRY
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">108 CAD Match</span>
+                <span className="text-[9px] text-slate-400 font-bold">108 CAD MATCH</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Blood Type</span>
-                  <p className="text-xl font-black text-rose-400 mt-1">{patientProfile.bloodGroup}</p>
-                  <span className="text-[10px] text-slate-500 font-medium">Compatible with O- / O+</span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                  <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">BLOOD TYPE</span>
+                  <p className="text-lg font-extrabold text-rose-400 mt-0.5">{patientProfile.bloodGroup}</p>
+                  <span className="text-[9px] text-slate-500 font-sans">Compatible with O- / O+</span>
                 </div>
-                <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl">
-                  <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Organ Donor</span>
-                  <p className="text-xl font-black text-emerald-400 mt-1">
-                    {patientProfile.organDonor ? 'Registered' : 'No'}
+                <div className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                  <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">ORGAN DONOR</span>
+                  <p className="text-lg font-extrabold text-emerald-400 mt-0.5">
+                    {patientProfile.organDonor ? 'REGISTERED' : 'NO'}
                   </p>
-                  <span className="text-[10px] text-slate-500 font-medium">NOTTO ID Verified</span>
+                  <span className="text-[9px] text-slate-500 font-sans">NOTTO Registry Verified</span>
                 </div>
               </div>
             </div>
@@ -188,30 +180,30 @@ export const DigitalHealthCard: React.FC = () => {
 
           {/* Red Flag Allergies */}
           <div className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" /> Severe Drug & Food Allergies
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> SEVERE DRUG &amp; FOOD ALLERGIES
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white animate-pulse">
-                  ER Red Flag
+                <span className="px-2 py-0.2 rounded text-[8px] font-bold uppercase tracking-wider bg-rose-600 text-white animate-pulse">
+                  ER RED FLAG
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-2.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {(isEditing ? editForm.allergies : patientProfile.allergies).map((allergy) => (
                   <span
                     key={allergy}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-rose-950/80 border border-rose-800/80 text-rose-200 flex items-center gap-2 shadow-sm"
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-950/80 border border-rose-800/80 text-rose-200 flex items-center gap-1.5 shadow-sm"
                   >
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                    <AlertTriangle className="w-3 h-3 text-rose-400" />
                     <span>{allergy}</span>
                     {isEditing && (
                       <button
                         onClick={() => removeAllergy(allergy)}
                         className="hover:text-white p-0.5 rounded-full hover:bg-rose-800 cursor-pointer ml-1"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-3 h-3" />
                       </button>
                     )}
                   </span>
@@ -219,20 +211,20 @@ export const DigitalHealthCard: React.FC = () => {
               </div>
 
               {isEditing && (
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 pt-1">
                   <input
                     type="text"
                     placeholder="Add allergy (e.g. Sulfa, Peanuts)"
                     value={newAllergy}
                     onChange={(e) => setNewAllergy(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addAllergy()}
-                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-rose-500"
+                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-rose-500"
                   />
                   <button
                     onClick={addAllergy}
-                    className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
                   >
-                    <Plus className="w-4 h-4" /> Add
+                    <Plus className="w-3.5 h-3.5" /> ADD
                   </button>
                 </div>
               )}
@@ -241,25 +233,27 @@ export const DigitalHealthCard: React.FC = () => {
 
           {/* Chronic Conditions */}
           <div className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-400 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-sky-500" /> Chronic Medical Diagnoses
-              </span>
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="border-b border-slate-800 pb-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-500" /> CHRONIC MEDICAL DIAGNOSES
+                </span>
+              </div>
 
-              <div className="flex flex-wrap gap-2.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {(isEditing ? editForm.chronicConditions : patientProfile.chronicConditions).map((cond) => (
                   <span
                     key={cond}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-950/80 border border-sky-800/80 text-sky-200 flex items-center gap-2"
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-950/80 border border-cyan-800/80 text-cyan-200 flex items-center gap-1.5"
                   >
-                    <Activity className="w-3.5 h-3.5 text-sky-400" />
+                    <Activity className="w-3 h-3 text-cyan-400" />
                     <span>{cond}</span>
                     {isEditing && (
                       <button
                         onClick={() => removeCondition(cond)}
-                        className="hover:text-white p-0.5 rounded-full hover:bg-sky-800 cursor-pointer ml-1"
+                        className="hover:text-white p-0.5 rounded-full hover:bg-cyan-800 cursor-pointer ml-1"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-3 h-3" />
                       </button>
                     )}
                   </span>
@@ -267,20 +261,20 @@ export const DigitalHealthCard: React.FC = () => {
               </div>
 
               {isEditing && (
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 pt-1">
                   <input
                     type="text"
                     placeholder="Add condition (e.g. Hypertension)"
                     value={newCondition}
                     onChange={(e) => setNewCondition(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCondition()}
-                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-sky-500"
+                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-cyan-500"
                   />
                   <button
                     onClick={addCondition}
-                    className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
                   >
-                    <Plus className="w-4 h-4" /> Add
+                    <Plus className="w-3.5 h-3.5" /> ADD
                   </button>
                 </div>
               )}
@@ -289,30 +283,32 @@ export const DigitalHealthCard: React.FC = () => {
         </div>
 
         {/* Right Bento: Active Medications & ICE Emergency Contacts */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Ongoing Medications */}
           <div className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2">
-                <Pill className="w-4 h-4 text-emerald-500" /> Active Medications & Dosage
-              </span>
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="border-b border-slate-800 pb-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                  <Pill className="w-3.5 h-3.5 text-emerald-500" /> ACTIVE MEDICATIONS &amp; DOSAGE
+                </span>
+              </div>
 
-              <div className="space-y-2.5 pt-1">
+              <div className="space-y-2 pt-0.5">
                 {(isEditing ? editForm.currentMedications : patientProfile.currentMedications).map((med) => (
                   <div
                     key={med}
-                    className="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-4 py-3 rounded-2xl text-xs font-bold text-slate-200"
+                    className="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl text-xs font-bold text-slate-200"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Pill className="w-4 h-4 text-emerald-400" />
+                    <div className="flex items-center gap-2">
+                      <Pill className="w-3.5 h-3.5 text-emerald-400" />
                       <span>{med}</span>
                     </div>
                     {isEditing && (
                       <button
                         onClick={() => removeMedication(med)}
-                        className="text-slate-500 hover:text-rose-400 cursor-pointer p-1"
+                        className="text-slate-500 hover:text-rose-400 cursor-pointer p-0.5"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
@@ -320,20 +316,20 @@ export const DigitalHealthCard: React.FC = () => {
               </div>
 
               {isEditing && (
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 pt-1">
                   <input
                     type="text"
                     placeholder="Add medication (e.g. Amlodipine 5mg OD)"
                     value={newMedication}
                     onChange={(e) => setNewMedication(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addMedication()}
-                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-100 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-emerald-500"
                   />
                   <button
                     onClick={addMedication}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
                   >
-                    <Plus className="w-4 h-4" /> Add
+                    <Plus className="w-3.5 h-3.5" /> ADD
                   </button>
                 </div>
               )}
@@ -342,37 +338,35 @@ export const DigitalHealthCard: React.FC = () => {
 
           {/* ICE Emergency Contacts with Quick Action */}
           <div className="double-bezel">
-            <div className="double-bezel-inner p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-indigo-500" /> In Case of Emergency (ICE) Contacts
+            <div className="double-bezel-inner p-4 space-y-3 bg-slate-950">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-indigo-500" /> IN CASE OF EMERGENCY (ICE) CONTACTS
                 </span>
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
-                  Instant SMS Link
+                <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-800">
+                  SMS LINKED
                 </span>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {patientProfile.emergencyContacts.map((contact) => (
                   <div
                     key={contact.id}
-                    className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex items-center justify-between gap-3"
+                    className="bg-slate-900/90 border border-slate-800 p-3 rounded-xl flex items-center justify-between gap-3"
                   >
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-100 text-sm">{contact.name}</span>
-                        <span className="text-[11px] text-slate-400">({contact.relation})</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-100 text-xs">{contact.name}</span>
+                        <span className="text-[10px] text-slate-400">({contact.relation})</span>
                       </div>
-                      <p className="text-xs font-mono font-bold text-slate-400 mt-1">{contact.phone}</p>
+                      <p className="text-[11px] font-bold text-slate-400 mt-0.5">{contact.phone}</p>
                     </div>
                     <a
                       href={`tel:${contact.phone}`}
-                      className="flex items-center gap-2 pl-3 pr-2 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 rounded-xl text-xs font-bold transition-all active:scale-[0.98]"
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 rounded-lg text-[11px] font-bold transition active:scale-95"
                     >
-                      <span>Call ICE</span>
-                      <div className="w-6 h-6 rounded-lg bg-indigo-600/40 flex items-center justify-center">
-                        <Phone className="w-3 h-3 text-indigo-200" />
-                      </div>
+                      <Phone className="w-3 h-3 text-indigo-300" />
+                      <span>CALL ICE</span>
                     </a>
                   </div>
                 ))}
@@ -381,12 +375,12 @@ export const DigitalHealthCard: React.FC = () => {
           </div>
 
           {/* DPDP Privacy Guarantee Box */}
-          <div className="p-5 rounded-3xl bg-emerald-950/30 border border-emerald-800/40 flex items-start gap-3.5">
-            <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-800/40 flex items-start gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
             <div>
-              <h4 className="text-xs font-extrabold text-emerald-300">DPDP Act 2023 Encrypted Vault</h4>
-              <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                Emergency health data is sealed and decrypted exclusively for the allocated paramedic crew and emergency room physician upon verified SOS activation.
+              <h4 className="text-[11px] font-bold text-emerald-300">DPDP ACT 2023 ENCRYPTED VAULT</h4>
+              <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed font-sans">
+                Health data is sealed and decrypted exclusively for allocated paramedic crew and ER trauma physician upon verified SOS trigger.
               </p>
             </div>
           </div>

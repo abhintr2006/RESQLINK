@@ -13,7 +13,11 @@ AlertStatus = Literal[
     "CONFIRMED", "DISPATCHED", "EN_ROUTE", "ON_SCENE", "RESOLVED", "CANCELLED",
 ]
 NetworkTier = Literal["5G_HIGH_SPEED", "3G_SPOTTY", "2G_SMS_FALLBACK"]
-LanguageCode = Literal["en", "kn", "hi"]
+LanguageCode = Literal[
+    "en", "hi", "kn", "ta", "te", "ml", "mr", "bn", "gu", "pa",
+    "or", "as", "ur", "sa", "kok", "mai", "mni", "ne", "brx",
+    "doi", "ks", "sat", "sd",
+]
 
 
 class GeoCoordinate(BaseModel):
