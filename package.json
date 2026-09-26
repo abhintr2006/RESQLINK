@@ -36,8 +36,8 @@
     "@radix-ui/react-toggle-group": "^1.1.19",
     "@radix-ui/react-tooltip": "^1.2.16",
     "@supabase/supabase-js": "^2.116.0",
-    "@tanstack/react-query": "^5.102.8",
-    "@tanstack/react-router": "^1.170.38",
+    "@tanstack/react-query": "^5.103.1",
+    "@tanstack/react-router": "^1.170.35",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -55,7 +55,7 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
     "vaul": "^1.1.2",
-    "zod": "^4.6.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
