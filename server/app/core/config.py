@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from functools import lru_cache
 import re
+from functools import lru_cache
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
