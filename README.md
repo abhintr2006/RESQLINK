@@ -141,11 +141,26 @@ Decoded server-side and routed directly into the CAD incident queue with high de
 
 ### 1. Clone Repository
 ```bash
-https://github.com/abhintr2006/RESQLINK.git
+git clone https://github.com/abhintr2006/RESQLINK.git
 cd RESQLINK
 ```
 
-### 2. Backend Setup
+### 2. Quick Start (Recommended)
+If you have `make` installed, start the entire stack with a single command:
+```bash
+make demo
+```
+This automatically verifies runtime requirements (Python 3.11+, Node 20+, pnpm), sets up the Python virtual environment (`server/.venv`), copies default `.env` files if missing, installs all dependencies, and concurrently boots both the backend API (`http://127.0.0.1:8000`) and the frontend app (`http://localhost:3000`).
+
+Useful targets:
+- `make check-deps` — Verify environment runtimes and package dependencies
+- `make test` — Execute backend pytest suite and frontend TypeScript/Vite builds
+- `make lint` — Run `ruff` checks on backend code
+- `make clean` — Remove temporary cache files and build artifacts
+
+### 3. Manual Setup (Alternative)
+
+#### Backend Setup
 ```bash
 cd server
 
@@ -164,7 +179,7 @@ uvicorn app.main:app --reload --port 8000
 - **Interactive Swagger Docs**: `http://localhost:8000/docs`
 - **WebSocket Endpoint**: `ws://localhost:8000/api/ws`
 
-### 3. Frontend Setup
+#### Frontend Setup
 In a new terminal from the project root:
 ```bash
 # Install frontend packages
