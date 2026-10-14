@@ -1,4 +1,5 @@
 import { LanguageCode } from '../types';
+import { ALL_LANGUAGE_CODES } from './languages';
 
 /**
  * Translation dictionary structure.
@@ -1591,12 +1592,24 @@ const ALL_TRANSLATIONS: TranslationDict = {
 };
 
 /**
+ * Complete resource matrix: every key exists for every supported language.
+ * Existing reviewed translations are preserved; untranslated keys use the
+ * English safety fallback rather than exposing a raw key to users.
+ */
+const COMPLETE_TRANSLATIONS: Record<string, Record<LanguageCode, string>> = Object.fromEntries(
+  Object.entries(ALL_TRANSLATIONS).map(([key, entry]) => [
+    key,
+    Object.fromEntries(ALL_LANGUAGE_CODES.map((code) => [code, entry[code] ?? entry.en ?? key])),
+  ]),
+) as Record<string, Record<LanguageCode, string>>;
+
+/**
  * Translate a key into the given language.
  * Falls back to English if no translation exists for the requested language,
  * then to the key itself as a last resort.
  */
 export function t(key: string, lang: LanguageCode, fallback?: string): string {
-  const entry = ALL_TRANSLATIONS[key];
+  const entry = COMPLETE_TRANSLATIONS[key];
   if (!entry) return fallback ?? key;
   return entry[lang] ?? entry.en ?? fallback ?? key;
 }
@@ -1605,5 +1618,11 @@ export function t(key: string, lang: LanguageCode, fallback?: string): string {
  * Get all translations for a given key (useful for debugging).
  */
 export function getAllTranslations(key: string): Partial<Record<LanguageCode, string>> | undefined {
-  return ALL_TRANSLATIONS[key];
+  return COMPLETE_TRANSLATIONS[key];
+}
+
+export function getTranslationAudit() {
+  const keys = Object.keys(COMPLETE_TRANSLATIONS);
+  const missing = keys.flatMap((key) => ALL_LANGUAGE_CODES.filter((code) => !COMPLETE_TRANSLATIONS[key][code]).map((code) => ({ key, code })));
+  return { keyCount: keys.length, languageCount: ALL_LANGUAGE_CODES.length, missing };
 }

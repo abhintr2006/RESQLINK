@@ -22,7 +22,9 @@ class VoiceCallResult:
 
 class SimulatedVoiceAdapter:
     async def place_call(self, message: str) -> VoiceCallResult:
-        recipient = get_settings().TWILIO_TO_NUMBER
+        recipient = get_settings().emergency_contact_number
+        if not recipient:
+            return VoiceCallResult("ERR-CONTACT", "", "FAILED", "simulated", "Invalid emergency contact configuration")
         return VoiceCallResult(f"SIM-CA-{uuid.uuid4().hex[:12]}", recipient, "SIMULATED", "simulated")
 
 
@@ -32,7 +34,7 @@ class TwilioVoiceAdapter:
         settings = get_settings()
         self.client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         self.from_number = settings.TWILIO_VOICE_FROM_NUMBER or settings.TWILIO_FROM_NUMBER
-        self.to_number = settings.TWILIO_TO_NUMBER
+        self.to_number = settings.emergency_contact_number
 
     async def place_call(self, message: str) -> VoiceCallResult:
         twiml = f'<Response><Say language="en-IN">{html.escape(message)}</Say></Response>'
@@ -51,7 +53,7 @@ class TwilioVoiceAdapter:
 
 def get_voice_adapter() -> SimulatedVoiceAdapter | TwilioVoiceAdapter:
     settings = get_settings()
-    if settings.twilio_configured and settings.TWILIO_VOICE_FROM_NUMBER:
+    if settings.twilio_configured and settings.TWILIO_VOICE_FROM_NUMBER and settings.emergency_contact_number:
         return TwilioVoiceAdapter()
     return SimulatedVoiceAdapter()
 

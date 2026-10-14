@@ -46,3 +46,49 @@ async def test_logout(client: AsyncClient, admin_token: str):
 async def test_hospital_role_cannot_access_eeg(client: AsyncClient, hospital_token: str):
     resp = await client.get("/api/eeg-metrics", headers={"Authorization": f"Bearer {hospital_token}"})
     assert resp.status_code == 403
+
+
+async def test_signup_success_and_subsequent_login(client: AsyncClient):
+    signup_payload = {
+        "username": "newdriver",
+        "password": "driverpassword",
+        "displayName": "Paramedic Driver",
+        "role": "patient",
+    }
+    resp = await client.post("/api/auth/signup", json=signup_payload)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["token_type"] == "bearer"
+    assert data["user"]["username"] == "newdriver"
+    assert data["user"]["displayName"] == "Paramedic Driver"
+
+    # Verify that the new user can log in with their credentials
+    login_resp = await client.post(
+        "/api/auth/login",
+        json={"username": "newdriver", "password": "driverpassword"},
+    )
+    assert login_resp.status_code == 200
+    assert login_resp.json()["user"]["username"] == "newdriver"
+
+
+async def test_signup_duplicate_username(client: AsyncClient):
+    resp = await client.post(
+        "/api/auth/signup",
+        json={
+            "username": "admin",
+            "password": "anotherpassword",
+            "displayName": "Admin Clone",
+            "role": "admin",
+        },
+    )
+    assert resp.status_code == 409
+
+
+async def test_signup_validation(client: AsyncClient):
+    # Short password (< 6 chars)
+    resp = await client.post(
+        "/api/auth/signup",
+        json={"username": "validuser", "password": "123", "displayName": "Valid Name", "role": "patient"},
+    )
+    assert resp.status_code == 422 or resp.status_code == 400
+

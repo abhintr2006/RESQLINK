@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useResqLink } from '../../context/ResqLinkContext';
 import { EmergencyCategory } from '../../types';
+import {
+  EMERGENCY_CONTACT_NUMBER,
+  formatEmergencyContact,
+  getValidatedEmergencyContact,
+  openEmergencyDialer,
+} from '../../config/emergencyContact';
 import { LocationLockIndicator } from './LocationLockIndicator';
 import { LiveTrackingCard } from './LiveTrackingCard';
 import { AIFirstAidGuidance } from './AIFirstAidGuidance';
-import { useTranslation } from '../../i18n';
+import { getAllTranslations, useTranslation } from '../../i18n';
 import {
   HeartPulse,
   Car,
@@ -22,6 +28,8 @@ import {
   Sparkles,
   Zap,
   Activity,
+  Phone,
+  X,
 } from 'lucide-react';
 
 export const CitizenSOSView: React.FC = () => {
@@ -39,46 +47,49 @@ export const CitizenSOSView: React.FC = () => {
   const { t } = useTranslation();
 
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory>('CARDIAC');
+  const [isCallPromptOpen, setIsCallPromptOpen] = useState(false);
+  const [callStatus, setCallStatus] = useState<string | null>(null);
+  const [isCallInProgress, setIsCallInProgress] = useState(false);
 
-  const categories: { id: EmergencyCategory; label: string; icon: any; color: string; badge: string }[] = [
+  const categories: { id: EmergencyCategory; label: NonNullable<ReturnType<typeof getAllTranslations>>; icon: any; color: string; badge: string }[] = [
     {
       id: 'CARDIAC',
-      label: t('sos.cardiac'),
+      label: getAllTranslations('sos.cardiac') ?? { en: t('sos.cardiac') },
       icon: HeartPulse,
       color: 'text-rose-400 bg-rose-950/60 border-rose-700/60',
       badge: 'ALS UNIT',
     },
     {
       id: 'TRAUMA_ACCIDENT',
-      label: t('sos.trauma'),
+      label: getAllTranslations('sos.trauma') ?? { en: t('sos.trauma') },
       icon: Car,
       color: 'text-amber-400 bg-amber-950/60 border-amber-700/60',
       badge: 'TRAUMA L1',
     },
     {
       id: 'STROKE',
-      label: t('sos.stroke'),
+      label: getAllTranslations('sos.stroke') ?? { en: t('sos.stroke') },
       icon: Brain,
       color: 'text-purple-400 bg-purple-950/60 border-purple-700/60',
       badge: 'NEURO HUB',
     },
     {
       id: 'RESPIRATORY',
-      label: t('sos.respiratory'),
+      label: getAllTranslations('sos.respiratory') ?? { en: t('sos.respiratory') },
       icon: Wind,
       color: 'text-cyan-400 bg-cyan-950/60 border-cyan-700/60',
       badge: 'O2 SUPPORT',
     },
     {
       id: 'ELDERLY_FALL',
-      label: t('sos.elderly_fall'),
+      label: getAllTranslations('sos.elderly_fall') ?? { en: t('sos.elderly_fall') },
       icon: UserCheck,
       color: 'text-emerald-400 bg-emerald-950/60 border-emerald-700/60',
       badge: 'BLS UNIT',
     },
     {
       id: 'GENERAL_MEDICAL',
-      label: t('sos.general'),
+      label: getAllTranslations('sos.general') ?? { en: t('sos.general') },
       icon: Stethoscope,
       color: 'text-blue-400 bg-blue-950/60 border-blue-700/60',
       badge: 'TRIAGE',
@@ -86,8 +97,37 @@ export const CitizenSOSView: React.FC = () => {
   ];
 
   const handleSOSTrigger = () => {
-    if (activeAlert) return;
-    triggerSOS(selectedCategory);
+    if (activeAlert || isSimulating || isCallInProgress) return;
+    setCallStatus(null);
+    setIsCallPromptOpen(true);
+  };
+
+  const handleConfirmedEmergency = async () => {
+    if (activeAlert || isSimulating || isCallInProgress) return;
+    const validatedContact = getValidatedEmergencyContact();
+    if (!validatedContact) {
+      setCallStatus('The configured emergency contact is invalid. Contact your administrator.');
+      return;
+    }
+
+    setIsCallInProgress(true);
+    setIsCallPromptOpen(false);
+    try {
+      // Preserve the existing alert, GPS-lock, audit, and dispatch workflow.
+      await triggerSOS(selectedCategory);
+      const dialer = openEmergencyDialer();
+      if (!dialer.ok) {
+        setCallStatus('The emergency event was created, but this device could not open a phone dialer. Use a supported mobile device or call the contact manually.');
+      } else if (dialer.isLikelyMobile) {
+        setCallStatus(`Dialer requested for ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}. RESQLINK cannot confirm that the call was placed or connected.`);
+      } else {
+        setCallStatus(`Dialer requested for ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}. Desktop browsers may not support phone calls.`);
+      }
+    } catch {
+      setCallStatus('The emergency request could not be created. Please try again or use your local emergency service.');
+    } finally {
+      setIsCallInProgress(false);
+    }
   };
 
   return (
@@ -142,6 +182,18 @@ export const CitizenSOSView: React.FC = () => {
         </div>
       </div>
 
+      {callStatus && (
+        <div role="status" className="mb-5 flex items-start justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 shadow-sm">
+          <div>
+            <strong className="block font-bold">Emergency call status</strong>
+            <span>{callStatus}</span>
+          </div>
+          <button type="button" onClick={() => setCallStatus(null)} className="rounded-lg p-1 hover:bg-amber-100" aria-label="Dismiss call status">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* ACTIVE EMERGENCY VIEW vs IDLE SOS TRIGGER */}
       {activeAlert ? (
         <div className="space-y-5 animate-in fade-in duration-200">
@@ -169,6 +221,22 @@ export const CitizenSOSView: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-6">
+          {isCallPromptOpen && (
+            <div role="dialog" aria-modal="true" aria-labelledby="emergency-call-title" className="rounded-2xl border-2 border-rose-500 bg-rose-50 p-4 shadow-lg">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white"><Phone className="h-5 w-5" /></div>
+                <div className="min-w-0 flex-1">
+                  <h2 id="emergency-call-title" className="font-bold text-rose-950">Call the configured emergency contact?</h2>
+                  <p className="mt-1 text-xs leading-relaxed text-rose-900">This development contact is <strong>{formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}</strong>. Confirming will create the existing RESQLINK emergency event and ask your device to open its dialer. Opening the dialer does not confirm that a call was placed or connected.</p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap justify-end gap-2">
+                <button type="button" onClick={() => setIsCallPromptOpen(false)} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={() => void handleConfirmedEmergency()} className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700" autoFocus>Call and request help</button>
+              </div>
+            </div>
+          )}
+
           {/* Emergency Category Selector */}
           <div className="care-panel space-y-2.5 rounded-2xl border p-4">
             <div className="flex items-center justify-between px-1">
@@ -213,7 +281,7 @@ export const CitizenSOSView: React.FC = () => {
                     </div>
                     <div>
                       <div className={`font-bold text-xs leading-tight ${isSelected ? 'text-rose-950 font-extrabold' : 'text-slate-900'}`}>
-                        {cat.label}
+                        {cat.label[language] || cat.label.en || cat.id}
                       </div>
                     </div>
                   </button>
@@ -233,9 +301,9 @@ export const CitizenSOSView: React.FC = () => {
               {/* Central Tactile Button */}
               <button
                 onClick={handleSOSTrigger}
-                disabled={isSimulating}
+                disabled={isSimulating || isCallInProgress}
                 className={`relative w-48 h-48 rounded-full bg-rose-600 text-white font-black shadow-xl shadow-rose-600/35 border-4 border-white active:scale-95 transition-all duration-200 transform flex flex-col items-center justify-center gap-1 cursor-pointer group hover:bg-rose-700 ${
-                  isSimulating ? 'opacity-70 animate-pulse' : ''
+                  isSimulating || isCallInProgress ? 'opacity-70 animate-pulse' : ''
                 }`}
                 aria-label="One-tap SOS Emergency Button"
               >

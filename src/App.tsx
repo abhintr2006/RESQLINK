@@ -4,10 +4,11 @@ import { HospitalDashboard } from './components/HospitalPortal/HospitalDashboard
 import { PatientDashboard } from './components/PatientPortal/PatientDashboard';
 import { EEGDashboard } from './components/EEGDashboard/EEGDashboard';
 import { AboutPaperView } from './components/AboutPaper/AboutPaperView';
-import { HomePageView } from './components/Home/HomePageView';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
 import { AuthGatewayScreen } from './components/Auth/AuthGatewayScreen';
 import { OperatorAccountsManager } from './components/AdminPortal/OperatorAccountsManager';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { CookieConsentManager } from './components/CookieConsentManager';
 import { LanguageCode, UserRole } from './types';
 import { useTranslation, INDIAN_LANGUAGES, getLanguageLabel } from './i18n';
 import { formatISTTime12h } from './utils/timeFormat';
@@ -26,7 +27,6 @@ import {
   FileText,
   Filter,
   Gauge,
-  Home,
   Languages,
   Layers3,
   LifeBuoy,
@@ -142,10 +142,8 @@ const navItems = [
   { id: 'Fleet control', label: 'Fleet control', labelKey: 'nav.fleet_control', icon: Ambulance },
   { id: 'Hospital ER', label: 'Hospital ER', labelKey: 'nav.hospital_er', icon: Building2 },
   { id: 'Citizen Lifeline', label: 'Citizen Lifeline', labelKey: 'nav.citizen_lifeline', icon: Users },
-  { id: 'Operator Accounts', label: 'Operator Accounts', labelKey: 'nav.operator_accounts', icon: ShieldCheck },
   { id: 'Governance', label: 'Governance', labelKey: 'nav.governance', icon: FileClock },
   { id: 'Research Paper', label: 'Research Paper', labelKey: 'nav.research_paper', icon: FileText },
-  { id: 'Platform Overview', label: 'Platform Overview', labelKey: 'nav.platform_overview', icon: Home },
 ];
 
 const activities = [
@@ -157,14 +155,15 @@ const activities = [
 
 export const MainLayout: React.FC = () => {
   const {
+    authUser,
     userRole,
-    setUserRole,
     activeAlert,
     triggerSOS,
     language,
     setLanguage,
     isGatewayActive,
     exitToGateway,
+    logout,
   } = useResqLink();
   const { t } = useTranslation();
 
@@ -174,7 +173,6 @@ export const MainLayout: React.FC = () => {
   const [layersOpen, setLayersOpen] = useState(false);
   const [dispatchedUnits, setDispatchedUnits] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isDPDPOpen, setIsDPDPOpen] = useState(false);
   const [notice, setNotice] = useState('Live sync active · Last update 12 sec ago');
@@ -247,18 +245,6 @@ export const MainLayout: React.FC = () => {
     setNotice('Emergency incident simulated in Bengaluru CAD network');
   };
 
-  const handleRoleSelect = (role: UserRole) => {
-    setUserRole(role);
-    setIsRoleDropdownOpen(false);
-    if (role === 'hospital') {
-      setActiveNav('Hospital ER');
-    } else if (role === 'patient') {
-      setActiveNav('Citizen Lifeline');
-    } else {
-      setActiveNav('Live operations');
-    }
-  };
-
   const roleProfiles = {
     admin: { name: 'Arjun Rao', title: 'Senior dispatcher', initials: 'AR' },
     hospital: { name: 'Dr. Priya Shenoy', title: 'ER Trauma Chief', initials: 'PS' },
@@ -267,11 +253,17 @@ export const MainLayout: React.FC = () => {
 
   const currentProfile = roleProfiles[userRole] || roleProfiles.admin;
 
-  const visibleNavItems = navItems.filter((item) => {
-    if (userRole === 'admin') return true;
-    if (userRole === 'hospital') return ['Hospital ER', 'Platform Overview'].includes(item.label);
-    return ['Citizen Lifeline', 'Platform Overview'].includes(item.label);
-  });
+  const visibleNavItems = useMemo(() => {
+    if (userRole === 'hospital') {
+      return navItems.filter((item) => item.label === 'Hospital ER');
+    }
+    if (userRole === 'patient') {
+      return navItems.filter((item) => item.label === 'Citizen Lifeline');
+    }
+    return navItems.filter((item) =>
+      ['Live operations', 'Incident queue', 'Fleet control', 'Governance', 'Research Paper'].includes(item.label)
+    );
+  }, [userRole]);
 
   const workspaceLabel = userRole === 'admin'
     ? t('nav.command_workspace', 'Command workspace')
@@ -299,10 +291,7 @@ export const MainLayout: React.FC = () => {
         >
           {/* Logo Header */}
           <div className="flex h-[76px] items-center justify-between border-b border-sidebar-border px-5">
-            <div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => setActiveNav('Platform Overview')}
-            >
+            <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-lg bg-safety-orange text-safety-orange-foreground shadow-[0_8px_20px_-8px_var(--color-safety-orange)]">
                 <LifeBuoy className="size-5" strokeWidth={2.4} />
               </div>
@@ -360,71 +349,45 @@ export const MainLayout: React.FC = () => {
             </nav>
           </div>
 
-          {/* Operator Profile & Role Switcher at Bottom */}
+          {/* Authenticated User Profile at Bottom (No role switching permitted) */}
           <div className="mt-auto px-4 pb-5">
             <div className="mb-4 border-t border-sidebar-border" />
-            <div className="relative">
-              <button
-                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                className="w-full flex items-center gap-3 rounded-lg bg-sidebar-accent/60 px-3 py-3 hover:bg-sidebar-accent transition cursor-pointer text-left"
-              >
-                <div className="relative flex size-8 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary-foreground">
-                  {currentProfile.initials}
+            <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary-foreground">
+                  {authUser?.displayName
+                    ? authUser.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                    : currentProfile.initials}
                   <span className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-sidebar bg-status-green" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-xs font-semibold text-sidebar-primary-foreground">
-                    {currentProfile.name}
+                    {authUser?.displayName || currentProfile.name}
                   </div>
-                  <div className="mt-0.5 text-[10px] text-sidebar-muted">
-                    {currentProfile.title}
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-sidebar-muted">
+                    <span className="font-mono lowercase">@{authUser?.username || 'user'}</span>
+                    <span>·</span>
+                    <span className="truncate">{currentProfile.title}</span>
                   </div>
                 </div>
-                <ChevronDown className="ml-auto size-4 text-sidebar-muted" />
-              </button>
+              </div>
 
-              {/* Role dropdown popup */}
-              {isRoleDropdownOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-full rounded-xl border border-sidebar-border bg-sidebar p-1.5 shadow-2xl z-50 space-y-1">
-                  <div className="px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-wider text-sidebar-muted border-b border-sidebar-border">
-                    Switch Persona
-                  </div>
-                  {[
-                    { role: 'admin' as const, label: 'Admin Dispatcher', sub: 'Full CAD Terminal' },
-                    { role: 'hospital' as const, label: 'Hospital Medical ER', sub: 'Trauma Bay Terminal' },
-                    { role: 'patient' as const, label: 'Citizen & Patient', sub: 'Emergency Lifeline' },
-                  ].map((p) => (
-                    <button
-                      key={p.role}
-                      onClick={() => handleRoleSelect(p.role)}
-                      className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition cursor-pointer ${
-                        userRole === p.role
-                          ? 'bg-sidebar-accent text-sidebar-primary-foreground font-bold'
-                          : 'text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-primary-foreground'
-                      }`}
-                    >
-                      <div>{p.label}</div>
-                      <div className="text-[10px] text-sidebar-muted">{p.sub}</div>
-                    </button>
-                  ))}
-                  <div className="pt-1 mt-1 border-t border-sidebar-border">
-                    <button
-                      onClick={() => {
-                        setIsRoleDropdownOpen(false);
-                        exitToGateway();
-                      }}
-                      className="w-full text-left px-2.5 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10 transition cursor-pointer flex items-center gap-2 font-medium"
-                    >
-                      <LogOut className="size-3.5" />
-                      <span>Lock / Exit to Gateway</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  exitToGateway();
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/80 py-2 text-xs font-medium text-sidebar-muted hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/10 transition cursor-pointer"
+                title="Sign out and return to sign in"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign out</span>
+              </button>
             </div>
 
             <div className="mt-4 flex items-center gap-2 px-1 text-[10px] text-sidebar-muted">
-              <span className="size-1.5 rounded-full bg-status-green" /> Bengaluru region · Shift A
+              <span className="size-1.5 rounded-full bg-status-green" /> Bengaluru region · Active session
             </div>
           </div>
         </aside>
@@ -579,32 +542,27 @@ export const MainLayout: React.FC = () => {
                 <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-safety-orange" />
               </button>
 
-              {/* Lock Station / Exit to Gateway */}
+              {/* Sign out / Lock Station */}
               <button
-                onClick={exitToGateway}
+                onClick={async () => {
+                  await logout();
+                  exitToGateway();
+                }}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
-                title="Lock Terminal & Return to Gateway"
+                title="Sign out and return to login"
               >
                 <LogOut className="size-3.5" />
-                <span className="hidden xl:inline">{t('nav.lock_station', 'Lock Station')}</span>
+                <span className="hidden xl:inline">{t('nav.sign_out', 'Sign out')}</span>
               </button>
             </div>
           </header>
 
-          {/* Body Content */}
+          {/* Body Content - Strictly isolated to userRole */}
           <div className="flex-1 p-3 sm:p-6 lg:p-8">
-            {activeNav === 'Operator Accounts' ? (
-              <OperatorAccountsManager />
-            ) : activeNav === 'Hospital ER' ? (
+            {userRole === 'hospital' ? (
               <HospitalDashboard />
-            ) : activeNav === 'Citizen Lifeline' ? (
+            ) : userRole === 'patient' ? (
               <PatientDashboard />
-            ) : activeNav === 'Governance' ? (
-              <EEGDashboard />
-            ) : activeNav === 'Research Paper' ? (
-              <AboutPaperView />
-            ) : activeNav === 'Platform Overview' ? (
-              <HomePageView />
             ) : activeNav === 'Incident queue' ? (
               <IncidentQueueWorkspace
                 incidents={filteredIncidents}
@@ -618,6 +576,10 @@ export const MainLayout: React.FC = () => {
                 dispatched={Boolean(dispatchedUnits[selectedIncident.id])}
                 onDispatch={handleDispatch}
               />
+            ) : activeNav === 'Governance' ? (
+              <EEGDashboard />
+            ) : activeNav === 'Research Paper' ? (
+              <AboutPaperView />
             ) : (
               <LiveOperationsWorkspace
                 incidents={incidents}
@@ -929,6 +891,8 @@ function QueueSignal({ label, value, tone }: { label: string; value: string; ton
 export default function App() {
   return (
     <ResqLinkProvider>
+      <PWAInstallPrompt />
+      <CookieConsentManager />
       <MainLayout />
     </ResqLinkProvider>
   );

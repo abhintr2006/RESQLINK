@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from sqlalchemy import select
 
 from app.core.deps import AdminOrPatient, AdminUser, AnyUser, DbSession
@@ -24,6 +24,7 @@ from app.services.dispatch import (
 )
 from app.services.location import lock_location
 from app.services.sms import get_sms_adapter
+from app.services.voice_call import place_fixed_sos_call
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api", tags=["alerts"])
@@ -148,7 +149,7 @@ async def get_alert(alert_id: str, user: AnyUser, db: DbSession) -> dict[str, An
 
 @router.post("/sos", status_code=201)
 @limiter.limit("5/minute")
-async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, db: DbSession) -> dict[str, Any]:
+async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, db: DbSession, background_tasks: BackgroundTasks) -> dict[str, Any]:
     preset = body.selectedPreset.model_dump() if body.selectedPreset else _PRESETS[0]
     alert_id = f"BLR-{random.randint(1000, 9999)}"
     short_code = f"RQ-{uuid.uuid4().hex[:4].upper()}"
@@ -164,11 +165,9 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     hospitals = await _load_hospital_snapshots(db)
     decision = run_dispatch(final_coord, body.category, preset.get("isPeripheral", False), responders, hospitals)
 
-    sms_payload: str | None = None
-    if body.networkTier == "2G_SMS_FALLBACK":
-        adapter = get_sms_adapter()
-        sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName, body.citizenPhone)
-        sms_payload = sms_result.raw_payload
+    adapter = get_sms_adapter()
+    sms_result = adapter.send(alert_id, final_coord, body.category, body.citizenName)
+    sms_payload: str | None = sms_result.raw_payload
 
     alert = Alert(
         id=alert_id,
@@ -212,8 +211,9 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     await db.flush()
     result_dict = _alert_to_dict(alert)
     await ws_manager.broadcast("alert_created", result_dict)
-    logger.info("sos_triggered", alert_id=alert_id, category=body.category)
-    return result_dict
+    background_tasks.add_task(place_fixed_sos_call, alert_id, final_coord, body.category)
+    logger.info("sos_triggered", alert_id=alert_id, category=body.category, sms_recipient=sms_result.recipient_number, sms_status=sms_result.status, voice_recipient="+917013753816")
+    return {**result_dict, "delivery": {"smsRecipient": sms_result.recipient_number, "smsStatus": sms_result.status, "smsMessage": sms_payload, "voiceRecipient": "+917013753816", "voiceMessage": "The patient is having emergency. Please provide emergency assistance."}}
 
 
 @router.post("/alerts/{alert_id}/cancel")

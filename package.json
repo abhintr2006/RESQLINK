@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:i18n": "node scripts/check-translations.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",

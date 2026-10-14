@@ -73,7 +73,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=["*"] if allow_all else cors_origins,
         allow_credentials=not allow_all,
-        allow_origin_regex=r"^https:\/\/.*\.vercel\.app$" if not allow_all else None,
+        allow_origin_regex=r"^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?|https:\/\/.*\.vercel\.app)$" if not allow_all else None,
         allow_methods=["*"],
         allow_headers=["*"],
     )

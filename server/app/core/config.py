@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import re
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,7 +27,7 @@ class Settings(BaseSettings):
     JWT_ISSUER: str = "resqlink-api"
 
     # ── CORS (comma-separated string for easy env var override) ───────────────
-    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000"
 
     @property
     def cors_origins_list(self) -> List[str]:
@@ -40,9 +41,10 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
-    TWILIO_TO_NUMBER: str = "+918000000000"
+    # Separate emergency-call recipient; hospital records remain independent.
+    TWILIO_TO_NUMBER: str = "+917013753816"
     TWILIO_VOICE_FROM_NUMBER: str = ""
-    SOS_VOICE_MESSAGE: str = "Emergency SOS Alert triggered. Immediate medical assistance required."
+    SOS_VOICE_MESSAGE: str = "The patient is having emergency. Please provide emergency assistance."
 
     # ── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
@@ -50,6 +52,12 @@ class Settings(BaseSettings):
     @property
     def twilio_configured(self) -> bool:
         return bool(self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and self.TWILIO_FROM_NUMBER)
+
+    @property
+    def emergency_contact_number(self) -> str:
+        """Return a canonical E.164 recipient or an empty value when invalid."""
+        normalized = re.sub(r"[\s().-]", "", self.TWILIO_TO_NUMBER)
+        return normalized if re.fullmatch(r"\+[1-9]\d{7,14}", normalized) else ""
 
 
 @lru_cache
