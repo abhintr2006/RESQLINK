@@ -2,66 +2,308 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { ResqLinkProvider, useResqLink } from './context/ResqLinkContext';
 import { HospitalDashboard } from './components/HospitalPortal/HospitalDashboard';
 import { PatientDashboard } from './components/PatientPortal/PatientDashboard';
+import { EEGDashboard } from './components/EEGDashboard/EEGDashboard';
+import { AboutPaperView } from './components/AboutPaper/AboutPaperView';
 import { DPDPNoticeModal } from './components/CitizenApp/DPDPNoticeModal';
-import { LoginScreen } from './components/Auth/LoginScreen';
+import { AuthGatewayScreen } from './components/Auth/AuthGatewayScreen';
+import { OperatorAccountsManager } from './components/AdminPortal/OperatorAccountsManager';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { CookieConsentManager } from './components/CookieConsentManager';
+import { LanguageCode, UserRole } from './types';
+import { useTranslation, INDIAN_LANGUAGES, getLanguageLabel } from './i18n';
+import { formatISTTime12h } from './utils/timeFormat';
+import {
+  Activity,
+  Ambulance,
+  ArrowUpRight,
+  Bell,
+  Building2,
+  Check,
+  ChevronDown,
+  CircleHelp,
+  Clock3,
+  Crosshair,
+  FileClock,
+  FileText,
+  Filter,
+  Gauge,
+  Languages,
+  Layers3,
+  LifeBuoy,
+  LogOut,
+  MapPin,
+  Maximize2,
+  Menu,
+  Navigation as NavIcon,
+  Radio,
+  Search,
+  ShieldCheck,
+  Siren,
+  SlidersHorizontal,
+  Stethoscope,
+  Users,
+  X,
+  Zap,
+} from 'lucide-react';
+
+type Priority = 'Critical' | 'Moderate' | 'Minor';
+
+type Incident = {
+  id: string;
+  type: string;
+  location: string;
+  time: string;
+  distance: string;
+  priority: Priority;
+  patient: string;
+  detail: string;
+  unit: string;
+  eta: string;
+  hospital: string;
+  coordinates: string;
+};
+
+const initialIncidents: [Incident, ...Incident[]] = [
+  {
+    id: 'RSQ-2841',
+    type: 'Road traffic collision',
+    location: 'Outer Ring Road · HSR Layout',
+    time: 'Just now',
+    distance: '2.4 km',
+    priority: 'Critical',
+    patient: '2 patients · adult',
+    detail: 'Possible entrapment reported. Bystander video attached.',
+    unit: 'AMB-07',
+    eta: '04:20',
+    hospital: 'Sakra World Hospital',
+    coordinates: '12.9116° N, 77.6474° E',
+  },
+  {
+    id: 'RSQ-2839',
+    type: 'Cardiac emergency',
+    location: 'Indiranagar · 12th Main',
+    time: '3 min ago',
+    distance: '5.1 km',
+    priority: 'Critical',
+    patient: '1 patient · 64 yrs',
+    detail: 'Chest pain and shortness of breath. Caller has medical ID.',
+    unit: 'AMB-12',
+    eta: '06:10',
+    hospital: 'Manipal Hospital',
+    coordinates: '12.9784° N, 77.6408° E',
+  },
+  {
+    id: 'RSQ-2837',
+    type: 'Fall injury',
+    location: 'Koramangala · 5th Block',
+    time: '8 min ago',
+    distance: '3.8 km',
+    priority: 'Moderate',
+    patient: '1 patient · adult',
+    detail: 'Conscious and stable. Possible wrist fracture.',
+    unit: 'AMB-04',
+    eta: '08:45',
+    hospital: 'St. John’s Medical College',
+    coordinates: '12.9352° N, 77.6245° E',
+  },
+  {
+    id: 'RSQ-2834',
+    type: 'Breathing difficulty',
+    location: 'Jayanagar · 4th Block',
+    time: '12 min ago',
+    distance: '7.2 km',
+    priority: 'Moderate',
+    patient: '1 patient · 42 yrs',
+    detail: 'Asthma attack. Oxygen support requested.',
+    unit: 'AMB-09',
+    eta: '11:30',
+    hospital: 'BGS Gleneagles Global',
+    coordinates: '12.9250° N, 77.5938° E',
+  },
+  {
+    id: 'RSQ-2828',
+    type: 'Minor laceration',
+    location: 'Whitefield · ITPL Main Road',
+    time: '18 min ago',
+    distance: '12.6 km',
+    priority: 'Minor',
+    patient: '1 patient · adult',
+    detail: 'Bleeding controlled. Non-urgent transport requested.',
+    unit: 'AMB-15',
+    eta: '15:00',
+    hospital: 'Columbia Asia Hospital',
+    coordinates: '12.9869° N, 77.7491° E',
+  },
+];
+
+const navItems = [
+  { id: 'Live operations', label: 'Live operations', labelKey: 'nav.live_ops', icon: Radio },
+  { id: 'Incident queue', label: 'Incident queue', labelKey: 'nav.incident_queue', count: '08', icon: Siren },
+  { id: 'Fleet control', label: 'Fleet control', labelKey: 'nav.fleet_control', icon: Ambulance },
+  { id: 'Hospital ER', label: 'Hospital ER', labelKey: 'nav.hospital_er', icon: Building2 },
+  { id: 'Citizen Lifeline', label: 'Citizen Lifeline', labelKey: 'nav.citizen_lifeline', icon: Users },
+  { id: 'Governance', label: 'Governance', labelKey: 'nav.governance', icon: FileClock },
+  { id: 'Research Paper', label: 'Research Paper', labelKey: 'nav.research_paper', icon: FileText },
+];
+
+const activities = [
+  { icon: ShieldCheck, tone: 'text-status-green', text: 'AMB-12 accepted dispatch', time: '09:42' },
+  { icon: Building2, tone: 'text-primary', text: 'Manipal Hospital confirmed bed', time: '09:40' },
+  { icon: Activity, tone: 'text-safety-orange', text: 'Traffic factor updated · ORR', time: '09:38' },
+  { icon: FileClock, tone: 'text-muted-foreground', text: 'Audit chain synced successfully', time: '09:36' },
+];
 
 export const MainLayout: React.FC = () => {
-  const { userRole, adminViewTab, authUser, authLoading } = useResqLink();
-  const [isDPDPOpen, setIsDPDPOpen] = useState<boolean>(false);
+  const {
+    authUser,
+    userRole,
+    activeAlert,
+    triggerSOS,
+    language,
+    setLanguage,
+    isGatewayActive,
+    exitToGateway,
+    logout,
+  } = useResqLink();
+  const { t } = useTranslation();
 
-  if (authLoading) {
-    return <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center">Loading secure session…</div>;
-  }
+  const [activeNav, setActiveNav] = useState('Live operations');
+  const [activeFilter, setActiveFilter] = useState<Priority | 'All'>('All');
+  const [selectedId, setSelectedId] = useState(initialIncidents[0].id);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [dispatchedUnits, setDispatchedUnits] = useState<Record<string, boolean>>({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isDPDPOpen, setIsDPDPOpen] = useState(false);
+  const [notice, setNotice] = useState('Live sync active · Last update 12 sec ago');
 
-  if (!authUser) {
-    return <LoginScreen />;
-  }
+  const [currentTime, setCurrentTime] = useState(() => formatISTTime12h());
 
-  // Determine active view based on role and admin dashboard switcher
-  const renderCurrentView = () => {
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(formatISTTime12h());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     if (userRole === 'hospital') {
-      return <HospitalDashboard />;
+      setActiveNav('Hospital ER');
+    } else if (userRole === 'patient') {
+      setActiveNav('Citizen Lifeline');
+    } else {
+      setActiveNav('Live operations');
     }
+  }, [userRole]);
 
-    if (userRole === 'patient') {
-      return <PatientDashboard />;
+  const incidents = useMemo(() => {
+    if (activeAlert) {
+      const activeItem: Incident = {
+        id: activeAlert.shortCode || 'RSQ-LIVE',
+        type: activeAlert.category.replace('_', ' '),
+        location: activeAlert.equityMetadata?.wardName || 'Bengaluru Central',
+        time: 'Just now',
+        distance: '1.4 km',
+        priority: 'Critical',
+        patient: activeAlert.citizenName || '1 patient',
+        detail: activeAlert.description || 'Emergency SOS triggered via CAD network.',
+        unit: activeAlert.assignedResponder?.name || 'AMB-01',
+        eta: `${activeAlert.estimatedArrivalMinutes || 4}:00`,
+        hospital: activeAlert.assignedHospital?.name || 'Manipal Hospital',
+        coordinates: `${activeAlert.location.latitude.toFixed(4)}° N, ${activeAlert.location.longitude.toFixed(4)}° E`,
+      };
+      return [activeItem, ...initialIncidents];
     }
+    return initialIncidents;
+  }, [activeAlert]);
 
-    // Default: Admin can access all 3 dashboards
-    if (adminViewTab === 'hospital') {
-      return <HospitalDashboard />;
+  const filteredIncidents = useMemo(
+    () =>
+      activeFilter === 'All'
+        ? incidents
+        : incidents.filter((incident) => incident.priority === activeFilter),
+    [activeFilter, incidents],
+  );
+
+  const selectedIncident = incidents.find((incident) => incident.id === selectedId) ?? incidents[0];
+
+  const handleFilter = (filter: Priority | 'All') => {
+    setActiveFilter(filter);
+    if (filter !== 'All' && selectedIncident.priority !== filter) {
+      const nextIncident = incidents.find((incident) => incident.priority === filter);
+      if (nextIncident) setSelectedId(nextIncident.id);
     }
-    if (adminViewTab === 'patient') {
-      return <PatientDashboard />;
-    }
-    return <AdminDashboard />;
   };
 
+  const handleDispatch = () => {
+    setDispatchedUnits((prev) => ({ ...prev, [selectedIncident.id]: true }));
+    setNotice(`${selectedIncident.unit} dispatched to ${selectedIncident.id} · ETA ${selectedIncident.eta}`);
+  };
+
+  const handleInjectEmergency = () => {
+    void triggerSOS('TRAUMA_ACCIDENT');
+    setNotice('Emergency incident simulated in Bengaluru CAD network');
+  };
+
+  const roleProfiles = {
+    admin: { name: 'Arjun Rao', title: 'Senior dispatcher', initials: 'AR' },
+    hospital: { name: 'Dr. Priya Shenoy', title: 'ER Trauma Chief', initials: 'PS' },
+    patient: { name: 'Ramesh Kumar', title: 'Citizen (ABHA Sync)', initials: 'RK' },
+  };
+
+  const currentProfile = roleProfiles[userRole] || roleProfiles.admin;
+
+  const visibleNavItems = useMemo(() => {
+    if (userRole === 'hospital') {
+      return navItems.filter((item) => item.label === 'Hospital ER');
+    }
+    if (userRole === 'patient') {
+      return navItems.filter((item) => item.label === 'Citizen Lifeline');
+    }
+    return navItems.filter((item) =>
+      ['Live operations', 'Incident queue', 'Fleet control', 'Governance', 'Research Paper'].includes(item.label)
+    );
+  }, [userRole]);
+
+  const workspaceLabel = userRole === 'admin'
+    ? t('nav.command_workspace', 'Command workspace')
+    : userRole === 'hospital'
+    ? t('nav.clinical_workspace', 'Clinical workspace')
+    : t('nav.citizen_workspace', 'Citizen workspace');
+
+  if (isGatewayActive) {
+    return (
+      <>
+        <AuthGatewayScreen onOpenDPDPModal={() => setIsDPDPOpen(true)} />
+        <DPDPNoticeModal isOpen={isDPDPOpen} onClose={() => setIsDPDPOpen(false)} />
+      </>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
-      {/* Top Floating Evaluation Simulation Bar (Visible across all roles for evaluation) */}
-      <SimulationBar />
-
-      {/* Main App Navigation with Role Switcher */}
-      <Navigation onOpenDPDPModal={() => setIsDPDPOpen(true)} />
-
-      {/* View Content */}
-      <main className="flex-1 pb-16">
-        {renderCurrentView()}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-800/80 py-4 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-300">RESQLINK</span>
-            <span>•</span>
-            <span>K S School of Engineering and Management (KSSEM), Bengaluru</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] text-slate-400">
-            <span>UN SDG 3 &amp; 11 Aligned</span>
-            <span>•</span>
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      <div className="product-shell flex min-h-screen flex-col lg:flex-row">
+        {/* Left Sidebar */}
+        <aside
+          className={`product-shell-sidebar fixed inset-y-0 left-0 z-40 flex w-[min(88vw,320px)] -translate-x-full flex-col shadow-2xl transition-transform lg:static lg:w-[246px] lg:translate-x-0 lg:shadow-none ${
+            isSidebarOpen ? 'translate-x-0' : ''
+          }`}
+        >
+          {/* Logo Header */}
+          <div className="flex h-[76px] items-center justify-between border-b border-sidebar-border px-5">
+            <div className="flex items-center gap-3">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-safety-orange text-safety-orange-foreground shadow-[0_8px_20px_-8px_var(--color-safety-orange)]">
+                <LifeBuoy className="size-5" strokeWidth={2.4} />
+              </div>
+              <div>
+                <div className="font-display text-[17px] font-bold tracking-[-0.03em] text-sidebar-primary-foreground">
+                  RESQLINK
+                </div>
+                <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-sidebar-muted">
+                  Emergency network
+                </div>
+              </div>
+            </div>
             <button
               className="text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-primary-foreground p-1.5 rounded-lg lg:hidden"
               onClick={() => setIsSidebarOpen(false)}
@@ -69,8 +311,295 @@ export const MainLayout: React.FC = () => {
             >
               <X className="size-5" />
             </button>
-            <span>•</span>
-            <span>MeitY AI Guidelines 2025</span>
+          </div>
+
+          {/* Navigation Items */}
+          <div className="px-3 pt-6 flex-1 overflow-y-auto">
+            <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-sidebar-muted">
+              {workspaceLabel}
+            </p>
+            <nav className="space-y-1" aria-label="Main navigation">
+              {visibleNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeNav === item.label;
+                return (
+                  <button
+                    key={item.label}
+                    className={`h-11 w-full flex items-center gap-3 rounded-lg px-3 text-[13px] font-medium transition-colors cursor-pointer text-left ${
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-primary-foreground shadow-[inset_3px_0_0_var(--color-safety-orange)] font-bold'
+                        : 'text-sidebar-muted hover:bg-sidebar-accent/70 hover:text-sidebar-primary-foreground'
+                    }`}
+                    onClick={() => {
+                      setActiveNav(item.label);
+                      setNotice(`${item.label} view active`);
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    <Icon className={`size-[17px] ${isActive ? 'text-safety-orange' : ''}`} />
+                    <span>{t(item.labelKey, item.label)}</span>
+                    {item.count && (
+                      <span className="ml-auto rounded bg-sidebar-badge px-1.5 py-0.5 text-[10px] font-bold text-sidebar-muted">
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Authenticated User Profile at Bottom (No role switching permitted) */}
+          <div className="mt-auto px-4 pb-5">
+            <div className="mb-4 border-t border-sidebar-border" />
+            <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/40 p-3 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary-foreground">
+                  {authUser?.displayName
+                    ? authUser.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                    : currentProfile.initials}
+                  <span className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-sidebar bg-status-green" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs font-semibold text-sidebar-primary-foreground">
+                    {authUser?.displayName || currentProfile.name}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-sidebar-muted">
+                    <span className="font-mono lowercase">@{authUser?.username || 'user'}</span>
+                    <span>·</span>
+                    <span className="truncate">{currentProfile.title}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  exitToGateway();
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/80 py-2 text-xs font-medium text-sidebar-muted hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/10 transition cursor-pointer"
+                title="Sign out and return to sign in"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign out</span>
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 px-1 text-[10px] text-sidebar-muted">
+              <span className="size-1.5 rounded-full bg-status-green" /> Bengaluru region · Active session
+            </div>
+          </div>
+        </aside>
+
+        {/* Mobile backdrop */}
+        {isSidebarOpen && (
+          <button
+            aria-label="Close navigation overlay"
+            className="fixed inset-0 z-30 bg-foreground/30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content Area */}
+        <main className="min-w-0 flex-1 bg-background flex flex-col">
+          {/* Header */}
+          <header className="grid min-h-[68px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-card px-3 sm:min-h-[76px] sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <button
+                className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted lg:hidden cursor-pointer"
+                onClick={() => setIsSidebarOpen(true)}
+                aria-label="Open navigation"
+              >
+                <Menu className="size-5" />
+              </button>
+              <div className="min-w-0">
+                <div className="hidden items-center gap-2 text-xs text-muted-foreground min-[390px]:flex">
+                  <span className="font-medium text-primary">Bengaluru</span>
+                  <span>/</span>
+                  <span>{navItems.find((n) => n.label === activeNav) ? t(navItems.find((n) => n.label === activeNav)!.labelKey, activeNav) : activeNav}</span>
+                </div>
+                <h1 className="truncate font-display text-lg font-bold sm:mt-1 sm:text-[23px]">
+                  {navItems.find((n) => n.label === activeNav) ? t(navItems.find((n) => n.label === activeNav)!.labelKey, activeNav) : activeNav}
+                </h1>
+                <span className="hidden text-[10px] font-semibold text-muted-foreground sm:block">
+                  {workspaceLabel} <span className="mx-1 text-border">·</span> {t('nav.demo_env', 'Demo environment')}
+                </span>
+              </div>
+            </div>
+
+            {/* Right Controls */}
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+              {/* IST Clock */}
+              <div className="hidden items-center gap-2 border-r border-border pr-3 text-xs text-muted-foreground md:flex">
+                <Clock3 className="size-4 text-muted-foreground" />
+                <span className="font-semibold text-foreground">{currentTime}</span>
+                <span>IST</span>
+              </div>
+
+              {/* Simulation controls are dispatcher-only. */}
+              {userRole === 'admin' && (
+                <button
+                  onClick={handleInjectEmergency}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                  title="Simulate incoming emergency incident"
+                >
+                  <Zap className="size-3.5 text-safety-orange" />
+                  <span className="hidden sm:inline">{t('nav.new_intake', 'New intake')}</span>
+                </button>
+              )}
+
+              {/* Multilingual Selector */}
+              <div className="relative flex items-center gap-1">
+                <div className="flex items-center rounded-lg border border-border bg-card p-0.5 text-xs font-mono font-bold">
+                  {(['en', 'kn', 'hi'] as LanguageCode[]).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setLanguage(lang)}
+                      className={`px-2 py-1 rounded transition cursor-pointer ${
+                        language === lang
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title={getLanguageLabel(lang)}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <button
+                    onClick={() => setIsLangDropdownOpen((prev) => !prev)}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-border bg-card text-xs font-bold text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                    title="All 23 Indian Languages"
+                    aria-label="Select Indian Language"
+                  >
+                    <Languages className="size-3.5 text-primary" />
+                    <span className="hidden sm:inline font-mono text-[10px]">{language.toUpperCase()}</span>
+                    <ChevronDown className="size-3 text-muted-foreground" />
+                  </button>
+
+                  {isLangDropdownOpen && (
+                    <>
+                      {/* Fixed backdrop to close dropdown on outside click */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsLangDropdownOpen(false)}
+                      />
+                      <div className="absolute right-0 mt-1.5 w-64 max-h-72 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl p-1 z-50 animate-in fade-in zoom-in-95 duration-100 ring-1 ring-white/10">
+                        <div className="px-2 py-1 text-[10px] font-mono font-bold text-slate-400 uppercase border-b border-slate-800 mb-1 flex items-center justify-between">
+                          <span>Pan-India Languages (23)</span>
+                          <Languages className="size-3 text-primary" />
+                        </div>
+                        {INDIAN_LANGUAGES.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => {
+                              setLanguage(lang.code);
+                              setIsLangDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-medium text-left transition cursor-pointer ${
+                              language === lang.code
+                                ? 'bg-primary/20 text-primary font-bold border border-primary/30'
+                                : 'hover:bg-slate-800 text-slate-200 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[10px] text-slate-400 w-6">{lang.code.toUpperCase()}</span>
+                              <div>
+                                <span className="font-semibold text-slate-100">{lang.nativeName}</span>
+                                <span className="ml-1 text-[10px] text-slate-400">({lang.name})</span>
+                              </div>
+                            </div>
+                            {language === lang.code && <Check className="size-3.5 text-primary" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+
+              {/* DPDP Pill */}
+              <button
+                onClick={() => setIsDPDPOpen(true)}
+                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/30 text-[11px] font-mono font-bold text-emerald-400 hover:bg-emerald-900/30 transition cursor-pointer"
+              >
+                <ShieldCheck className="size-3.5" />
+                <span>{t('nav.dpdp_2023', 'DPDP 2023')}</span>
+              </button>
+
+              {/* Notifications */}
+              <button
+                className="relative p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition cursor-pointer"
+                aria-label="Notifications"
+                title="Notifications"
+                onClick={() => setNotice('No critical alert backlogs')}
+              >
+                <Bell className="size-[18px]" />
+                <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-safety-orange" />
+              </button>
+
+              {/* Sign out / Lock Station */}
+              <button
+                onClick={async () => {
+                  await logout();
+                  exitToGateway();
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-card text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition cursor-pointer shadow-sm"
+                title="Sign out and return to login"
+              >
+                <LogOut className="size-3.5" />
+                <span className="hidden xl:inline">{t('nav.sign_out', 'Sign out')}</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Body Content - Strictly isolated to userRole */}
+          <div className="flex-1 p-3 sm:p-6 lg:p-8">
+            {userRole === 'hospital' ? (
+              <HospitalDashboard />
+            ) : userRole === 'patient' ? (
+              <PatientDashboard />
+            ) : activeNav === 'Incident queue' ? (
+              <IncidentQueueWorkspace
+                incidents={filteredIncidents}
+                totalIncidents={incidents.length}
+                selectedId={selectedId}
+                selectedIncident={selectedIncident}
+                activeFilter={activeFilter}
+                dispatchedUnits={dispatchedUnits}
+                onSelect={setSelectedId}
+                onFilter={handleFilter}
+                dispatched={Boolean(dispatchedUnits[selectedIncident.id])}
+                onDispatch={handleDispatch}
+              />
+            ) : activeNav === 'Governance' ? (
+              <EEGDashboard />
+            ) : activeNav === 'Research Paper' ? (
+              <AboutPaperView />
+            ) : (
+              <LiveOperationsWorkspace
+                incidents={incidents}
+                filteredIncidents={filteredIncidents}
+                selectedId={selectedId}
+                selectedIncident={selectedIncident}
+                activeFilter={activeFilter}
+                layersOpen={layersOpen}
+                notice={notice}
+                dispatchedUnits={dispatchedUnits}
+                onSelect={setSelectedId}
+                onFilter={handleFilter}
+                onToggleLayers={() => setLayersOpen((open) => !open)}
+                onDispatch={handleDispatch}
+                onNotice={setNotice}
+                onNewIntake={handleInjectEmergency}
+                onFleet={() => setActiveNav('Fleet control')}
+                onPrivacy={() => setIsDPDPOpen(true)}
+              />
+            )}
           </div>
         </main>
       </div>
