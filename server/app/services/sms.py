@@ -34,6 +34,7 @@ class SmsResult:
     raw_payload: str
     latency_ms: int
     status: str  # "DELIVERED" | "FAILED" | "SIMULATED"
+    recipient_number: str = ""
 
 
 class SmsAdapter(ABC):
@@ -52,13 +53,14 @@ class SimulatedSmsAdapter(SmsAdapter):
             raw_payload=payload,
             latency_ms=random.randint(1200, 2000),
             status="SIMULATED",
+            recipient_number="+917013753816",
         )
 
 
 class TwilioSmsAdapter(SmsAdapter):
     """Real Twilio REST API call. Only instantiated when credentials are present."""
 
-    def __init__(self, account_sid: str, auth_token: str, from_number: str, to_number: str = "+918000000000") -> None:
+    def __init__(self, account_sid: str, auth_token: str, from_number: str, to_number: str = "+917013753816") -> None:
         from twilio.rest import Client  # type: ignore[import]
         self._client = Client(account_sid, auth_token)
         self._from = from_number
@@ -76,6 +78,7 @@ class TwilioSmsAdapter(SmsAdapter):
                 raw_payload=payload,
                 latency_ms=latency,
                 status="DELIVERED" if msg.status in ("sent", "delivered", "queued") else "FAILED",
+                recipient_number=target_number,
             )
         except Exception as err:
             logger.error("twilio_sms_dispatch_failed", error=str(err), alert_id=alert_id)
@@ -85,6 +88,7 @@ class TwilioSmsAdapter(SmsAdapter):
                 raw_payload=payload,
                 latency_ms=latency,
                 status="FAILED",
+                recipient_number=target_number,
             )
 
 

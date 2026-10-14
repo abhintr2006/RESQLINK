@@ -12,27 +12,19 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  UserPlus,
   Zap,
   HeartHandshake,
+  LockKeyhole,
 } from 'lucide-react';
 
 export const HomePageView: React.FC = () => {
   const {
-    setUserRole,
-    setAdminViewTab,
-    setActiveAppTab,
     activeAlert,
     hospitals,
     responders,
+    openGatewayWithTab,
   } = useResqLink();
-
-  const handleLaunchRole = (role: 'admin' | 'hospital' | 'patient') => {
-    setUserRole(role);
-    if (role === 'admin') {
-      setAdminViewTab('admin');
-    }
-    setActiveAppTab('dashboard');
-  };
 
   const availableUnits = responders.filter((r) => r.isAvailable).length;
   const totalBeds = hospitals.reduce((acc, h) => acc + h.icuBedsAvailable, 0);
@@ -59,32 +51,23 @@ export const HomePageView: React.FC = () => {
             RESQLINK connects citizens, dispatch teams, ambulances and trauma centres in one workflow. This interactive overview uses simulated Bengaluru data for demonstration.
           </p>
 
-          {/* Quick Launch Role Pill Buttons */}
+          {/* Authentication Actions: Sign In and Sign Up */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
-              onClick={() => handleLaunchRole('admin')}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-bold font-mono tracking-wide shadow-lg shadow-rose-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              onClick={() => openGatewayWithTab('credentials')}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold font-mono tracking-wide shadow-lg shadow-orange-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Radio className="size-4" />
-              <span>LAUNCH ADMIN CAD</span>
+              <LockKeyhole className="size-4" />
+              <span>SIGN IN</span>
               <ArrowRight className="size-3.5 ml-1" />
             </button>
 
             <button
-              onClick={() => handleLaunchRole('hospital')}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-bold font-mono tracking-wide border border-indigo-500/50 shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              onClick={() => openGatewayWithTab('signup')}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold font-mono tracking-wide border border-slate-700 shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <Building2 className="size-4" />
-              <span>HOSPITAL ER TERMINAL</span>
-              <ArrowRight className="size-3.5 ml-1" />
-            </button>
-
-            <button
-              onClick={() => handleLaunchRole('patient')}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs font-bold font-mono tracking-wide border border-emerald-500/50 shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <Users className="size-4" />
-              <span>CITIZEN LIFELINE SOS</span>
+              <UserPlus className="size-4 text-orange-400" />
+              <span>SIGN UP</span>
               <ArrowRight className="size-3.5 ml-1" />
             </button>
           </div>
@@ -225,10 +208,10 @@ export const HomePageView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => handleLaunchRole('admin')}
+              onClick={() => openGatewayWithTab('credentials')}
               className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-600 text-white text-xs font-bold font-mono transition-colors cursor-pointer"
             >
-              <span>ENTER COMMAND CENTER</span>
+              <span>SIGN IN AS DISPATCHER</span>
               <ArrowRight className="size-3.5" />
             </button>
           </div>
@@ -271,10 +254,10 @@ export const HomePageView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => handleLaunchRole('hospital')}
+              onClick={() => openGatewayWithTab('credentials')}
               className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-white text-xs font-bold font-mono transition-colors cursor-pointer"
             >
-              <span>ACCESS ER TERMINAL</span>
+              <span>SIGN IN TO HOSPITAL ER</span>
               <ArrowRight className="size-3.5" />
             </button>
           </div>
@@ -317,13 +300,35 @@ export const HomePageView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => handleLaunchRole('patient')}
+              onClick={() => openGatewayWithTab('credentials')}
               className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 hover:bg-emerald-600 text-white text-xs font-bold font-mono transition-colors cursor-pointer"
             >
-              <span>OPEN CITIZEN LIFELINE</span>
+              <span>SIGN IN AS CITIZEN</span>
               <ArrowRight className="size-3.5" />
             </button>
           </div>
+        </div>
+
+        {/* Account Registration Banner */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 border border-orange-200">
+              <UserPlus className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-950">Need a personal operator or citizen login?</h3>
+              <p className="mt-0.5 text-xs text-slate-600">
+                Create an account to store your profile, emergency medical ID, or assigned clinical department in the database for future logins.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => openGatewayWithTab('signup')}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold transition active:scale-[0.98] cursor-pointer"
+          >
+            <span>Sign up now</span>
+            <ArrowRight className="size-3.5" />
+          </button>
         </div>
       </section>
 

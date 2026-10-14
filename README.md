@@ -141,11 +141,26 @@ Decoded server-side and routed directly into the CAD incident queue with high de
 
 ### 1. Clone Repository
 ```bash
-https://github.com/abhintr2006/RESQLINK.git
+git clone https://github.com/abhintr2006/RESQLINK.git
 cd RESQLINK
 ```
 
-### 2. Backend Setup
+### 2. Quick Start (Recommended)
+If you have `make` installed, start the entire stack with a single command:
+```bash
+make demo
+```
+This automatically verifies runtime requirements (Python 3.11+, Node 20+, pnpm), sets up the Python virtual environment (`server/.venv`), copies default `.env` files if missing, installs all dependencies, and concurrently boots both the backend API (`http://127.0.0.1:8000`) and the frontend app (`http://localhost:3000`).
+
+Useful targets:
+- `make check-deps` — Verify environment runtimes and package dependencies
+- `make test` — Execute backend pytest suite and frontend TypeScript/Vite builds
+- `make lint` — Run `ruff` checks on backend code
+- `make clean` — Remove temporary cache files and build artifacts
+
+### 3. Manual Setup (Alternative)
+
+#### Backend Setup
 ```bash
 cd server
 
@@ -164,7 +179,7 @@ uvicorn app.main:app --reload --port 8000
 - **Interactive Swagger Docs**: `http://localhost:8000/docs`
 - **WebSocket Endpoint**: `ws://localhost:8000/api/ws`
 
-### 3. Frontend Setup
+#### Frontend Setup
 In a new terminal from the project root:
 ```bash
 # Install frontend packages
@@ -205,9 +220,25 @@ way to run the frontend and backend together.
 
 ---
 
+## Authentication & Access Control
+
+RESQLINK enforces strict role-based access control and workspace isolation across three distinct operational portals:
+
+- **Central Dispatch CAD (`admin`)**: Metropolitan incident triage, dynamic unit assignment, GIS fleet tracking, and EEG governance metrics.
+- **Hospital Trauma Bay (`hospital`)**: Real-time inbound ambulance telemetry, pre-arrival patient vitals, and ICU/ER bed manager.
+- **Citizen Lifeline (`patient`)**: One-tap SOS beacon, GPS lock, ABHA digital medical profile, and nearby emergency facility locator.
+
+### Account Registration & Security
+- **Signup & Role Selection**: New operators or citizens register via `/api/auth/signup`, selecting their designated role and facility affiliation.
+- **Credential Storage**: Passwords are encrypted with `bcrypt` and stored in the database (`server/resqlink.db` in SQLite or managed PostgreSQL).
+- **Session Tokens**: Stateless JSON Web Tokens (JWT, HS256) signed with server-side secrets enforce permission boundaries.
+- **Dashboard Isolation**: Authenticated sessions strictly open only the portal corresponding to the user's role. Cross-portal switching is disallowed.
+
+---
+
 ## Demo Credentials
 
-The database is automatically seeded on startup with the following test accounts:
+The database is seeded on startup with the following demonstration accounts:
 
 | Role | Username | Password | Access Level |
 |---|---|---|---|
@@ -219,10 +250,10 @@ The database is automatically seeded on startup with the following test accounts
 
 ## Testing and Quality Assurance
 
-### Run Backend Tests (23 Async Tests)
+### Run Backend Tests (26 Async Tests)
 ```bash
 cd server
-python -m pytest -q
+pytest -q
 ```
 
 ### Run Frontend Typecheck and Build
@@ -246,6 +277,15 @@ pnpm run build
 
 - **UN SDG 3: Good Health and Well-being** — Target 3.6 and 3.d: Halving urban emergency response delays and fortifying early warning/risk reduction.
 - **UN SDG 11: Sustainable Cities and Communities** — Target 11.2 and 11.5: Expanding accessible, inclusive municipal safety infrastructure.
+
+---
+
+## Contributors
+
+- **Pavan Kumar** ([@abhintr2006](https://github.com/abhintr2006))
+- **Pranav Arun** ([@toxicbishop](https://github.com/toxicbishop))
+- **Guruprasad** ([@guruemail125-sys](https://github.com/guruemail125-sys))
+- **Mohammed** ([@Mohammed0572](https://github.com/Mohammed0572))
 
 ---
 

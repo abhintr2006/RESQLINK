@@ -33,12 +33,14 @@ import { AuditLogger } from '../services/auditLogger';
 import { audioService } from '../services/audioService';
 import { secureRandomInt, secureRandomFloat } from '../utils/secureRandom';
 
-import { api, authStorage, AuthUser } from '../services/api';
+import { api, authStorage, AuthUser, SignupPayload } from '../services/api';
+import { ALL_LANGUAGE_CODES, LANGUAGE_MAP } from '../i18n/languages';
 
 interface ResqLinkContextType {
   authUser: AuthUser | null;
   authLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  signup: (payload: SignupPayload) => Promise<void>;
   logout: () => Promise<void>;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
@@ -49,8 +51,10 @@ interface ResqLinkContextType {
   activeAppTab: 'dashboard' | 'homepage';
   setActiveAppTab: (tab: 'dashboard' | 'homepage') => void;
   isGatewayActive: boolean;
-  enterGatewayWithRole: (role: UserRole) => void;
   exitToGateway: () => void;
+  gatewayTab: 'credentials' | 'signup';
+  setGatewayTab: (tab: 'credentials' | 'signup') => void;
+  openGatewayWithTab: (tab: 'credentials' | 'signup') => void;
 
   activeAlert: EmergencyAlert | null;
   alertHistory: EmergencyAlert[];
@@ -116,6 +120,20 @@ const DEFAULT_AUTH_USERS: Record<UserRole, AuthUser> = {
   patient: { username: 'patient', role: 'patient', displayName: 'Citizen Lifeline' },
 };
 
+const LANGUAGE_STORAGE_KEY = 'resqlink_language';
+
+function getInitialLanguage(): LanguageCode {
+  try {
+    const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as LanguageCode | null;
+    if (saved && ALL_LANGUAGE_CODES.includes(saved)) return saved;
+    const deviceLanguage = navigator.language.split('-')[0] as LanguageCode;
+    if (ALL_LANGUAGE_CODES.includes(deviceLanguage)) return deviceLanguage;
+  } catch {
+    // Browser storage and navigator access may be restricted.
+  }
+  return 'en';
+}
+
 export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authUser, setAuthUser] = useState<AuthUser | null>(DEFAULT_AUTH_USERS.admin);
   const [authLoading, setAuthLoading] = useState(false);
@@ -124,22 +142,15 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [selectedHospitalId, setSelectedHospitalId] = useState('HOSP-01');
   const [activeAppTab, setActiveAppTab] = useState<'dashboard' | 'homepage'>('dashboard');
   const [isGatewayActive, setIsGatewayActive] = useState<boolean>(true);
+  const [gatewayTab, setGatewayTab] = useState<'credentials' | 'signup'>('credentials');
 
-  const enterGatewayWithRole = useCallback((role: UserRole) => {
-    setUserRoleState(role);
-    setAuthUser(DEFAULT_AUTH_USERS[role]);
-    if (role === 'admin') {
-      setAdminViewTab('admin');
-    } else if (role === 'hospital') {
-      setAdminViewTab('hospital');
-      setSelectedHospitalId('HOSP-01');
-    } else {
-      setAdminViewTab('patient');
-    }
-    setIsGatewayActive(false);
+  const openGatewayWithTab = useCallback((tab: 'credentials' | 'signup') => {
+    setGatewayTab(tab);
+    setIsGatewayActive(true);
   }, []);
 
   const exitToGateway = useCallback(() => {
+    setGatewayTab('credentials');
     setIsGatewayActive(true);
   }, []);
 
@@ -156,7 +167,7 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [selectedPreset, setSelectedPreset] = useState<PresetLocation>(BENGALURU_PRESET_LOCATIONS[0]);
   const [currentLocation, setCurrentLocation] = useState<GeoCoordinate | null>(null);
   const [networkTier, setNetworkTier] = useState<NetworkTier>('5G_HIGH_SPEED');
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguageState] = useState<LanguageCode>(getInitialLanguage);
 
   // Theme locked to permanent tactical dark mode
   const [theme] = useState<ThemeMode>('dark');
@@ -169,7 +180,6 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setTheme = useCallback((_newTheme: ThemeMode) => {}, []);
   const toggleTheme = useCallback(() => {}, []);
-
   const [assistiveHighContrast, setAssistiveHighContrast] = useState(false);
   const [voiceGuidanceEnabled, setVoiceGuidanceEnabled] = useState(true);
   const [responders, setResponders] = useState<Responder[]>(INITIAL_RESPONDERS);
@@ -180,6 +190,24 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [hospitalStatuses, setHospitalStatuses] = useState<Record<string, HospitalEmergencyStatus>>(initialStatuses);
   const [hospitalAdmissions, setHospitalAdmissions] = useState<HospitalAdmissionRecord[]>(INITIAL_ADMISSION_RECORDS);
   const [patientProfile, setPatientProfile] = useState<PatientMedicalProfile>(INITIAL_PATIENT_PROFILE);
+
+  const setLanguage = useCallback((nextLanguage: LanguageCode) => {
+    const next = ALL_LANGUAGE_CODES.includes(nextLanguage) ? nextLanguage : 'en';
+    setLanguageState(next);
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
+    } catch {
+      // Continue with in-memory language switching when storage is unavailable.
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = LANGUAGE_MAP[next].bcp47;
+      document.documentElement.dir = next === 'ur' ? 'rtl' : 'ltr';
+    }
+  }, []);
+
+  useEffect(() => {
+    setLanguage(language);
+  }, [language, setLanguage]);
 
   const refreshAuditLogs = useCallback(async (alertId?: string) => {
     try {
@@ -243,6 +271,16 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const login = async (username: string, password: string) => {
     const response = await api.login(username, password);
+    setAuthUser(response.user);
+    setUserRole(response.user.role);
+    setAdminViewTab(response.user.role === 'admin' ? 'admin' : response.user.role);
+    setSelectedHospitalId(response.user.hospitalId || 'HOSP-01');
+    setIsGatewayActive(false);
+    await hydrate();
+  };
+
+  const signup = async (payload: SignupPayload) => {
+    const response = await api.signup(payload);
     setAuthUser(response.user);
     setUserRole(response.user.role);
     setAdminViewTab(response.user.role === 'admin' ? 'admin' : response.user.role);
@@ -423,6 +461,7 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       authUser,
       authLoading,
       login,
+      signup,
       logout,
       userRole,
       setUserRole,
@@ -433,8 +472,10 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       activeAppTab,
       setActiveAppTab,
       isGatewayActive,
-      enterGatewayWithRole,
       exitToGateway,
+      gatewayTab,
+      setGatewayTab,
+      openGatewayWithTab,
       activeAlert,
       alertHistory,
       currentLocation,

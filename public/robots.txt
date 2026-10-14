@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://resqlink-nine.vercel.app/sitemap.xml

@@ -15,7 +15,10 @@ import {
 import { useResqLink } from '../../context/ResqLinkContext';
 
 export const LoginScreen: React.FC = () => {
-  const { login } = useResqLink();
+  const { login, signup } = useResqLink();
+  const [isSignup, setIsSignup] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [role, setRole] = useState<'admin' | 'hospital' | 'patient'>('patient');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,15 +30,30 @@ export const LoginScreen: React.FC = () => {
     setError('');
     setIsSubmitting(true);
     try {
-      await login(username, password);
+      if (isSignup) {
+        if (!displayName.trim()) {
+          setError('Full name is required.');
+          setIsSubmitting(false);
+          return;
+        }
+        await signup({
+          username: username.trim().toLowerCase(),
+          password,
+          displayName: displayName.trim(),
+          role,
+        });
+      } else {
+        await login(username, password);
+      }
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to sign in');
+      setError(reason instanceof Error ? reason.message : 'Unable to complete request');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const fillDemo = (user: string, pass: string) => {
+    setIsSignup(false);
     setUsername(user);
     setPassword(pass);
     setError('');
@@ -71,8 +89,12 @@ export const LoginScreen: React.FC = () => {
                   <LockKeyhole className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-sm text-white">AUTHENTICATION</h2>
-                  <p className="text-[11px] font-mono text-slate-400">JWT 256-Bit Encrypted Session</p>
+                  <h2 className="font-bold text-sm text-white">
+                    {isSignup ? 'ACCOUNT REGISTRATION' : 'AUTHENTICATION'}
+                  </h2>
+                  <p className="text-[11px] font-mono text-slate-400">
+                    {isSignup ? 'Save credentials to database' : 'JWT 256-Bit Encrypted Session'}
+                  </p>
                 </div>
               </div>
               <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-800/60">
@@ -92,6 +114,55 @@ export const LoginScreen: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {isSignup && (
+              <>
+                <div className="mb-4">
+                  <label
+                    className="block text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 mb-1.5"
+                    htmlFor="displayName"
+                  >
+                    FULL NAME / OPERATOR NAME
+                  </label>
+                  <input
+                    id="displayName"
+                    name="displayName"
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="e.g. Ramesh Kumar or Dr. Ananya"
+                    required
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950/90 px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400 mb-1.5">
+                    ACCOUNT ROLE
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 text-xs font-mono">
+                    {[
+                      { r: 'patient' as const, label: 'Citizen' },
+                      { r: 'hospital' as const, label: 'Hospital' },
+                      { r: 'admin' as const, label: 'Admin CAD' },
+                    ].map((item) => (
+                      <button
+                        key={item.r}
+                        type="button"
+                        onClick={() => setRole(item.r)}
+                        className={`py-2 px-2 rounded-xl border text-center transition cursor-pointer ${
+                          role === item.r
+                            ? 'border-rose-500 bg-rose-950/50 text-rose-200 font-bold'
+                            : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="mb-4">
               <label
@@ -127,7 +198,7 @@ export const LoginScreen: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
                   placeholder="Enter password"
                   required
                   className="w-full rounded-xl border border-slate-700 bg-slate-950/90 pl-3.5 pr-10 py-2.5 text-xs font-mono text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50"
@@ -153,8 +224,27 @@ export const LoginScreen: React.FC = () => {
               disabled={isSubmitting}
               className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 px-4 py-3 text-xs font-mono font-bold text-white shadow-lg shadow-rose-600/30 transition active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-rose-500/50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
-              {isSubmitting ? 'AUTHENTICATING SECURE SESSION…' : 'INITIALIZE COMMAND SESSION'}
+              {isSubmitting
+                ? 'PROCESSING REQUEST…'
+                : isSignup
+                ? 'CREATE ACCOUNT & INITIALIZE'
+                : 'INITIALIZE COMMAND SESSION'}
             </button>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignup((prev) => !prev);
+                  setError('');
+                }}
+                className="text-xs font-mono text-rose-400 hover:underline cursor-pointer"
+              >
+                {isSignup
+                  ? 'Already have credentials? Sign in'
+                  : 'New operator or citizen? Create account'}
+              </button>
+            </div>
           </form>
         </div>
 

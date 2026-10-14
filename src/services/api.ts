@@ -23,6 +23,14 @@ export interface AuthUser {
   hospitalId?: string | null;
 }
 
+export interface SignupPayload {
+  username: string;
+  password: string;
+  displayName: string;
+  role: UserRole;
+  hospitalId?: string | null;
+}
+
 interface TokenResponse {
   access_token: string;
   token_type: 'bearer';
@@ -106,6 +114,11 @@ export interface BootstrapPayload {
 export const api = {
   login: async (username: string, password: string) => {
     const response = await request<TokenResponse>('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    authStorage.setToken(response.access_token);
+    return response;
+  },
+  signup: async (payload: SignupPayload) => {
+    const response = await request<TokenResponse>('/auth/signup', { method: 'POST', body: JSON.stringify(payload) });
     authStorage.setToken(response.access_token);
     return response;
   },

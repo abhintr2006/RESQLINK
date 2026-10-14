@@ -8,5 +8,5 @@ export {
   getLanguageShortLabel,
 } from './languages';
 export type { LanguageInfo } from './languages';
-export { t, getAllTranslations } from './translations';
+export { t, getAllTranslations, getTranslationAudit } from './translations';
 export { useTranslation } from './useTranslation';
