@@ -284,7 +284,7 @@ pnpm run build
 
 - **Pavan Kumar** ([@abhintr2006](https://github.com/abhintr2006))
 - **Pranav Arun** ([@toxicbishop](https://github.com/toxicbishop))
-- **Guruprasad** ([@guruemail125-sys](https://github.com/guruemail125-sys))
+- **Ajith.G** ([@guruemail125-sys](https://github.com/guruemail125-sys))
 - **Mohammed** ([@Mohammed0572](https://github.com/Mohammed0572))
 
 ---
