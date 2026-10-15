@@ -37,7 +37,13 @@ class TwilioVoiceAdapter:
         self.to_number = settings.emergency_contact_number
 
     async def place_call(self, message: str) -> VoiceCallResult:
-        twiml = f'<Response><Say language="en-IN">{html.escape(message)}</Say></Response>'
+        twiml = (
+            f'<Response>'
+            f'<Say voice="Polly.Aditi" language="en-IN">{html.escape(message)}</Say>'
+            f'<Pause length="1"/>'
+            f'<Say voice="Polly.Aditi" language="en-IN">Repeating message: {html.escape(message)}</Say>'
+            f'</Response>'
+        )
         try:
             call = await asyncio.to_thread(
                 self.client.calls.create,
@@ -53,15 +59,28 @@ class TwilioVoiceAdapter:
 
 def get_voice_adapter() -> SimulatedVoiceAdapter | TwilioVoiceAdapter:
     settings = get_settings()
-    if settings.twilio_configured and settings.TWILIO_VOICE_FROM_NUMBER and settings.emergency_contact_number:
+    if settings.twilio_configured and settings.emergency_contact_number:
         return TwilioVoiceAdapter()
     return SimulatedVoiceAdapter()
 
 
 async def place_fixed_sos_call(alert_id: str, location: dict, category: str) -> VoiceCallResult:
-    settings = get_settings()
-    message = settings.SOS_VOICE_MESSAGE
-    result = await get_voice_adapter().place_call(message)
+    category_readable = category.replace("_", " ").title()
+    lat = location.get("lat") or location.get("latitude")
+    lng = location.get("lng") or location.get("longitude")
+
+    if isinstance(lat, (int, float)) and isinstance(lng, (int, float)):
+        coord_text = f"at latitude {lat:.4f}, longitude {lng:.4f}"
+    else:
+        coord_text = ""
+
+    ai_script = (
+        f"Emergency alert from the RESQLINK automated dispatch system. "
+        f"A patient is experiencing a critical {category_readable} emergency {coord_text}. "
+        f"Immediate emergency medical assistance and ambulance dispatch are required. "
+        f"Please dispatch an ambulance to this location immediately."
+    )
+    result = await get_voice_adapter().place_call(ai_script)
     logger.info(
         "sos_voice_call_result",
         alert_id=alert_id,
@@ -69,7 +88,7 @@ async def place_fixed_sos_call(alert_id: str, location: dict, category: str) -> 
         provider=result.provider,
         status=result.status,
         category=category,
-        message=message,
+        message=ai_script,
         location=location,
     )
     return result

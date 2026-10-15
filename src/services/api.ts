@@ -148,6 +148,7 @@ export const api = {
   toggleEmergencyDivert: (hospitalId: string) => request<HospitalEmergencyStatus>(`/hospitals/${hospitalId}/divert/toggle`, { method: 'POST' }),
   acknowledgeHospitalInbound: (alertId: string) => request<{ ok: boolean }>(`/hospitals/inbound/${alertId}/acknowledge`, { method: 'POST' }),
   prepareTraumaBay: (alertId: string) => request<{ ok: boolean }>(`/hospitals/inbound/${alertId}/prepare-trauma-bay`, { method: 'POST' }),
+  acceptAndDispatch: (alertId: string) => request<{ ok: boolean; alertId: string; status: string; dispatchedAt: string }>(`/hospitals/inbound/${alertId}/accept-and-dispatch`, { method: 'POST' }),
   updatePatientProfile: (data: Partial<PatientMedicalProfile>) => request<PatientMedicalProfile>('/patient-profile', { method: 'PATCH', body: JSON.stringify({ data }) }),
   reset: () => request<{ ok: boolean }>('/reset', { method: 'POST' }),
 };

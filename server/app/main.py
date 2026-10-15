@@ -20,7 +20,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -31,6 +31,14 @@ from app.db.base import create_all_tables, get_session_factory
 from app.middleware.rate_limit import limiter
 from app.middleware.request_id import RequestIDMiddleware
 from app.routers import alerts, audit, auth, eeg, hospitals, patient, responders, ws
+from app.services.keep_alive import (
+    check_database_health,
+    get_keep_alive_stats,
+    get_uptime_seconds,
+    ping_health_endpoint,
+    start_keep_alive_task,
+    stop_keep_alive_task,
+)
 
 logger = get_logger(__name__)
 
@@ -51,8 +59,12 @@ async def lifespan(application: FastAPI):
             from app.services.seed import seed_database
             await seed_database(session)
 
+    # Start background keep-alive loop (pings health endpoint every 5 minutes)
+    start_keep_alive_task()
+
     logger.info("ready", message="RESQLINK backend is ready")
     yield
+    await stop_keep_alive_task()
     logger.info("shutdown")
 
 
@@ -92,14 +104,37 @@ def create_app() -> FastAPI:
     application.include_router(patient.router)
     application.include_router(ws.router, prefix="/api")
 
-    # ── Health ────────────────────────────────────────────────────────────────
+    # ── Health & Keep-Alive Monitoring ────────────────────────────────────────
     @application.get("/api/health", tags=["health"])
-    async def health(request: Request) -> dict:
+    @application.get("/health", tags=["health"])
+    async def health(response: Response) -> dict:
+        db_healthy, db_detail = await check_database_health()
+        status = "ok" if db_healthy else "degraded"
+        if not db_healthy:
+            response.status_code = 503
+
         return {
-            "status": "ok",
+            "status": status,
             "service": "resqlink-backend",
             "version": settings.APP_VERSION,
+            "uptime_seconds": get_uptime_seconds(),
+            "database": {
+                "status": "connected" if db_healthy else "unreachable",
+                "detail": db_detail,
+                "driver": settings.DATABASE_URL.split("://")[0],
+            },
+            "keep_alive": get_keep_alive_stats(),
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
+
+    @application.post("/api/health/ping", tags=["health"])
+    async def trigger_keep_alive_ping() -> dict:
+        """Manually trigger a keep-alive ping."""
+        result = await ping_health_endpoint()
+        return {
+            "triggered": True,
+            "result": result,
+            "stats": get_keep_alive_stats(),
         }
 
     # ── Static / Frontend SPA Mounting ───────────────────────────────────────

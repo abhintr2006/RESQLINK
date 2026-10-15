@@ -81,6 +81,7 @@ interface ResqLinkContextType {
   toggleEmergencyDivert: (hospitalId: string) => void;
   acknowledgeHospitalInbound: (alertId: string) => void;
   prepareTraumaBay: (alertId: string) => void;
+  acceptAndDispatch: (alertId: string) => void;
 
   patientProfile: PatientMedicalProfile;
   updatePatientProfile: (profile: Partial<PatientMedicalProfile>) => void;
@@ -448,6 +449,25 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     void api.prepareTraumaBay(alertId).then(() => refreshAuditLogs(alertId)).catch((error) => console.error('Unable to prepare trauma bay', error));
   };
 
+  const acceptAndDispatch = (alertId: string) => {
+    void api.acceptAndDispatch(alertId).then(async () => {
+      // Optimistically update local alert state so the UI reacts immediately
+      setActiveAlert((prev) =>
+        prev && prev.id === alertId
+          ? { ...prev, status: 'DISPATCHED', statusTimestamps: { ...prev.statusTimestamps, dispatchedAt: new Date().toISOString() } }
+          : prev
+      );
+      setAlertHistory((prev) =>
+        prev.map((item) =>
+          item.id === alertId
+            ? { ...item, status: 'DISPATCHED', statusTimestamps: { ...item.statusTimestamps, dispatchedAt: new Date().toISOString() } }
+            : item
+        )
+      );
+      await refreshAuditLogs(alertId);
+    }).catch((error) => console.error('Unable to accept and dispatch alert', error));
+  };
+
   const updatePatientProfile = (updates: Partial<PatientMedicalProfile>) => {
     void api.updatePatientProfile(updates).then(setPatientProfile).catch((error) => console.error('Unable to update patient profile', error));
   };
@@ -497,6 +517,7 @@ export const ResqLinkProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       toggleEmergencyDivert,
       acknowledgeHospitalInbound,
       prepareTraumaBay,
+      acceptAndDispatch,
       patientProfile,
       updatePatientProfile,
       triggerSOS,

@@ -155,11 +155,13 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
     }
   }, [assignedResponder, assignedHospital, location]);
 
+  const isDispatched = ['DISPATCHED', 'EN_ROUTE', 'ON_SCENE'].includes(alert.status);
+
   const stages = [
-    { label: 'Alerting', status: 'ALERTING', done: true },
-    { label: 'Locked', status: 'CONFIRMED', done: true },
-    { label: 'Dispatched', status: 'DISPATCHED', done: true },
-    { label: 'En Route', status: 'EN_ROUTE', done: alert.status === 'EN_ROUTE' || alert.status === 'ON_SCENE' },
+    { label: 'Alerting', done: true },
+    { label: 'Locked', done: true },
+    { label: 'Dispatched', done: isDispatched },
+    { label: 'En Route', done: alert.status === 'EN_ROUTE' || alert.status === 'ON_SCENE' },
   ];
 
   return (
@@ -193,29 +195,50 @@ export const LiveTrackingCard: React.FC<LiveTrackingCardProps> = ({
             ))}
           </div>
 
-          {/* Live ETA Banner */}
-          <div className="bg-gradient-to-r from-emerald-950/90 via-slate-900 to-slate-900 border border-emerald-700/60 rounded-xl p-3 flex items-center justify-between shadow-inner">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-sm">
-                <Clock className="w-4.5 h-4.5 text-emerald-400 animate-spin" />
-              </div>
-              <div>
-                <div className="text-[9px] uppercase font-mono font-bold tracking-widest text-emerald-300">
-                  {t('track.ambulance_eta')}
+          {/* Status Banner — changes based on phase */}
+          {alert.status === 'AWAITING_DISPATCH' ? (
+            <div className="bg-gradient-to-r from-amber-950/90 via-slate-900 to-slate-900 border border-amber-700/60 rounded-xl p-3 flex items-center justify-between shadow-inner">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-600/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-sm">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 animate-pulse" />
                 </div>
-                <div className="text-xl font-mono font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                  ~ {estimatedArrivalMinutes} {t('track.minutes')} <span className="text-xs font-normal text-slate-400 font-sans">(MODERATE Traffic)</span>
+                <div>
+                  <div className="text-[9px] uppercase font-mono font-bold tracking-widest text-amber-300">
+                    HOSPITAL ALERTED
+                  </div>
+                  <div className="text-sm font-mono font-bold text-white tracking-tight">
+                    Awaiting dispatch confirmation from ER staff
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="text-right">
-              <span className="text-[9px] font-mono font-bold bg-emerald-900/80 text-emerald-200 px-2.5 py-1 rounded-md border border-emerald-600 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                PRIORITY 1 DISPATCH
+              <span className="text-[9px] font-mono font-bold bg-amber-900/80 text-amber-200 px-2.5 py-1 rounded-md border border-amber-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                PENDING DISPATCH
               </span>
             </div>
-          </div>
+          ) : (
+            <div className="bg-gradient-to-r from-emerald-950/90 via-slate-900 to-slate-900 border border-emerald-700/60 rounded-xl p-3 flex items-center justify-between shadow-inner">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-sm">
+                  <Clock className="w-4.5 h-4.5 text-emerald-400 animate-spin" />
+                </div>
+                <div>
+                  <div className="text-[9px] uppercase font-mono font-bold tracking-widest text-emerald-300">
+                    {t('track.ambulance_eta')}
+                  </div>
+                  <div className="text-xl font-mono font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                    ~ {estimatedArrivalMinutes} {t('track.minutes')} <span className="text-xs font-normal text-slate-400 font-sans">(MODERATE Traffic)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[9px] font-mono font-bold bg-emerald-900/80 text-emerald-200 px-2.5 py-1 rounded-md border border-emerald-600 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  PRIORITY 1 DISPATCH
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Interactive Tactical Map */}

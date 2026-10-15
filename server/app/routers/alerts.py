@@ -178,8 +178,8 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
         citizen_phone=body.citizenPhone,
         location=final_coord,
         location_lock_state=lock_result.to_dict(),
-        status="DISPATCHED",
-        status_timestamps={"triggeredAt": triggered_at, "confirmedAt": triggered_at, "dispatchedAt": triggered_at},
+        status="AWAITING_DISPATCH",
+        status_timestamps={"triggeredAt": triggered_at, "confirmedAt": triggered_at},
         network_used=body.networkTier,
         fallback_sms_used=body.networkTier == "2G_SMS_FALLBACK",
         sms_payload_raw=sms_payload,
@@ -196,17 +196,11 @@ async def trigger_sos(request: Request, body: SosRequest, user: AdminOrPatient, 
     )
     db.add(alert)
 
-    # Mark responder busy
-    resp_row = await db.get(Responder, decision.matched_responder["id"])
-    if resp_row:
-        resp_row.is_available = False
-        resp_row.assigned_incident_id = alert_id
-        resp_row.eta_minutes = decision.estimated_arrival_minutes
-
+    # Responder is staged but NOT locked — they are committed only when hospital dispatches
     await _write_audit(db, alert_id, "SOS_TRIGGERED", "CITIZEN", {"category": body.category, "networkTier": body.networkTier, "ward": preset.get("ward", ""), "language": body.language})
     await _write_audit(db, alert_id, "LOCATION_LOCK_VERIFIED", "GEOLOCATION_ENGINE", {"confidenceScore": lock_result.confidence_score, "isLocked": lock_result.is_locked})
     await _write_audit(db, alert_id, "AI_TRIAGE_COMPUTED", "AI_DISPATCH_ENGINE", {"triageScore": decision.triage_score, "urgencyLevel": decision.urgency_level})
-    await _write_audit(db, alert_id, "RESPONDER_ALLOCATED", "AI_DISPATCH_ENGINE", {"responderId": decision.matched_responder["id"], "etaMinutes": decision.estimated_arrival_minutes})
+    await _write_audit(db, alert_id, "RESPONDER_STAGED", "AI_DISPATCH_ENGINE", {"responderId": decision.matched_responder["id"], "etaMinutes": decision.estimated_arrival_minutes, "note": "Awaiting hospital acceptance before dispatch is confirmed"})
 
     await db.flush()
     result_dict = _alert_to_dict(alert)

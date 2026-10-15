@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -7,10 +8,16 @@ from sqlalchemy import select
 
 from app.core.deps import AdminOrHospital, AnyUser, DbSession
 from app.db.models import Hospital, HospitalAdmission, HospitalStatus
+from app.db.models.alert import Alert
+from app.db.models.responder import Responder
 from app.routers.ws import manager as ws_manager
 from app.schemas.hospital import BedUpdate
 
 router = APIRouter(prefix="/api", tags=["hospitals"])
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _h_dict(h: Hospital) -> dict[str, Any]:
@@ -103,3 +110,48 @@ async def acknowledge_inbound(alert_id: str, user: AdminOrHospital) -> dict:
 @router.post("/hospitals/inbound/{alert_id}/prepare-trauma-bay")
 async def prepare_trauma_bay(alert_id: str, user: AdminOrHospital) -> dict:
     return {"ok": True, "alertId": alert_id, "action": "TRAUMA_BAY_PREPPED"}
+
+
+@router.post("/hospitals/inbound/{alert_id}/accept-and-dispatch")
+async def accept_and_dispatch(alert_id: str, user: AdminOrHospital, db: DbSession) -> dict:
+    """Hospital staff accept the incoming incident and officially dispatch the ambulance.
+
+    Transitions the alert from AWAITING_DISPATCH → DISPATCHED, locks the
+    pre-staged responder, and broadcasts ``alert_dispatched`` over WebSocket so
+    every connected portal (hospital radar + citizen lifeline) updates in real time.
+    """
+    alert = await db.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    if alert.status not in ("AWAITING_DISPATCH", "CONFIRMED"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot dispatch alert with status '{alert.status}'. Expected AWAITING_DISPATCH.",
+        )
+    if not alert.assigned_responder:
+        raise HTTPException(status_code=422, detail="No responder staged for this alert")
+
+    dispatched_at = _now_iso()
+    alert.status = "DISPATCHED"
+    alert.status_timestamps = {**alert.status_timestamps, "dispatchedAt": dispatched_at}
+
+    # Commit the pre-staged responder — mark them unavailable
+    resp_row = await db.get(Responder, alert.assigned_responder["id"])
+    if resp_row:
+        resp_row.is_available = False
+        resp_row.assigned_incident_id = alert_id
+        resp_row.eta_minutes = alert.estimated_arrival_minutes
+
+    await db.flush()
+
+    payload = {
+        "alertId": alert_id,
+        "status": "DISPATCHED",
+        "dispatchedAt": dispatched_at,
+        "assignedResponder": alert.assigned_responder,
+        "assignedHospital": alert.assigned_hospital,
+        "estimatedArrivalMinutes": alert.estimated_arrival_minutes,
+    }
+    await ws_manager.broadcast("alert_dispatched", payload)
+
+    return {"ok": True, "alertId": alert_id, "status": "DISPATCHED", "dispatchedAt": dispatched_at}

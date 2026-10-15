@@ -28,7 +28,8 @@ export const HospitalDashboard: React.FC = () => {
 
   const totalInbound =
     activeAlert &&
-    (activeAlert.status === 'DISPATCHED' ||
+    (activeAlert.status === 'AWAITING_DISPATCH' ||
+      activeAlert.status === 'DISPATCHED' ||
       activeAlert.status === 'EN_ROUTE' ||
       activeAlert.status === 'ON_SCENE')
       ? 1

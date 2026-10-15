@@ -49,9 +49,15 @@ class Settings(BaseSettings):
     # ── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
 
+    # ── Keep-Alive / Render Health Monitor ────────────────────────────────────
+    RENDER_EXTERNAL_URL: str = ""
+    KEEP_ALIVE_INTERVAL_SECONDS: int = 300  # 5 minutes
+    KEEP_ALIVE_ENABLED: bool = True
+
     @property
     def twilio_configured(self) -> bool:
-        return bool(self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and self.TWILIO_FROM_NUMBER)
+        has_from = bool(self.TWILIO_FROM_NUMBER or self.TWILIO_VOICE_FROM_NUMBER)
+        return bool(self.TWILIO_ACCOUNT_SID and self.TWILIO_AUTH_TOKEN and has_from)
 
     @property
     def emergency_contact_number(self) -> str:

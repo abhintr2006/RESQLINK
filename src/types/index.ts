@@ -13,6 +13,7 @@ export type AlertStatus =
   | 'LOCATION_LOCKED'
   | 'ALERTING'
   | 'CONFIRMED'
+  | 'AWAITING_DISPATCH'
   | 'DISPATCHED'
   | 'EN_ROUTE'
   | 'ON_SCENE'

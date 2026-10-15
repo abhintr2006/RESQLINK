@@ -32,12 +32,16 @@ export function openEmergencyDialer(): DialerResult {
 
   const telUri = `tel:${phone}`;
   const isLikelyMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  const link = document.createElement('a');
-  link.href = telUri;
-  link.setAttribute('aria-hidden', 'true');
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  try {
+    window.location.href = telUri;
+  } catch {
+    const link = document.createElement('a');
+    link.href = telUri;
+    link.setAttribute('aria-hidden', 'true');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
   return { ok: true, telUri, isLikelyMobile };
 }

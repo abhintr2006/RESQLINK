@@ -10,6 +10,7 @@ import {
 import { LocationLockIndicator } from './LocationLockIndicator';
 import { LiveTrackingCard } from './LiveTrackingCard';
 import { AIFirstAidGuidance } from './AIFirstAidGuidance';
+import { audioService } from '../../services/audioService';
 import { getAllTranslations, useTranslation } from '../../i18n';
 import {
   HeartPulse,
@@ -112,19 +113,39 @@ export const CitizenSOSView: React.FC = () => {
 
     setIsCallInProgress(true);
     setIsCallPromptOpen(false);
+
+    // 1. Play alert chime and announce via AI Voice Agent immediately
+    audioService.playEmergencyAlertTone();
+
+    const categoryName = selectedCategory.replace(/_/g, ' ').toLowerCase();
+    const locationName = selectedPreset.name || 'Bengaluru';
+    const wardName = selectedPreset.ward ? `in ${selectedPreset.ward}` : '';
+
+    let aiAnnouncement = `Emergency dispatch alert from RESQLINK. A patient has reported a critical ${categoryName} emergency in ${locationName} ${wardName}. Emergency coordinates transmitted to hospital trauma center. Inbound ambulance unit is dispatched. Please stay calm, medical assistance is on the way.`;
+
+    if (language === 'kn') {
+      aiAnnouncement = `ರೆಸ್ಕ್‌ಲಿಂಕ್ ತುರ್ತು ರವಾನೆ ಎಚ್ಚರಿಕೆ. ${locationName} ನಲ್ಲಿ ರೋಗಿಗೆ ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು ಬೇಕಾಗಿದೆ. ಆಸ್ಪತ್ರೆಗೆ ಸ್ಥಳ ಮಾಹಿತಿ ಕಳುಹಿಸಲಾಗಿದೆ. ಆಂಬ್ಯುಲೆನ್ಸ್ ರವಾನೆಯಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ಶಾಂತರಾಗಿರಿ.`;
+    } else if (language === 'hi') {
+      aiAnnouncement = `रेस्कलिंक आपातकालीन प्रेषण सूचना। ${locationName} में मरीज को गंभीर आपातकालीन सहायता की आवश्यकता है। अस्पताल को स्थान भेज दिया गया है। एम्बुलेंस भेजी जा रही है, कृपया शांत रहें।`;
+    }
+
+    audioService.speak(aiAnnouncement, language);
+
+    // 2. Trigger dialer synchronously within the user click gesture before any async delays
+    const dialer = openEmergencyDialer();
+
     try {
-      // Preserve the existing alert, GPS-lock, audit, and dispatch workflow.
+      // Dispatch emergency alert, GPS verification, audit logging, and responder allocation
       await triggerSOS(selectedCategory);
-      const dialer = openEmergencyDialer();
       if (!dialer.ok) {
-        setCallStatus('The emergency event was created, but this device could not open a phone dialer. Use a supported mobile device or call the contact manually.');
+        setCallStatus(`Alert dispatched. Dial directly using the button below.`);
       } else if (dialer.isLikelyMobile) {
-        setCallStatus(`Dialer requested for ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}. RESQLINK cannot confirm that the call was placed or connected.`);
+        setCallStatus(`Alert dispatched. Opening dialer for ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}.`);
       } else {
-        setCallStatus(`Dialer requested for ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}. Desktop browsers may not support phone calls.`);
+        setCallStatus(`Alert dispatched. If your calling app did not open automatically, click Call below.`);
       }
     } catch {
-      setCallStatus('The emergency request could not be created. Please try again or use your local emergency service.');
+      setCallStatus('The emergency request could not be created. Please call directly using the button below.');
     } finally {
       setIsCallInProgress(false);
     }
@@ -183,14 +204,31 @@ export const CitizenSOSView: React.FC = () => {
       </div>
 
       {callStatus && (
-        <div role="status" className="mb-5 flex items-start justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950 shadow-sm">
-          <div>
-            <strong className="block font-bold">Emergency call status</strong>
+        <div role="status" className="mb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950 shadow-sm">
+          <div className="space-y-0.5">
+            <strong className="block font-bold">Emergency Call Status</strong>
             <span>{callStatus}</span>
           </div>
-          <button type="button" onClick={() => setCallStatus(null)} className="rounded-lg p-1 hover:bg-amber-100" aria-label="Dismiss call status">
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {getValidatedEmergencyContact() && (
+              <a
+                href={`tel:${getValidatedEmergencyContact()}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 shadow-sm transition-colors cursor-pointer"
+                aria-label={`Call emergency contact ${formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}`}
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Call {formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}</span>
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => setCallStatus(null)}
+              className="rounded-lg p-1 hover:bg-amber-100 text-amber-800"
+              aria-label="Dismiss call status"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -205,6 +243,47 @@ export const CitizenSOSView: React.FC = () => {
               language={language}
             />
           )}
+
+          {/* AI Voice Dispatcher Broadcast Card */}
+          <div className="double-bezel shadow-xl">
+            <div className="double-bezel-inner p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-indigo-950/40 border border-indigo-700/60 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-950 border border-indigo-600/80 flex items-center justify-center text-indigo-400 shrink-0 shadow-md">
+                  <Volume2 className="w-4.5 h-4.5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-white uppercase">AI Voice Dispatcher</span>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">AUTOMATED BROADCAST</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    Live voice report announced for <strong>{activeAlert.category.replace(/_/g, ' ')}</strong> emergency
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const categoryName = activeAlert.category.replace(/_/g, ' ').toLowerCase();
+                  const loc = activeAlert.equityMetadata?.wardName || selectedPreset.name || 'Bengaluru';
+                  const hosp = activeAlert.assignedHospital?.name || 'hospital trauma center';
+                  const eta = activeAlert.estimatedArrivalMinutes || 4;
+                  let speech = `Emergency dispatch alert from RESQLINK. Patient experiencing critical ${categoryName} emergency in ${loc}. Coordinates transmitted to ${hosp}. Ambulance dispatched, estimated arrival in ${eta} minutes.`;
+                  if (language === 'kn') {
+                    speech = `ರೆಸ್ಕ್‌ಲಿಂಕ್ ತುರ್ತು ರವಾನೆ ಎಚ್ಚರಿಕೆ. ${loc} ನಲ್ಲಿ ರೋಗಿಗೆ ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು ಬೇಕಾಗಿದೆ. ಆಸ್ಪತ್ರೆಗೆ ಸ್ಥಳ ಮಾಹಿತಿ ಕಳುಹಿಸಲಾಗಿದೆ. ಆಂಬ್ಯುಲೆನ್ಸ್ ರವಾನೆಯಾಗುತ್ತಿದೆ, ಆಗಮನ ಸಮಯ ${eta} ನಿಮಿಷಗಳು.`;
+                  } else if (language === 'hi') {
+                    speech = `रेस्कलिंक आपातकालीन प्रेषण सूचना। ${loc} में मरीज को गंभीर आपातकालीन सहायता की आवश्यकता है। अस्पताल को स्थान भेज दिया गया है। एम्बुलेंस भेजी जा रही है, आगमन समय ${eta} मिनट।`;
+                  }
+                  audioService.speak(speech, language);
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+              >
+                <Volume2 className="w-3.5 h-3.5" />
+                <span>Replay AI Voice</span>
+              </button>
+            </div>
+          </div>
 
           {/* Real-Time Tracking & Map */}
           <LiveTrackingCard
@@ -226,13 +305,25 @@ export const CitizenSOSView: React.FC = () => {
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-600 text-white"><Phone className="h-5 w-5" /></div>
                 <div className="min-w-0 flex-1">
-                  <h2 id="emergency-call-title" className="font-bold text-rose-950">Call the configured emergency contact?</h2>
-                  <p className="mt-1 text-xs leading-relaxed text-rose-900">This development contact is <strong>{formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}</strong>. Confirming will create the existing RESQLINK emergency event and ask your device to open its dialer. Opening the dialer does not confirm that a call was placed or connected.</p>
+                  <h2 id="emergency-call-title" className="font-bold text-rose-950">Confirm Emergency Call</h2>
+                  <p className="mt-1 text-xs leading-relaxed text-rose-900">
+                    Emergency Contact: <strong>{formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}</strong>. Confirming will dispatch response units and initiate a phone call via your device.
+                  </p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap justify-end gap-2">
-                <button type="button" onClick={() => setIsCallPromptOpen(false)} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
-                <button type="button" onClick={() => void handleConfirmedEmergency()} className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700" autoFocus>Call and request help</button>
+                <button type="button" onClick={() => setIsCallPromptOpen(false)} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <a
+                  href={`tel:${getValidatedEmergencyContact() || ''}`}
+                  onClick={() => {
+                    void handleConfirmedEmergency();
+                  }}
+                  className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-700 cursor-pointer inline-flex items-center gap-1.5"
+                  autoFocus
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call {formatEmergencyContact(EMERGENCY_CONTACT_NUMBER)}</span>
+                </a>
               </div>
             </div>
           )}

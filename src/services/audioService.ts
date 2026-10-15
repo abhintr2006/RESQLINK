@@ -105,9 +105,20 @@ class AudioService {
         sat: 'sat-IN',
         sd: 'sd-IN',
       };
-      utterance.lang = langCodes[lang] || 'en-IN';
+      const targetLang = langCodes[lang] || 'en-IN';
+      utterance.lang = targetLang;
       utterance.rate = 0.95;
       utterance.pitch = 1.0;
+
+      const voices = this.synth.getVoices();
+      if (voices && voices.length > 0) {
+        const matchingVoice = voices.find(
+          (v) => v.lang === targetLang || v.lang.replace('_', '-').toLowerCase().startsWith(targetLang.slice(0, 2).toLowerCase())
+        );
+        if (matchingVoice) {
+          utterance.voice = matchingVoice;
+        }
+      }
 
       this.synth.speak(utterance);
     } catch (err) {
