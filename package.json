@@ -71,5 +71,11 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "seroval": "^1.7.6",
+      "seroval-plugins": "^1.7.6"
+    }
   }
 }
