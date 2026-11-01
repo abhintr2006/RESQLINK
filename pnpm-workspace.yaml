@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: true
 packages:
   - "."
+overrides:
+  seroval: ^1.7.6
+  seroval-plugins: ^1.7.6
