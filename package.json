@@ -49,7 +49,7 @@
     "lucide-react": "^1.52.0",
     "react": "^19.3.1",
     "react-day-picker": "^10.0.2",
-    "react-dom": "^19.2.8",
+    "react-dom": "^19.3.1",
     "react-hook-form": "^7.88.0",
     "react-resizable-panels": "^4.14.1",
     "recharts": "^3.10.1",
